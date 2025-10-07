@@ -1,0 +1,5 @@
+comnds om te runnen:
+backend: dotnet run 
+docker-sql: docker-compose up
+frontend: npm run dev
+(instal node modules als je dat nog niet hebt gedaan met npm install)

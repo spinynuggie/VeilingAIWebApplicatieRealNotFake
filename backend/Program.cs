@@ -1,3 +1,5 @@
+using MySql.Data.MySqlClient;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -32,6 +36,25 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+app.MapGet("/testdb", async (IConfiguration config) =>
+{
+    var connStr = config.GetConnectionString("DefaultConnection");
+    using var conn = new MySqlConnection(connStr);
+    await conn.OpenAsync();
+    using var cmd = new MySqlCommand("SELECT * FROM test_table;", conn);
+    using var reader = await cmd.ExecuteReaderAsync();
+    var results = new List<object>();
+    while (await reader.ReadAsync())
+    {
+        results.Add(new {
+            id = reader.GetInt32(0),      // eerste kolom
+            name = reader.GetString(1)    // tweede kolom
+        });
+    }
+    return Results.Ok(results);
+})
+.WithName("Data base");;
 
 app.Run();
 
