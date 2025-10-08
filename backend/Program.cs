@@ -42,7 +42,7 @@ app.MapGet("/testdb", async (IConfiguration config) =>
     var connStr = config.GetConnectionString("DefaultConnection");
     using var conn = new MySqlConnection(connStr);
     await conn.OpenAsync();
-    using var cmd = new MySqlCommand("SELECT * FROM test_table;", conn);
+    using var cmd = new MySqlCommand("SELECT * FROM gebruiker;", conn);
     using var reader = await cmd.ExecuteReaderAsync();
     var results = new List<object>();
     while (await reader.ReadAsync())
@@ -54,7 +54,7 @@ app.MapGet("/testdb", async (IConfiguration config) =>
     }
     return Results.Ok(results);
 })
-.WithName("Data base");;
+.WithName("Data base");
 
 app.Run();
 
