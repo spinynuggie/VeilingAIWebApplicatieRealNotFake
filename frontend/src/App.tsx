@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Navigate, Link } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Landing from "./pages/Landing";
@@ -8,6 +8,8 @@ function App() {
     <div>
      {/* Define routes */}
       <Routes>
+        <Route path="/" element={<Navigate to="/Landing" replace />} />
+
         <Route path="/Login" element={<Login />} />
         <Route path="/Register" element={<Register />}/>
         <Route path="/Landing" element={<Landing />}/>

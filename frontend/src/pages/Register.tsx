@@ -21,7 +21,7 @@ function Login() {
   const handleClick = () => {
 
     console.log("Button clicked!");
-    navigate("/Register");
+    navigate("/Landing");
   };
 
   return (

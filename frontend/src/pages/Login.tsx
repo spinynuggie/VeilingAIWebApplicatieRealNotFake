@@ -42,7 +42,7 @@ function Login() {
             height: "100%",
             objectFit: "cover",
           }}
-        />
+        /> 
       </Grid>
 
       {/* Right half - Logo, Text, Button */}
