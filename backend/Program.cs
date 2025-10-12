@@ -1,64 +1,28 @@
-using MySql.Data.MySqlClient;
-
+using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+builder.Services.AddRouting();
 
+// Add Swagger services
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+});
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
-app.MapGet("/testdb", async (IConfiguration config) =>
-{
-    var connStr = config.GetConnectionString("DefaultConnection");
-    using var conn = new MySqlConnection(connStr);
-    await conn.OpenAsync();
-    using var cmd = new MySqlCommand("SELECT * FROM gebruiker;", conn);
-    using var reader = await cmd.ExecuteReaderAsync();
-    var results = new List<object>();
-    while (await reader.ReadAsync())
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
     {
-        results.Add(new {
-            id = reader.GetInt32(0),      // eerste kolom
-            name = reader.GetString(1)    // tweede kolom
-        });
-    }
-    return Results.Ok(results);
-})
-.WithName("Data base");
-
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
+    });
 }
+app.UseHttpsRedirection();
+app.UseRouting();
+app.MapControllers();
+app.Run();
