@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace YourNamespace.Models
+namespace backend.Models
 {
     /// <summary>
     /// Maakt een model aan voor Veiling Meester Gegevens met de benodigde gegevens ervoor
