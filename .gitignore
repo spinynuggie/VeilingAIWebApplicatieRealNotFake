@@ -1,24 +1,142 @@
-# Logs
-logs
+##################################
+# OS / Editor Files
+##################################
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+*.swp
+*.swo
+*.tmp
 *.log
+*.bak
+*.orig
+*.rej
+*.diff
+*.patch
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+##################################
+# .NET / Visual Studio
+##################################
+# Build results
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+[Ll]ogs/
+out/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+*.dbmdl
+*.bak
+*.Cache
+*.log
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vs/
+.vsconfig
+Generated\ Files/
+launchSettings.json
+
+# .NET specific
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nuget.props
+*.nuget.targets
+*.nupkg
+*.snupkg
+*.dll
+*.exe
+*.pdb
+*.cache
+*.config
+*.runtimeconfig.json
+*.deps.json
+*.mdb
+
+# Coverage / analysis
+*.coverage
+*.coveragexml
+*.dotCover
+*.ncrunch*
+nCrunchTemp_*
+TestResult.xml
+TestResults/
+coverage.*
+CoverageOutput/
+
+##################################
+# React / Node Frontend
+##################################
+# dependencies
+node_modules/
+bower_components/
+
+# production
+build/
+dist/
+public/dist/
+public/build/
+
+# misc
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
+package-lock.json
+yarn.lock
 
-node_modules
-dist
-dist-ssr
-*.local
+# testing
+coverage/
+.vitest/
+jest-cache/
+jest-html-reporters-*
+*.lcov
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+##################################
+# Misc / Tooling
+##################################
+*.sqlite
+*.db
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+docker-compose.override.yml
+
+# macOS
+.AppleDouble
+.LSOverride
+
+# Windows image file caches
+ehthumbs_vista.db
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# JetBrains Rider
+.idea/
+*.sln.iml

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\nuggie\\Documents\\School\\VeilingAIWebApplicatieRealNotFake\\backend\\backend.csproj": {}
+    "/Users/rayan/Documents/School/VeilingAIWebApplicatieRealNotFake/backend/backend.csproj": {}
   },
   "projects": {
-    "C:\\Users\\nuggie\\Documents\\School\\VeilingAIWebApplicatieRealNotFake\\backend\\backend.csproj": {
+    "/Users/rayan/Documents/School/VeilingAIWebApplicatieRealNotFake/backend/backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\nuggie\\Documents\\School\\VeilingAIWebApplicatieRealNotFake\\backend\\backend.csproj",
+        "projectUniqueName": "/Users/rayan/Documents/School/VeilingAIWebApplicatieRealNotFake/backend/backend.csproj",
         "projectName": "backend",
-        "projectPath": "C:\\Users\\nuggie\\Documents\\School\\VeilingAIWebApplicatieRealNotFake\\backend\\backend.csproj",
-        "packagesPath": "C:\\Users\\nuggie\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\nuggie\\Documents\\School\\VeilingAIWebApplicatieRealNotFake\\backend\\obj\\",
+        "projectPath": "/Users/rayan/Documents/School/VeilingAIWebApplicatieRealNotFake/backend/backend.csproj",
+        "packagesPath": "/Users/rayan/.nuget/packages/",
+        "outputPath": "/Users/rayan/Documents/School/VeilingAIWebApplicatieRealNotFake/backend/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\nuggie\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/Users/rayan/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
@@ -84,7 +84,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
