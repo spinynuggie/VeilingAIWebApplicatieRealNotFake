@@ -1,73 +1,61 @@
-import React, { useState } from "react";
-import { Grid, Button, Typography, TextField, IconButton, Alert, } from "@mui/material";
-import { useNavigate, Link } from "react-router-dom";
+import React from 'react';
+import './Landing.css';
 import royalLogo from "../assets/loginAssets/royalLogo.png";
 
-const BASE = (import.meta as any).env?.VITE_API_BASE || "http://localhost:5000";
 
-export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [pw, setPw] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-
-  const navigate = useNavigate();
-
-  const handleTogglePassword = () => setShowPassword((prev) => !prev);
-
+const Testing: React.FC = () => {
   return (
-    <div>
-      <Grid container
-      sx={{
-        backgroundColor: "gray",
-        width: "100vw"
-      }}>
-        <Typography variant="body1" sx={{
-           backgroundColor: "black",
-         }}>
-          <Link
-            to="/Login"
-            style={{
-              color: "#5575d4ff",
-              textDecoration: "underline",
-              marginRight: "10px"
-            }}
-          >
+   <div>
+      <header className="header">
+        <div className="header-left">
+          <svg className="user-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            {/*Person icon toevoegen */}
+          </svg>
+          <a href="/Login" className="header-left-link">
             Inloggen
-          </Link>
+          </a>
+          <span className="separator">of</span>
+          <a href="/Register" className="header-left-link">
+            registreren
+          </a>
+        </div>
+        <div className="header-right">
+          <a href="#" className="header-link">
+            <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {/*Nieuws icon toevoegen */}
+            </svg>
+            <span>Nieuws</span>
+          </a>
 
-          of
+          <a href="#" className="header-link">
+            <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {/*Werken bij icon toevoegen */}
+              </svg>
+            <span>Werken bij</span>
+          </a>
+        </div>
+      </header>
 
-          <Link
-            to="/Register"
-            style={{
-              color: "#5575d4ff",
-              textDecoration: "underline",
-              marginLeft: "10px"
-            }}
-          >
-            Registreren
-          </Link>
-        </Typography>
-      </Grid>
-      <Grid container
-        sx={{
-        height: "94vh",
-        width: "100vw",
-        background: "linear-gradient(to bottom, #E2FFE9 0%, #E2FFE9 70%, #FFFFFF 100%)",
-        }}>
-        <Grid container justifyContent="center">
-          <Grid item xs={4} md={6} sx={{
-           }}>
-            <img
-              src={royalLogo}
-              alt="Royal FloraHolland Logo"
-              style={{  }}
-            />
-          </Grid>
-        </Grid>
-      </Grid>
+      <main className="hero-section">
+        <div className="logo">
+              <img
+                src={royalLogo}
+                alt="Royal FloraHolland Logo">
+              </img>
+        </div>
+
+        <h1 className="hero-title">
+          De grootste<br />
+          internationale<br />
+          sierteeltmarktplaats
+        </h1>
+
+        <button className="cta-button">
+          Meer informatie
+        </button>
+      </main>
     </div>
   );
-}
+};
+
+export default Testing;

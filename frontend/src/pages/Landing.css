@@ -1,0 +1,141 @@
+\* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  overflow: hidden;
+}
+
+body {
+  background: linear-gradient(to bottom, #d4f1d4, #e8f5e8);
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+  width: 100%;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2d5f3f;
+  font-size: 0.95rem;
+}
+
+.header-left-link {
+  color: #2d5f3f;
+  text-decoration: none;
+}
+
+.header-left-link:hover {
+  text-decoration: underline;
+}
+
+.separator {
+  color: #2d5f3f;
+}
+
+.user-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.header-right {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.header-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2d5f3f;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.header-link:hover {
+  text-decoration: underline;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.hero-section {
+  background: linear-gradient(to bottom, #d4f1d4, #e8f5e8);
+  height: calc(100vh - 61px);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.logo {
+  margin-bottom: 4rem;
+}
+
+.logo-img {
+  height: 80px;
+  width: auto;
+}
+
+.hero-title {
+  font-size: 4.5rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 3rem;
+  line-height: 1.2;
+  max-width: 1000px;
+}
+
+.cta-button {
+  background-color: #2d5f3f;
+  color: #ffffff;
+  padding: 1rem 3rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: #234a32;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .header-right {
+    gap: 1rem;
+  }
+
+  .logo-img {
+    height: 60px;
+  }
+}
