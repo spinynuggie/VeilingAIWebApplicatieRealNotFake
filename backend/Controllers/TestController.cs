@@ -17,7 +17,7 @@ namespace Backend.Controllers
             };
             return Ok(test);
         }
-
+        
         // A POST endpoint to receive a message
         [HttpPost]
         public IActionResult PostTest([FromBody] TestModel model)
