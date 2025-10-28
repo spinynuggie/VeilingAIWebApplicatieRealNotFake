@@ -1,6 +1,6 @@
 import React from 'react';
 import './Testing.css';
-import royalLogo from "../assets/loginAssets/royalLogo.png";
+import royalLogo from "../assets/loginAssets/royalLogo.svg";
 
 
 const Testing: React.FC = () => {

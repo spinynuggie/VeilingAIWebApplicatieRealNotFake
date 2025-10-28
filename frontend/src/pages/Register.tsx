@@ -5,7 +5,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import floraHollandKantoor from "../assets/loginAssets/floraHollandKantoor.png";
-import royalLogo from "../assets/loginAssets/royalLogo.png";
+import royalLogo from "../assets/loginAssets/royalLogo.svg";
 import { useNavigate } from "react-router-dom";
 
 const BASE = (import.meta as any).env?.VITE_API_BASE || "http://localhost:5000";
