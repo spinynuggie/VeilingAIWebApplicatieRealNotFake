@@ -15,6 +15,12 @@ namespace backend.Models
 
         public string Fotos { get; set; }
 
-        public string OverigeProductinformatie { get; set; }
+        public string ProductNaam { get; set; }
+
+        public int Hoeveelheid { get; set; }
+
+        public string ProductBeschrijving { get; set; }
+
+        public int VerkoperId { get; set; }
     }
 }

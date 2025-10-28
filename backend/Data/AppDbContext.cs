@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using backend.Models;
 
 namespace backend.Data
@@ -16,5 +16,7 @@ namespace backend.Data
             : base(options)
         {
         }
+        public DbSet<backend.Models.Aankoop> Aankoop { get; set; } = default!;
+        public DbSet<backend.Models.Veiling> Veiling { get; set; } = default!;
     }
 }

@@ -3,18 +3,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace backend.Models
 {
-    /// <summary>
-    /// Maakt een model aan voor Veiling Meester Gegevens met de benodigde gegevens ervoor
-    /// </summary>
-    [Table("veiling_meester")]
-    public class VeilingMeester
+    public class Aankoop
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int MeesterId { get; set; }
+        public int AankoopId { get; set; }
 
-        [Required]
+        public int ProductId { get; set; }
         public int GebruikerId { get; set; }
+
+        public decimal Prijs { get; set; }
+        public int AanKoopHoeveelheid { get; set; }
+        public bool IsBetaald { get; set; }
 
     }
 }
