@@ -15,11 +15,11 @@ export default function Landing() {
             stroke="currentColor"
             strokeWidth="2"
           />
-          <Link href="/Login" legacyBehavior>
+          <Link href="/login" legacyBehavior>
             <a className="navbar-left-link">Inloggen</a>
           </Link>
           <span>of</span>
-          <Link href="/Register" legacyBehavior>
+          <Link href="/register" legacyBehavior>
             <a className="navbar-left-link">registreren</a>
           </Link>
         </div>
