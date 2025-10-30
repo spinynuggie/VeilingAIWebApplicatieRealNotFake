@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-// @ts-ignore - CSS side-effect import typing not declared
+// @ts-ignore:
 import './page.css';
-import { TextField, InputAdornment, IconButton, Checkbox, Button } from '@mui/material';
+import { TextField, InputAdornment, IconButton, Checkbox, Button, Alert } from '@mui/material';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
@@ -11,6 +11,41 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const apiBase = 'http://localhost:5000/api/gebruiker';
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    setLoading(true);
+
+    try {
+      const endpoint = `${apiBase}/login`;
+      const body = { emailadres: email, wachtwoord: password };
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(body),
+      });
+
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || 'Fout bij inloggen');
+
+      setSuccess('Inloggen geslaagd!');
+    } catch (err: any) {
+      setError(err.message || 'Er is iets misgegaan.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="login-container">
@@ -18,13 +53,13 @@ export default function LoginPage() {
         <img src="/loginAssets/FloraHollandGebouw.png" alt="Royal Flora Holland" className="login-image" />
       </div>
       <div className="login-right">
-        <div className="login-form">
+        <form className="login-form" onSubmit={handleSubmit}>
           <img src="/loginAssets/royalLogo.svg" alt="Royal Flora Holland Logo" className="logo" />
-           <div className="inloggen-text">Inloggen</div> 
+          <div className="inloggen-text">Inloggen</div>
 
           <div className="register-section">
             <span>Nieuwe gebruiker?</span>
-            <button className="register-btn">Account aanmaken</button>
+            <a href="/register" className="register-btn">Account aanmaken</a>
           </div>
 
           <div className="input-field">
@@ -32,6 +67,8 @@ export default function LoginPage() {
               label="E-mail adres"
               variant="outlined"
               fullWidth
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -48,6 +85,8 @@ export default function LoginPage() {
               type={showPassword ? 'text' : 'password'}
               variant="outlined"
               fullWidth
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -73,8 +112,13 @@ export default function LoginPage() {
             <a href="#" className="forgot-link">Wachtwoord vergeten?</a>
           </div>
 
-          <Button variant="contained" className="login-btn">Inloggen</Button>
-        </div>
+          {error && <Alert severity="error">{error}</Alert>}
+          {success && <Alert severity="success">{success}</Alert>}
+
+          <Button type="submit" variant="contained" className="login-btn" disabled={loading}>
+            {loading ? 'Bezig...' : 'Inloggen'}
+          </Button>
+        </form>
       </div>
     </div>
   );

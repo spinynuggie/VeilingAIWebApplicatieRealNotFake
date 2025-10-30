@@ -11,8 +11,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251013102350_AddAllModels")]
-    partial class AddAllModels
+    [Migration("20251030015212_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,34 @@ namespace backend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("backend.Models.Aankoop", b =>
+                {
+                    b.Property<int>("AankoopId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AankoopId"));
+
+                    b.Property<int>("AanKoopHoeveelheid")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("GebruikerId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsBetaald")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("Prijs")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("AankoopId");
+
+                    b.ToTable("Aankoop");
+                });
 
             modelBuilder.Entity("backend.Models.Gebruiker", b =>
                 {
@@ -39,8 +67,7 @@ namespace backend.Migrations
 
                     b.Property<string>("Huisnummer")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Naam")
                         .IsRequired()
@@ -49,18 +76,20 @@ namespace backend.Migrations
 
                     b.Property<string>("Postcode")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Straat")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Wachtwoord")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("Woonplaats")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.HasKey("GebruikerId");
 
@@ -79,9 +108,19 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("OverigeProductinformatie")
+                    b.Property<int>("Hoeveelheid")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ProductBeschrijving")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("ProductNaam")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("VerkoperId")
+                        .HasColumnType("integer");
 
                     b.HasKey("ProductId");
 
@@ -105,6 +144,41 @@ namespace backend.Migrations
                     b.ToTable("TestModels");
                 });
 
+            modelBuilder.Entity("backend.Models.Veiling", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Eindtijd")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Huidigeprijs")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Naam")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Startprijs")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("Starttijd")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("VeilingMeesterId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("veiling");
+                });
+
             modelBuilder.Entity("backend.Models.VeilingMeester", b =>
                 {
                     b.Property<int>("MeesterId")
@@ -117,8 +191,6 @@ namespace backend.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("MeesterId");
-
-                    b.HasIndex("GebruikerId");
 
                     b.ToTable("veiling_meester");
                 });
@@ -151,17 +223,6 @@ namespace backend.Migrations
                     b.HasKey("VerkoperId");
 
                     b.ToTable("verkoper");
-                });
-
-            modelBuilder.Entity("backend.Models.VeilingMeester", b =>
-                {
-                    b.HasOne("backend.Models.Gebruiker", "Gebruiker")
-                        .WithMany()
-                        .HasForeignKey("GebruikerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Gebruiker");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using backend.Data;
@@ -98,6 +93,53 @@ namespace backend.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        // POST: api/Gebruiker/register
+        [HttpPost("register")]
+        public async Task<ActionResult<Gebruiker>> Register(Gebruiker gebruiker)
+        {
+            var existing = await _context.Gebruikers
+                .FirstOrDefaultAsync(g => g.Emailadres.ToLower() == gebruiker.Emailadres.ToLower());
+
+            if (existing != null)
+            {
+                return BadRequest("E-mailadres is al geregistreerd.");
+            }
+
+            _context.Gebruikers.Add(gebruiker);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, gebruiker);
+        }
+
+        // POST: api/Gebruiker/login
+        [HttpPost("login")]
+        public async Task<ActionResult> Login([FromBody] Gebruiker loginRequest)
+        {
+            if (string.IsNullOrEmpty(loginRequest.Emailadres) || string.IsNullOrEmpty(loginRequest.Wachtwoord))
+            {
+                return BadRequest("E-mail en wachtwoord zijn verplicht.");
+            }
+
+            var gebruiker = await _context.Gebruikers
+                .FirstOrDefaultAsync(g => g.Emailadres.ToLower() == loginRequest.Emailadres.ToLower());
+
+            if (gebruiker == null)
+            {
+                return NotFound("Gebruiker niet gevonden.");
+            }
+
+            if (gebruiker.Wachtwoord != loginRequest.Wachtwoord)
+            {
+                return Unauthorized("Ongeldig wachtwoord.");
+            }
+
+            return Ok(new
+            {
+                message = "Login geslaagd!",
+                gebruiker = new { gebruiker.GebruikerId, gebruiker.Naam, gebruiker.Emailadres }
+            });
         }
 
         private bool GebruikerExists(int id)
