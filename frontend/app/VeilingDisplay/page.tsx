@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import  VeilingDisplay  from "../../components/VeilingDisplay";
 import { getVeilingen } from "../../services/veilingService";
 
+//Tijdelijke file om te kijken hoe de objecten er uiteindelijk uit komen te zien zonder andere pagina's in de weg te zitten
 export default function VeilingList() {
   const [veilingen, setVeilingen] = useState<any[]>([]);
 
