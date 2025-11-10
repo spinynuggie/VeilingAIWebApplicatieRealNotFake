@@ -18,72 +18,29 @@ export default function VeilingList() {
 
   return (
     <div style={{ backgroundColor: "white" }}>
-    <Navbar
-      style={{ backgroundColor: "#C8FFD6"}}
-      left={
-        <img src={royalLogo.src} alt="Logo Royal Flora Holland" width={100}/>
-      }
-      center={
-        <SearchBar/>
-      }
-      right={
-        <span>tijdelijke text</span>
-      }
-    />
+      <Navbar
+        style={{ backgroundColor: "#C8FFD6"}}
+        left={
+          <img src={royalLogo.src} alt="Logo Royal Flora Holland" width={100}/>
+        }
+        center={
+          <SearchBar/>
+        }
+        right={
+          <span>tijdelijke text</span>
+        }
+      />
 
       {/* Rij voor huidige veilingen*/}
-      <div style={{ padding: "40px" }}>
-        <h2 style={{ marginBottom: "20px" }}>Huidige veilingen</h2>
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "nowrap",
-            gap: "20px",
-            overflowX: "auto",
-          }}
-        >
-          {veilingen.length === 0 ? (
-            <p>Geen veilingen gevonden...</p>
-          ) : (
-            veilingen.map((v) => (
-              <VeilingDisplay
-                key={v.id}
-                id={v.id}
-                naam={v.naam}
-              ></VeilingDisplay>
-            ))
-          )}
-        </div>
+      <div style={{ padding: "30px" }}>
+        <h2 style={{ marginBottom: "10px", marginTop:"0" }}>Huidige veilingen</h2>
+        <VeilingDisplay veilingen={veilingen} />
       </div>
 
       {/* opkomende veilingen */}
-      <div style={{ padding: "40px" }}>
-        <h2 style={{ marginBottom: "20px" }}>Toekomstige veilingen - tijdelijk copie van huidige veilingen</h2>
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "nowrap",
-            gap: "20px",
-            overflowX: "auto",
-          }}
-        >
-          {/* Deze kan later nog vervangen worden als we meer veilingen hebben */}
-          {veilingen.length === 0 ? (
-            <p>Geen veilingen gevonden...</p>
-          ) : (
-            veilingen.map((v) => (
-              <VeilingDisplay
-                key={`${v.id}-2`}
-                id={v.id}
-                naam={v.naam}
-              />
-            ))
-          )}
-        </div>
+      <div style={{ padding: "30px" }}>
+        <h2 style={{ marginBottom: "20px", marginTop: "-10px"}}>Toekomstige veilingen - tijdelijk copie van huidige veilingen</h2>
+        <VeilingDisplay veilingen={veilingen} />
       </div>
     </div>
   );

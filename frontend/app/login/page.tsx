@@ -28,7 +28,6 @@ export default function LoginPage() {
     try {
       const endpoint = `${apiBase}/login`;
       const body = { emailadres: email, wachtwoord: password };
-
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
