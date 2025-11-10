@@ -20,7 +20,7 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const apiBase = 'http://localhost:5000/api/gebruiker';
+  const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
