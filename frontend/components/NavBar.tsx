@@ -1,43 +1,22 @@
-
 "use client";
 
-import Link from "next/link";
+import React from "react";
 
-export default function Navbar() {
+type NavbarProps = {
+  left?: React.ReactNode;
+  center?: React.ReactNode;
+  right?: React.ReactNode;
+  style?: React.CSSProperties;
+};
+
+export default function Navbar({ left, center, right, style }: NavbarProps) {
   return (
     <>
-      <nav className="navbar">
-        <div className="navbar-left">
-          <svg
-            className="icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
-          <Link href="/login" legacyBehavior>
-            <a className="navbar-left-link">Inloggen</a>
-          </Link>
-          <span>of</span>
-          <Link href="/register" legacyBehavior>
-            <a className="navbar-left-link">registreren</a>
-          </Link>
-        </div>
+      <nav className="navbar" style={style}>
+        <div className="navbar-left">{left}</div>
+        <div className="navbar-center">{center}</div>
+        <div className="navbar-right">{right}</div>
 
-        <div className="navbar-right">
-          <Link href="#" legacyBehavior>
-            <a className="navbar-link flex items-center gap-1">
-              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" />
-              <span>Nieuws</span>
-            </a>
-          </Link>
-          <Link href="#" legacyBehavior>
-            <a className="navbar-link flex items-center gap-1">
-              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" />
-              <span>Werken bij</span>
-            </a>
-          </Link>
-        </div>
       </nav>
 
       <style jsx>{`
@@ -50,10 +29,17 @@ export default function Navbar() {
           border-bottom: 2px solid #d5d5d5;
         }
 
-        .navbar-left, .navbar-right {
+        .navbar-left,
+        .navbar-center,
+        .navbar-right {
           display: flex;
           align-items: center;
           gap: 0.5rem;
+        }
+
+        .navbar-center {
+          flex: 1;
+          justify-content: center;
         }
 
         .navbar-right {
@@ -82,6 +68,15 @@ export default function Navbar() {
         @media (max-width: 768px) {
           .navbar-right {
             gap: 1rem;
+          }
+
+          .navbar {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .navbar-center {
+            justify-content: center;
           }
         }
       `}</style>
