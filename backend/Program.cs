@@ -1,15 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using backend.Data;
-using backend.Models;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Env.Load();
+var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://localhost:3000";
 // --- Add CORS ---
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000") // your frontend origin
+        policy.WithOrigins(frontendUrl) // your frontend origin
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();

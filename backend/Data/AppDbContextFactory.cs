@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using DotNetEnv;
 
 namespace backend.Data
 {
@@ -7,9 +8,10 @@ namespace backend.Data
     {
         public AppDbContext CreateDbContext(string[] args)
         {
+            Env.Load();
+            var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=VeilingWebsiteDB;Username=devuser;Password=Shrek");
-
+            optionsBuilder.UseNpgsql(connectionString);
             return new AppDbContext(optionsBuilder.Options);
         }
     }

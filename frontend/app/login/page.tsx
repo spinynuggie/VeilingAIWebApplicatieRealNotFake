@@ -26,7 +26,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const endpoint = `${apiBase}/login`;
+      const endpoint = `${apiBase}/Gebruiker/login`;
       const body = { emailadres: email, wachtwoord: password };
       const res = await fetch(endpoint, {
         method: 'POST',
