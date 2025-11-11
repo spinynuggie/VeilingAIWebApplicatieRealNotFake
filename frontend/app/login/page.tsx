@@ -18,7 +18,7 @@ export default function LoginPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  
+
   const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,7 +41,7 @@ export default function LoginPage() {
       if (!res.ok) throw new Error(text || 'Fout bij inloggen');
       else {
         setSuccess('Succesvol ingelogd!');
-        router.push('/VeilingDashboard')
+        router.push('/veilingDisplay')
       }
     } catch (err: any) {
       setError(err.message || 'Er is iets misgegaan.');
