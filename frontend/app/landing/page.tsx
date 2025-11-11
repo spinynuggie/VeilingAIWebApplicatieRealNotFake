@@ -130,7 +130,7 @@ export default function Landing() {
           max-width: 1000px;
         }
 
-        .cta-button {z  
+        .cta-button {  
           background-color: #2d5f3f;
           color: #fff;
           padding: 1rem 3rem;
