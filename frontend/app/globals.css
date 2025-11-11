@@ -6,3 +6,38 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', sans-serif;
 }
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #fff;
+  border-bottom: 2px solid #d5d5d5;
+}
+
+.navbar-left,
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-right {
+  gap: 2rem;
+}
+
+.navbar-left-link,
+.navbar-link {
+  color: #2d5f3f;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.navbar-left-link:hover,
+.navbar-link:hover {
+  color: #234a32;
+  text-decoration: underline;
+}
+

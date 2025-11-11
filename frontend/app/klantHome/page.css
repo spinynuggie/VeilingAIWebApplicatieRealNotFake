@@ -1,0 +1,141 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(to bottom, #d4f1d4, #e8f5e8);
+  font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: #2d5f3f;
+}
+
+
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.hero-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.logo {
+  margin-bottom: 4rem;
+}
+
+.logo-img img {
+  height: auto;
+  width: auto;
+}
+
+.hero-title {
+  font-size: 4.5rem;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.2;
+  margin-bottom: 3rem;
+  max-width: 1000px;
+}
+
+.cta-button {
+  background-color: #2d5f3f;
+  color: #fff;
+  padding: 1rem 3rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: #21492f;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .navbar-right {
+    gap: 1rem;
+  }
+
+  .logo-img img {
+    height: 60px;
+  }
+}
+
+/* Topbar: groen balk met logo en gecentreerde zoekbalk */
+.topbar {
+  /* Ensure the topbar sits in normal document flow under the nav (not fixed/absolute) */
+  position: static;
+  z-index: 0;
+  background: linear-gradient(180deg, #e8f9ea, #dff4e6);
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid #cfead4;
+  margin-top: 0; /* keeps it directly under the nav */
+}
+
+.topbar-left {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.topbar-center {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.search-container {
+  display: flex;
+  width: min(800px, 70%);
+  background: #fff;
+  padding: 6px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  outline: none;
+  border-radius: 9999px;
+}
+
+.search-button {
+  background: #2d5f3f;
+  color: #fff;
+  border: none;
+  padding: 0.45rem 0.75rem;
+  margin-left: 6px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.search-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 768px) {
+  .search-container { width: calc(100% - 2rem); }
+  .topbar { padding: 0.5rem; }
+}
