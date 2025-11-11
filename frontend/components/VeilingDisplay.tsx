@@ -1,5 +1,5 @@
 interface Veiling {
-  id: number;
+  veilingId: number;
   naam: string;
   beschrijving: string;
   image: string;
