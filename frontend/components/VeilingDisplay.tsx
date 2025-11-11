@@ -27,7 +27,7 @@ export default function VeilingDisplay({ veilingen }: VeilingDisplayProps) {
       }}>
         {veilingen.map((v) => (
           <div
-            key={v.id}
+            key={v.veilingId}
             style={{
               display: "flex",
               border: "1px solid #ccc",
