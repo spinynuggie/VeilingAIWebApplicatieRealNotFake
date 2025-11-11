@@ -8,6 +8,7 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,7 +17,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
+  const router = useRouter();
+  
   const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,8 +39,10 @@ export default function LoginPage() {
 
       const text = await res.text();
       if (!res.ok) throw new Error(text || 'Fout bij inloggen');
-
-      setSuccess('Inloggen geslaagd!');
+      else {
+        setSuccess('Succesvol ingelogd!');
+        router.push('/VeilingDashboard')
+      }
     } catch (err: any) {
       setError(err.message || 'Er is iets misgegaan.');
     } finally {
