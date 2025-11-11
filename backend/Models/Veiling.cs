@@ -13,7 +13,7 @@ namespace backend.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int VeilingId { get; set; }
         
         [Required]
         public string Naam { get; set; }
@@ -25,14 +25,8 @@ namespace backend.Models
         public int Starttijd { get; set; }
         
         public int Eindtijd { get; set; }
-        
-        public decimal Startprijs { get; set; }
-        
-        public decimal Huidigeprijs { get; set; }
 
         public int VeilingMeesterId { get; set; }
-
-        public int ProductId { get; set; }
         
     }
 }

@@ -47,7 +47,7 @@ namespace backend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutVeiling(int id, Veiling veiling)
         {
-            if (id != veiling.Id)
+            if (id != veiling.VeilingId)
             {
                 return BadRequest();
             }
@@ -81,7 +81,7 @@ namespace backend.Controllers
             _context.Veiling.Add(veiling);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetVeiling", new { id = veiling.Id }, veiling);
+            return CreatedAtAction("GetVeiling", new { id = veiling.VeilingId }, veiling);
         }
 
         // DELETE: api/Veiling/5
@@ -102,7 +102,7 @@ namespace backend.Controllers
 
         private bool VeilingExists(int id)
         {
-            return _context.Veiling.Any(e => e.Id == id);
+            return _context.Veiling.Any(e => e.VeilingId == id);
         }
     }
 }
