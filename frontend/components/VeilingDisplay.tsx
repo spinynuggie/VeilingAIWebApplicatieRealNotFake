@@ -1,13 +1,4 @@
-interface Veiling {
-  veilingId: number;
-  naam: string;
-  beschrijving: string;
-  image: string;
-}
-
-interface VeilingDisplayProps {
-  veilingen: Veiling[];
-}
+import { Veiling, VeilingDisplayProps } from '@/types/veiling';
 
 export default function VeilingDisplay({ veilingen }: VeilingDisplayProps) {
   // Bescherm tegen undefined

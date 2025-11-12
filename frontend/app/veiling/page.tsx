@@ -1,55 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ProductDisplay from "../../components/ProductDisplay";
-import { getProduct } from "../../services/productService";
-
-// Interface voor type safety
-interface ProductGegevens {
-  productId: number;
-  fotos: string;
-  productNaam: string;
-  hoeveelheid: number;
-  productBeschrijving: string;
-  verkoperId: number;
-}
+import { getProducts } from "../../services/productService";
+import { Product } from "@/types/product";
 
 export default function ProductList() {
-  const [productGegevens, setProductGegevens] = useState<ProductGegevens[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    getProduct()
-      .then((data) => {
-        setProductGegevens(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError("Fout bij ophalen producten");
-        setLoading(false);
-      });
+    getProducts().then(setProducts).catch(console.error);
   }, []);
-
-  if (loading) return <p>Laden...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <div>
-      <h2>Producten</h2>
-      {productGegevens.length === 0 ? (
-        <p>Geen producten gevonden...</p>
-      ) : (
-        productGegevens.map((product) => (
-          <ProductDisplay
-            key={product.productId}
-            productId={product.productId}
-            productNaam={product.productNaam}
-            foto={product.fotos}
-          />
-        ))
-      )}
+      <h2>Producten ({products.length})</h2>
+      {products.map((p) => (
+        <div key={p.productId} style={{ padding: '10px', border: '1px solid #ccc', margin: '10px' }}>
+          <p>ID: {p.productId}</p>
+          <p>Naam: {p.productNaam}</p>
+          {p.fotos && <img src={p.fotos} alt={p.productNaam} width="100" />}
+        </div>
+      ))}
     </div>
   );
 }

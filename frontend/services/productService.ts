@@ -1,4 +1,6 @@
-export async function getProduct() {
+import { Product } from '@/types/product';
+
+export async function getProducts(): Promise<Product[]> {
   const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
   const res = await fetch(`${apiBase}/api/ProductGegevens`);
   if (!res.ok) throw new Error("Ophalen mislukt");

@@ -1,17 +1,14 @@
-interface ProductDisplayProps {
-  productId: number;
-  productNaam: string;
-  foto: string;
-}
+// components/ProductDisplay.tsx
+import { Product, ProductDisplayProps } from '@/types/product';
 
-export default function ProductDisplay({ productId, productNaam, foto }: ProductDisplayProps) {
-return (
-    <div key={productId} style={{margin: '20px', border: '1px solid #ccc', padding: '10px' }}>
-      <h3>Naam: {productNaam} ID:{productId}</h3>
-      {foto ? (
+export default function ProductDisplay({ product }: ProductDisplayProps) {
+  return (
+    <div key={product.productId} style={{margin: '20px', border: '1px solid #ccc', padding: '10px' }}>
+      <h3>Naam: {product.productNaam} ID:{product.productId}</h3>
+      {product.fotos ? (
         <img
-          src={foto}
-          alt={productNaam}
+          src={product.fotos}
+          alt={product.productNaam}
           style={{ width: '200px', height: 'auto', objectFit: 'cover' }}
         />
       ) : (
