@@ -2,30 +2,27 @@
 import Image from "next/image";
 import Link from "next/link";
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
+import Navbar from "@/components/NavBar";
 
 export default function Landing() {
   return (
-    <div className="container">
-      <nav className="navbar">
-        <div className="navbar-left">
-          <svg
-            className="icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
-          <Link href="/login" legacyBehavior>
-            <a className="navbar-left-link">Inloggen</a>
-          </Link>
-          <span>of</span>
-          <Link href="/register" legacyBehavior>
-            <a className="navbar-left-link">registreren</a>
-          </Link>
-        </div>
 
-        <div className="navbar-right">
-          <Link href="#" legacyBehavior>
+      <div className="container">
+        <Navbar
+          left={
+          <>
+            <Link href="/login" legacyBehavior>
+              <a className="navbar-left-link">Inloggen</a>
+            </Link>
+            <span>of</span>
+            <Link href="/register" legacyBehavior>
+              <a className="navbar-left-link">registreren</a>
+            </Link>
+          </>
+          }
+          right= {
+            <>
+            <Link href="#" legacyBehavior>
             <a className="navbar-link flex items-center gap-1">
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" />
               <span>Nieuws</span>
@@ -37,8 +34,10 @@ export default function Landing() {
               <span>Werken bij</span>
             </a>
           </Link>
-        </div>
-      </nav>
+          </>
+          }
+        ></Navbar>
+
 
       <main className="hero-section">
         <div className="logo">
@@ -62,25 +61,6 @@ export default function Landing() {
           background: linear-gradient(to bottom, #d4f1d4, #e8f5e8);
           font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
           color: #2d5f3f;
-        }
-
-        .navbar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 1rem 2rem;
-          background: #fff;
-          border-bottom: 2px solid #d5d5d5;
-        }
-
-        .navbar-left, .navbar-right {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .navbar-right {
-          gap: 2rem;
         }
 
         .navbar-left-link,
@@ -130,7 +110,7 @@ export default function Landing() {
           max-width: 1000px;
         }
 
-        .cta-button {  
+        .cta-button {
           background-color: #2d5f3f;
           color: #fff;
           padding: 1rem 3rem;
