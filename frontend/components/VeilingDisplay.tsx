@@ -1,11 +1,15 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { Veiling, VeilingDisplayProps } from '@/types/veiling';
 import { useRouter } from "next/navigation";
 import { Box } from '@mui/material';
+import { getProducts } from '@/services/productService';
 
 export default function VeilingDisplay({ veilingen }: VeilingDisplayProps) {
-const router = useRouter();
+  const [product, setProduct] = useState<any[]>([]);
+  const router = useRouter();
+
 
   if (!veilingen || veilingen.length === 0) {
     return <p>Geen veilingen beschikbaar</p>;
@@ -15,6 +19,7 @@ const router = useRouter();
     console.log("Clicked veiling:", veiling);
     console.log("VeilingId:", veiling.veilingId);
 
+
     if (!veiling.veilingId) {
       console.error("No veilingId found in veiling object:", veiling);
       return;
@@ -22,6 +27,7 @@ const router = useRouter();
 
     router.push(`/veiling/${veiling.veilingId}`);
   };
+
 
 
   return (
