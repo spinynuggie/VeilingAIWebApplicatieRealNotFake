@@ -10,6 +10,7 @@ import royalLogo from "@/public/loginAssets/royalLogo.svg";
 import ProductDisplay from "@/components/ProductDisplay";
 import { getProducts } from "@/services/productService";
 import { Product } from "@/types/product";
+import Profile  from "@/components/Profile";
 
 export default function VeilingDetailPage() {
   const [veiling, setVeiling] = useState<Veiling | null>(null);
@@ -62,7 +63,7 @@ export default function VeilingDetailPage() {
           <SearchBar/>
         }
         right={
-          <span>tijdelijke text</span>
+          <Profile/>
         }
         ></Navbar>
       <p>naam: {veiling.naam}; veilingId: {veiling.veilingId};</p>

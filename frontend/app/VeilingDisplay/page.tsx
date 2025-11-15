@@ -5,6 +5,7 @@ import VeilingDisplay from "../../components/VeilingDisplay";
 import { getVeilingen } from "../../services/veilingService";
 import Navbar from "@/components/NavBar";
 import SearchBar from "@/components/SearchBar"
+import Profile from "@/components/Profile";
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
 
 export default function VeilingList() {
@@ -27,7 +28,7 @@ export default function VeilingList() {
           <SearchBar/>
         }
         right={
-          <span>tijdelijke text</span>
+          <Profile/>
         }
       />
 
