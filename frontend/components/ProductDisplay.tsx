@@ -39,7 +39,6 @@ export default function ProductDisplay({ product }: ProductDisplayProps) {
           maxHeight: "530px",
           overflowY: "auto",
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-          margin: "0 auto",
           "&::-webkit-scrollbar": {
             width: "8px",
           },

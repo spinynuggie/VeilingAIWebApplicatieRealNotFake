@@ -11,6 +11,8 @@ import ProductDisplay from "@/components/ProductDisplay";
 import { getProducts } from "@/services/productService";
 import { Product } from "@/types/product";
 import Profile  from "@/components/Profile";
+import SingleProduct from "@/components/SingleProduct";
+import { Box } from "@mui/material"
 
 export default function VeilingDetailPage() {
   const [veiling, setVeiling] = useState<Veiling | null>(null);
@@ -66,8 +68,20 @@ export default function VeilingDetailPage() {
           <Profile/>
         }
         ></Navbar>
-      <p>naam: {veiling.naam}; veilingId: {veiling.veilingId};</p>
-      <ProductDisplay product={product}/>
+      <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'row',
+        gap: 1,
+        justifyContent: 'center',
+        paddingY: 4
+        }}
+      >
+        <SingleProduct product={product}/>
+        <SingleProduct product={product}/>
+        <ProductDisplay product={product}/>
+      </Box>
+            <p>naam: {veiling.naam}; veilingId: {veiling.veilingId};</p>
     </div>
   );
 }
