@@ -35,8 +35,14 @@ export default function ProductDisplay({ product }: ProductDisplayProps) {
           borderRadius: "16px",
           width: "fit-content",
           maxWidth: "90vw",
+          // Calculate max height for 3 products: 3*150px (product height) + 2*16px (gaps) + 48px (padding)
+          maxHeight: "530px",
+          overflowY: "auto",
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
           margin: "0 auto",
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
           "&::-webkit-scrollbar-track": {
             background: "#f1f1f1",
             borderRadius: "4px",
