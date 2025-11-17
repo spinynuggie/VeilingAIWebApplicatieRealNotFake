@@ -22,6 +22,7 @@ export default function Navbar({ left, center, right, style }: NavbarProps) {
       <style jsx>{`
         .navbar {
           display: flex;
+          width: 100%;
           justify-content: space-between;
           align-items: center;
           padding: 1rem 2rem;

@@ -8,12 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
 var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://localhost:3000";
+var frontendUrlAlt = Environment.GetEnvironmentVariable("FRONTEND_URL_ALT") ?? "http://127.0.0.1:3000";
 // --- Add CORS ---
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(frontendUrl) // your frontend origin
+        policy.WithOrigins(frontendUrl, frontendUrlAlt) // your frontend origins
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();

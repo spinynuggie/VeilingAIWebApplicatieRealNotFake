@@ -1,15 +1,12 @@
 "use client";
 import Image from "next/image";
-import Link from "next/link";
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
 import AppNavbar from "@/components/AppNavbar";
 
 export default function Landing() {
   return (
-
-      <div className="container">
-        <AppNavbar />
-
+    <div className="landing-container">
+      <AppNavbar />
 
       <main className="hero-section">
         <div className="logo">
@@ -26,17 +23,21 @@ export default function Landing() {
       </main>
 
       <style jsx>{`
-        .container {
+        .landing-container {
           min-height: 100vh;
+          width: 100%;
+          max-width: none;
           display: flex;
           flex-direction: column;
           background: linear-gradient(to bottom, #d4f1d4, #e8f5e8);
           font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
           color: #2d5f3f;
+          overflow-x: hidden;
         }
 
         .hero-section {
           flex: 1;
+          width: 100%;
           display: flex;
           flex-direction: column;
           justify-content: center;
