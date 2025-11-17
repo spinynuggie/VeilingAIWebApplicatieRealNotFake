@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 // @ts-ignore:
 import './page.css';
 import { TextField, InputAdornment, IconButton, Checkbox, Button, Alert } from '@mui/material';
@@ -8,9 +8,11 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/components/AuthProvider';
+import * as authService from '@/services/authService';
 
-export default function LoginPage() {
+function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,8 +20,8 @@ export default function LoginPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
+  const searchParams = useSearchParams();
+  const { refreshUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,21 +30,12 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const endpoint = `${apiBase}/api/Gebruiker/login`;
-      const body = { emailadres: email, wachtwoord: password };
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(body),
-      });
+      await authService.login(email, password);
+      await refreshUser();
 
-      const text = await res.text();
-      if (!res.ok) throw new Error(text || 'Fout bij inloggen');
-      else {
-        setSuccess('Succesvol ingelogd!');
-        router.push('/veilingDisplay')
-      }
+      setSuccess('Succesvol ingelogd!');
+      const next = searchParams.get('next');
+      router.push(next || '/veilingDisplay');
     } catch (err: any) {
       setError(err.message || 'Er is iets misgegaan.');
     } finally {
@@ -124,5 +117,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

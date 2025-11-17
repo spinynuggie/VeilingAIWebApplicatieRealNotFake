@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import GebruikerDisplay from "@/components/GebruikerDisplay";
 import { getGebruiker } from "@/services/gebruikerService";
+import RequireAuth from "@/components/RequireAuth";
 
 
 export default function klantProfile() {
@@ -14,11 +15,11 @@ export default function klantProfile() {
   }, []);
 
   return (
-
-
-    <div>
-        <h1>thuis pagina voor de klant</h1>
-        <GebruikerDisplay gebruikers={gebruikers}/>
-    </div>
+    <RequireAuth>
+      <div>
+          <h1>thuis pagina voor de klant</h1>
+          <GebruikerDisplay gebruikers={gebruikers}/>
+      </div>
+    </RequireAuth>
   );
 }

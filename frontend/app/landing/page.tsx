@@ -2,41 +2,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
-import Navbar from "@/components/NavBar";
+import AppNavbar from "@/components/AppNavbar";
 
 export default function Landing() {
   return (
 
       <div className="container">
-        <Navbar
-          left={
-          <>
-            <Link href="/login" legacyBehavior>
-              <a className="navbar-left-link">Inloggen</a>
-            </Link>
-            <span>of</span>
-            <Link href="/register" legacyBehavior>
-              <a className="navbar-left-link">registreren</a>
-            </Link>
-          </>
-          }
-          right= {
-            <>
-            <Link href="#" legacyBehavior>
-            <a className="navbar-link flex items-center gap-1">
-              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" />
-              <span>Nieuws</span>
-            </a>
-          </Link>
-          <Link href="#" legacyBehavior>
-            <a className="navbar-link flex items-center gap-1">
-              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" />
-              <span>Werken bij</span>
-            </a>
-          </Link>
-          </>
-          }
-        ></Navbar>
+        <AppNavbar />
 
 
       <main className="hero-section">
@@ -61,25 +33,6 @@ export default function Landing() {
           background: linear-gradient(to bottom, #d4f1d4, #e8f5e8);
           font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
           color: #2d5f3f;
-        }
-
-        .navbar-left-link,
-        .navbar-link {
-          color: #2d5f3f;
-          text-decoration: none;
-          font-size: 0.95rem;
-          transition: color 0.3s ease, text-decoration 0.3s ease;
-        }
-
-        .navbar-left-link:hover,
-        .navbar-link:hover {
-          color: #234a32;
-          text-decoration: underline;
-        }
-
-        .icon {
-          width: 24px;
-          height: 24px;
         }
 
         .hero-section {

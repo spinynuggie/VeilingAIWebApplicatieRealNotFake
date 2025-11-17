@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Veiling } from '@/types/veiling';
 import { getVeilingen } from "@/services/veilingService"; // <-- Added necessary import
+import RequireAuth from "@/components/RequireAuth";
 
 export default function VeilingDetailPage() {
   const [veiling, setVeiling] = useState<Veiling | null>(null);
@@ -41,8 +42,10 @@ export default function VeilingDetailPage() {
   if (!veiling) return <p>Loading... (looking for id: {id})</p>;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <p>naam: {veiling.naam}; veilingId: {veiling.veilingId};</p>
-    </div>
+    <RequireAuth>
+      <div style={{ padding: "20px" }}>
+        <p>naam: {veiling.naam}; veilingId: {veiling.veilingId};</p>
+      </div>
+    </RequireAuth>
   );
 }

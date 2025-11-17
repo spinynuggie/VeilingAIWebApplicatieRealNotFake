@@ -8,6 +8,9 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/AuthProvider';
+import * as authService from '@/services/authService';
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,8 +22,8 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
+  const router = useRouter();
+  const { refreshUser } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -39,17 +42,14 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${apiBase}/api/Gebruiker/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ emailadres: form.emailadres, wachtwoord: form.wachtwoord }),
-      });
-
-      const text = await res.text();
-      if (!res.ok) throw new Error(text || 'Fout bij registreren');
+      await authService.register(form.emailadres, form.wachtwoord);
       setSuccess('Account succesvol aangemaakt!');
       setForm({ emailadres: '', wachtwoord: '', repeatWachtwoord: '' });
+
+      // Automatically log in the user after successful registration
+      await authService.login(form.emailadres, form.wachtwoord);
+      await refreshUser();
+      router.push('/veilingDisplay');
     } catch (err: any) {
       setError(err.message || 'Er is iets misgegaan.');
     } finally {

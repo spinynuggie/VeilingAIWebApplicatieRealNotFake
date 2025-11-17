@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using backend.Data;
+using backend.Services;
 using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,19 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<PasswordHasher>();
+
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.SlidingExpiration = true;
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -32,10 +47,34 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 // ✅ Enable CORS before authorization and mapping controllers
-app.UseCors("AllowFrontend");
-
 app.UseRouting();
+app.UseCors("AllowFrontend");
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Seed an admin user for demo purposes
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<AppDbContext>();
+    var passwordHasher = services.GetRequiredService<PasswordHasher>();
+
+    const string adminEmail = "admin@example.com";
+    const string adminPassword = "baller1234";
+
+    if (!context.Gebruikers.Any(g => g.Emailadres == adminEmail))
+    {
+        context.Gebruikers.Add(new backend.Models.Gebruiker
+        {
+            Emailadres = adminEmail,
+            Wachtwoord = passwordHasher.Hash(adminPassword),
+            Naam = "Admin",
+            Role = "ADMIN"
+        });
+
+        context.SaveChanges();
+    }
+}
 
 app.Run();

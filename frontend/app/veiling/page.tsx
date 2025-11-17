@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getProducts } from "../../services/productService";
 import { Product } from "@/types/product";
+import RequireAuth from "@/components/RequireAuth";
 
 export default function ProductList() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -12,15 +13,17 @@ export default function ProductList() {
   }, []);
 
   return (
-    <div>
-      <h2>Producten ({products.length})</h2>
-      {products.map((p) => (
-        <div key={p.productId} style={{ padding: '10px', border: '1px solid #ccc', margin: '10px' }}>
-          <p>ID: {p.productId}</p>
-          <p>Naam: {p.productNaam}</p>
-          {p.fotos && <img src={p.fotos} alt={p.productNaam} width="100" />}
-        </div>
-      ))}
-    </div>
+    <RequireAuth>
+      <div>
+        <h2>Producten ({products.length})</h2>
+        {products.map((p) => (
+          <div key={p.productId} style={{ padding: '10px', border: '1px solid #ccc', margin: '10px' }}>
+            <p>ID: {p.productId}</p>
+            <p>Naam: {p.productNaam}</p>
+            {p.fotos && <img src={p.fotos} alt={p.productNaam} width="100" />}
+          </div>
+        ))}
+      </div>
+    </RequireAuth>
   );
 }

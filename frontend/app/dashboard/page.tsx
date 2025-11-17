@@ -1,11 +1,15 @@
 "use client";
 
 import RequireAuth from "@/components/RequireAuth";
+import { useAuth } from "@/components/AuthProvider";
 import { useEffect, useState } from "react";
 import { getVeilingen } from "@/services/veilingService";
 import type { Veiling } from "@/types/veiling";
+import UserInfoCard from "@/components/UserInfoCard";
+import VeilingListSimple from "@/components/VeilingListSimple";
 
-export default function Landing() {
+export default function DashboardPage() {
+  const { user, loading } = useAuth();
   const [veilingen, setVeilingen] = useState<Veiling[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,13 +20,14 @@ export default function Landing() {
   }, []);
 
   return (
-    <RequireAuth roles={["ADMIN", "VERKOPER"]}>
-      <div style={{ padding: "20px", display: "grid", gap: 12 }}>
-        <h1 style={{ margin: 0 }}>Dashboard voor veilingmeester</h1>
+    <RequireAuth>
+      <div style={{ padding: "20px", display: "grid", gap: 24 }}>
+        <h1 style={{ margin: 0 }}>Dashboard</h1>
+        {user && !loading && <UserInfoCard user={user} title="Jouw gegevens" />}
         {error ? (
           <div style={{ color: "red" }}>{error}</div>
         ) : (
-          <div style={{ fontWeight: 600 }}>Totaal aantal veilingen: {veilingen.length}</div>
+          <VeilingListSimple title="Beschikbare veilingen" items={veilingen} />
         )}
       </div>
     </RequireAuth>

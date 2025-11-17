@@ -1,7 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using backend.Data;
 using backend.Models;
+using backend.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace backend.Controllers
 {
@@ -10,10 +15,12 @@ namespace backend.Controllers
     public class GebruikerController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly PasswordHasher _passwordHasher;
 
-        public GebruikerController(AppDbContext context)
+        public GebruikerController(AppDbContext context, PasswordHasher passwordHasher)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
         }
 
         // GET: api/Gebruiker
@@ -38,7 +45,6 @@ namespace backend.Controllers
         }
 
         // PUT: api/Gebruiker/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutGebruiker(int id, Gebruiker gebruiker)
         {
@@ -69,10 +75,17 @@ namespace backend.Controllers
         }
 
         // POST: api/Gebruiker
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Gebruiker>> PostGebruiker(Gebruiker gebruiker)
         {
+            if (string.IsNullOrWhiteSpace(gebruiker.Wachtwoord))
+            {
+                return BadRequest("Wachtwoord is verplicht.");
+            }
+
+            gebruiker.Role = string.IsNullOrWhiteSpace(gebruiker.Role) ? "KOPER" : gebruiker.Role;
+            gebruiker.Wachtwoord = _passwordHasher.Hash(gebruiker.Wachtwoord);
+
             _context.Gebruikers.Add(gebruiker);
             await _context.SaveChangesAsync();
 
@@ -95,17 +108,43 @@ namespace backend.Controllers
             return NoContent();
         }
 
+        public class RegisterRequest
+        {
+            public string Emailadres { get; set; } = string.Empty;
+            public string Wachtwoord { get; set; } = string.Empty;
+            public string? Naam { get; set; }
+        }
+
+        public class LoginRequest
+        {
+            public string Emailadres { get; set; } = string.Empty;
+            public string Wachtwoord { get; set; } = string.Empty;
+        }
+
         // POST: api/Gebruiker/register
         [HttpPost("register")]
-        public async Task<ActionResult<Gebruiker>> Register(Gebruiker gebruiker)
+        public async Task<ActionResult> Register([FromBody] RegisterRequest request)
         {
             var existing = await _context.Gebruikers
-                .FirstOrDefaultAsync(g => g.Emailadres.ToLower() == gebruiker.Emailadres.ToLower());
+                .FirstOrDefaultAsync(g => g.Emailadres.ToLower() == request.Emailadres.ToLower());
 
             if (existing != null)
             {
                 return BadRequest("E-mailadres is al geregistreerd.");
             }
+
+            if (string.IsNullOrWhiteSpace(request.Wachtwoord))
+            {
+                return BadRequest("Wachtwoord is verplicht.");
+            }
+
+            var gebruiker = new Gebruiker
+            {
+                Emailadres = request.Emailadres,
+                Naam = request.Naam,
+                Wachtwoord = _passwordHasher.Hash(request.Wachtwoord),
+                Role = "KOPER"
+            };
 
             _context.Gebruikers.Add(gebruiker);
             await _context.SaveChangesAsync();
@@ -115,7 +154,7 @@ namespace backend.Controllers
 
         // POST: api/Gebruiker/login
         [HttpPost("login")]
-        public async Task<ActionResult> Login([FromBody] Gebruiker loginRequest)
+        public async Task<ActionResult> Login([FromBody] LoginRequest loginRequest)
         {
             if (string.IsNullOrEmpty(loginRequest.Emailadres) || string.IsNullOrEmpty(loginRequest.Wachtwoord))
             {
@@ -130,16 +169,67 @@ namespace backend.Controllers
                 return NotFound("Gebruiker niet gevonden.");
             }
 
-            if (gebruiker.Wachtwoord != loginRequest.Wachtwoord)
+            if (!_passwordHasher.Verify(loginRequest.Wachtwoord, gebruiker.Wachtwoord))
             {
                 return Unauthorized("Ongeldig wachtwoord.");
             }
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, gebruiker.GebruikerId.ToString()),
+                new Claim(ClaimTypes.Email, gebruiker.Emailadres),
+                new Claim(ClaimTypes.Role, gebruiker.Role ?? "KOPER")
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
             return Ok(new
             {
                 message = "Login geslaagd!",
                 gebruiker = new { gebruiker.GebruikerId, gebruiker.Naam, gebruiker.Emailadres }
             });
+        }
+
+        // GET: api/Gebruiker/me
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult> GetCurrentUser()
+        {
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(idClaim) || !int.TryParse(idClaim, out var gebruikerId))
+            {
+                return Unauthorized();
+            }
+
+            var gebruiker = await _context.Gebruikers.FindAsync(gebruikerId);
+            if (gebruiker == null)
+            {
+                return Unauthorized();
+            }
+
+            return Ok(new
+            {
+                gebruikerId = gebruiker.GebruikerId,
+                naam = gebruiker.Naam,
+                emailadres = gebruiker.Emailadres,
+                role = gebruiker.Role ?? "KOPER",
+                straat = gebruiker.Straat,
+                huisnummer = gebruiker.Huisnummer,
+                postcode = gebruiker.Postcode,
+                woonplaats = gebruiker.Woonplaats
+            });
+        }
+
+        // POST: api/Gebruiker/logout
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return NoContent();
         }
 
         private bool GebruikerExists(int id)

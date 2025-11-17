@@ -14,12 +14,12 @@ namespace backend.Models
         public int VerkoperId { get; set; }
 
         [MaxLength(50)]
-        public string KvkNummer { get; set; }
+        public string KvkNummer { get; set; } = string.Empty;
 
-        public string Bedrijfsgegevens { get; set; }
+        public string Bedrijfsgegevens { get; set; } = string.Empty;
 
-        public string Adresgegevens { get; set; }
+        public string Adresgegevens { get; set; } = string.Empty;
 
-        public string FinancieleGegevens { get; set; }
+        public string FinancieleGegevens { get; set; } = string.Empty;
     }
 }
