@@ -27,6 +27,8 @@ namespace backend.Models
         public int Eindtijd { get; set; }
 
         public int VeilingMeesterId { get; set; }
+
+        public int ProductId { get; set; }
         
     }
 }
