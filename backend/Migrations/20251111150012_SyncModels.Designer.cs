@@ -11,8 +11,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251030114310_InitialMigrations")]
-    partial class InitialMigrations
+    [Migration("20251111150012_SyncModels")]
+    partial class SyncModels
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -99,12 +99,18 @@ namespace backend.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ProductId"));
 
+                    b.Property<decimal>("EindPrijs")
+                        .HasColumnType("numeric");
+
                     b.Property<string>("Fotos")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Hoeveelheid")
                         .HasColumnType("integer");
+
+                    b.Property<decimal>("Huidigeprijs")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("ProductBeschrijving")
                         .IsRequired()
@@ -114,7 +120,13 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<decimal>("StartPrijs")
+                        .HasColumnType("numeric");
+
                     b.Property<int>("VerkoperId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("veilingId")
                         .HasColumnType("integer");
 
                     b.HasKey("ProductId");
@@ -141,17 +153,22 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.Veiling", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("VeilingId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("VeilingId"));
+
+                    b.Property<string>("Beschrijving")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("Eindtijd")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("Huidigeprijs")
-                        .HasColumnType("numeric");
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Naam")
                         .IsRequired()
@@ -160,16 +177,13 @@ namespace backend.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("Startprijs")
-                        .HasColumnType("numeric");
-
                     b.Property<int>("Starttijd")
                         .HasColumnType("integer");
 
                     b.Property<int>("VeilingMeesterId")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                    b.HasKey("VeilingId");
 
                     b.ToTable("veiling");
                 });
