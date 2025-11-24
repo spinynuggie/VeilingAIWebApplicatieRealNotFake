@@ -22,6 +22,7 @@ namespace backend.Models
         public required string Wachtwoord { get; set; }
 
         [MaxLength(50)]
+        [Column("role")]
         public string Role { get; set; } = "KOPER";
 
         public string? Straat { get; set; }
