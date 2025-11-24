@@ -7,6 +7,7 @@ import Navbar from "@/components/NavBar";
 import SearchBar from "@/components/SearchBar"
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
 import RequireAuth from "@/components/RequireAuth";
+import Profile from "@/components/Profile";
 
 export default function VeilingList() {
   const [veilingen, setVeilingen] = useState<any[]>([]);
@@ -29,7 +30,7 @@ export default function VeilingList() {
             <SearchBar/>
           }
           right={
-            <span>tijdelijke text</span>
+            <Profile></Profile>
           }
         />
 

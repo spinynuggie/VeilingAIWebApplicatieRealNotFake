@@ -14,21 +14,19 @@ namespace backend.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int VeilingId { get; set; }
-        
+
         [Required]
         public string Naam { get; set; } = string.Empty;
-        
+
         public string Beschrijving { get; set; } = string.Empty;
-        
+
         public string Image {get; set; } = string.Empty;
-        
+
         public int Starttijd { get; set; }
-        
+
         public int Eindtijd { get; set; }
 
         public int VeilingMeesterId { get; set; }
 
-        public int ProductId { get; set; }
-        
     }
 }
