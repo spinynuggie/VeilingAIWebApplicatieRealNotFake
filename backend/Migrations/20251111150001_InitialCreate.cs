@@ -34,13 +34,13 @@ namespace backend.Migrations
                 {
                     GebruikerId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Naam = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Naam = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     Emailadres = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     Wachtwoord = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Straat = table.Column<string>(type: "text", nullable: false),
-                    Huisnummer = table.Column<string>(type: "text", nullable: false),
-                    Postcode = table.Column<string>(type: "text", nullable: false),
-                    Woonplaats = table.Column<string>(type: "text", nullable: false)
+                    Straat = table.Column<string>(type: "text", nullable: true),
+                    Huisnummer = table.Column<string>(type: "text", nullable: true),
+                    Postcode = table.Column<string>(type: "text", nullable: true),
+                    Woonplaats = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -55,8 +55,12 @@ namespace backend.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Fotos = table.Column<string>(type: "text", nullable: false),
                     ProductNaam = table.Column<string>(type: "text", nullable: false),
-                    Hoeveelheid = table.Column<int>(type: "integer", nullable: false),
                     ProductBeschrijving = table.Column<string>(type: "text", nullable: false),
+                    Hoeveelheid = table.Column<int>(type: "integer", nullable: false),
+                    StartPrijs = table.Column<decimal>(type: "numeric", nullable: false),
+                    EindPrijs = table.Column<decimal>(type: "numeric", nullable: false),
+                    Huidigeprijs = table.Column<decimal>(type: "numeric", nullable: false),
+                    veilingId = table.Column<int>(type: "integer", nullable: false),
                     VerkoperId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -81,19 +85,19 @@ namespace backend.Migrations
                 name: "veiling",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    VeilingId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Naam = table.Column<string>(type: "text", nullable: false),
+                    Beschrijving = table.Column<string>(type: "text", nullable: false),
+                    Image = table.Column<string>(type: "text", nullable: false),
                     Starttijd = table.Column<int>(type: "integer", nullable: false),
                     Eindtijd = table.Column<int>(type: "integer", nullable: false),
-                    Startprijs = table.Column<decimal>(type: "numeric", nullable: false),
-                    Huidigeprijs = table.Column<decimal>(type: "numeric", nullable: false),
                     VeilingMeesterId = table.Column<int>(type: "integer", nullable: false),
                     ProductId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_veiling", x => x.Id);
+                    table.PrimaryKey("PK_veiling", x => x.VeilingId);
                 });
 
             migrationBuilder.CreateTable(

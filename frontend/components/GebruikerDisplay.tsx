@@ -1,17 +1,6 @@
-interface Gebruiker {
-  gebruikerId: number;
-  naam: string;
-  emailadres: string;
-  straat: string;
-  huisnummer: string;
-  postcode: string;
-  woonplaats: string;
-}
+"use client";
 
-interface GebruikerDisplayProps {
-  gebruikers: Gebruiker[];
-}
-
+import {Gebruiker, GebruikerDisplayProps } from '@/types/gebruiker';
 export default function GebruikerDisplay({ gebruikers }: GebruikerDisplayProps) {
   // Bescherm tegen undefined
   if (!gebruikers || gebruikers.length === 0) {
