@@ -26,4 +26,10 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
   </ItemGroup>
 
+  <!-- Exclude tooling projects placed under backend/tools from the web project compilation -->
+  <ItemGroup>
+    <Compile Remove="tools\**\*.cs" />
+    <None Remove="tools\**" />
+  </ItemGroup>
+
 </Project>

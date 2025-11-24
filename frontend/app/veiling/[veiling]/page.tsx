@@ -13,6 +13,7 @@ import { Product } from "@/types/product";
 import Profile  from "@/components/Profile";
 import SingleProduct from "@/components/SingleProduct";
 import { Box } from "@mui/material"
+import RequireAuth from "@/components/RequireAuth";
 
 export default function VeilingDetailPage() {
   const [veiling, setVeiling] = useState<Veiling | null>(null);
@@ -55,6 +56,8 @@ export default function VeilingDetailPage() {
   if (!veiling) return <p>Loading... (looking for id: {id})</p>;
 
   return (
+    <RequireAuth>
+
     <div style={{background: "white" }}>
       <Navbar
         style={{ backgroundColor: "#C8FFD6"}}
@@ -83,5 +86,6 @@ export default function VeilingDetailPage() {
       </Box>
             <p>naam: {veiling.naam}; veilingId: {veiling.veilingId};</p>
     </div>
+    </RequireAuth>
   );
 }

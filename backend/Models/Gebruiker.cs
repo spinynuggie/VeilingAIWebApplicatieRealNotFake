@@ -23,7 +23,7 @@ namespace backend.Models
 
         [MaxLength(50)]
         [Column("role")]
-        public string Role { get; set; } = "KOPER";
+        public string Role { get; set; } 
 
         public string? Straat { get; set; }
 
