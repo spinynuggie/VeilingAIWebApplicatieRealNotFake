@@ -32,4 +32,8 @@
     <None Remove="tools\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

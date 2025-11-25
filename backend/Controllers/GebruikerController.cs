@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using backend.Dtos; // DTOs zijn nu beschikbaar
+using System.Linq;
 
 namespace backend.Controllers
 {
@@ -23,16 +25,34 @@ namespace backend.Controllers
             _passwordHasher = passwordHasher;
         }
 
-        // GET: api/Gebruiker
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Gebruiker>>> GetGebruikers()
+        // Helper functie om de Entiteit naar DTO te mappen
+        private GebruikerResponseDto MapToResponseDto(Gebruiker gebruiker)
         {
-            return await _context.Gebruikers.ToListAsync();
+            return new GebruikerResponseDto
+            {
+                GebruikerId = gebruiker.GebruikerId,
+                Naam = gebruiker.Naam,
+                Emailadres = gebruiker.Emailadres,
+                Straat = gebruiker.Straat,
+                Huisnummer = gebruiker.Huisnummer,
+                Postcode = gebruiker.Postcode,
+                Woonplaats = gebruiker.Woonplaats
+            };
         }
 
-        // GET: api/Gebruiker/5
+        // GET: api/Gebruiker (GEBRUIKT DTO VOOR OUTPUT)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<GebruikerResponseDto>>> GetGebruikers()
+        {
+            var gebruikers = await _context.Gebruikers.ToListAsync();
+    
+            // Map ORM models to DTOs before returning
+            return gebruikers.Select(MapToResponseDto).ToList();
+        }
+
+        // GET: api/Gebruiker/5 (GEBRUIKT DTO VOOR OUTPUT)
         [HttpGet("{id}")]
-        public async Task<ActionResult<Gebruiker>> GetGebruiker(int id)
+        public async Task<ActionResult<GebruikerResponseDto>> GetGebruiker(int id)
         {
             var gebruiker = await _context.Gebruikers.FindAsync(id);
 
@@ -41,18 +61,29 @@ namespace backend.Controllers
                 return NotFound();
             }
 
-            return gebruiker;
+            // Stuur DTO terug i.p.v. de Entiteit
+            return MapToResponseDto(gebruiker);
         }
 
-        // PUT: api/Gebruiker/5
+        // PUT: api/Gebruiker/5 (GEBRUIKT DTO VOOR INPUT)
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutGebruiker(int id, Gebruiker gebruiker)
+        public async Task<IActionResult> PutGebruiker(int id, GebruikerUpdateDto gebruikerDto)
         {
-            if (id != gebruiker.GebruikerId)
-            {
-                return BadRequest();
-            }
+            var gebruiker = await _context.Gebruikers.FindAsync(id);
 
+            if (gebruiker == null)
+            {
+                return NotFound();
+            }
+            
+            // Map DTO velden naar de Entiteit (geen wachtwoord/role aanpassingen hier)
+            gebruiker.Naam = gebruikerDto.Naam;
+            gebruiker.Emailadres = gebruikerDto.Emailadres;
+            gebruiker.Straat = gebruikerDto.Straat;
+            gebruiker.Huisnummer = gebruikerDto.Huisnummer;
+            gebruiker.Postcode = gebruikerDto.Postcode;
+            gebruiker.Woonplaats = gebruikerDto.Woonplaats;
+            
             _context.Entry(gebruiker).State = EntityState.Modified;
 
             try
@@ -61,38 +92,34 @@ namespace backend.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!GebruikerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                // De GebruikerExists check is hier niet meer nodig omdat we de Entiteit al hebben opgehaald.
+                throw;
             }
 
             return NoContent();
         }
 
-        // POST: api/Gebruiker
+        // POST: api/Gebruiker (GEBRUIKT DTO VOOR INPUT, VERVANGT OUDE POST)
         [HttpPost]
-        public async Task<ActionResult<Gebruiker>> PostGebruiker(Gebruiker gebruiker)
+        public async Task<ActionResult<GebruikerResponseDto>> PostGebruiker(GebruikerCreateDto gebruikerDto)
         {
-            if (string.IsNullOrWhiteSpace(gebruiker.Wachtwoord))
+            // Entiteit aanmaken op basis van DTO
+            var gebruiker = new Gebruiker
             {
-                return BadRequest("Wachtwoord is verplicht.");
-            }
-
-            gebruiker.Role = string.IsNullOrWhiteSpace(gebruiker.Role) ? "KOPER" : gebruiker.Role;
-            gebruiker.Wachtwoord = _passwordHasher.Hash(gebruiker.Wachtwoord);
+                Emailadres = gebruikerDto.Emailadres,
+                Naam = gebruikerDto.Naam,
+                Role = "KOPER", // Role wordt hardgecodeerd
+                Wachtwoord = _passwordHasher.Hash(gebruikerDto.Wachtwoord)
+            };
 
             _context.Gebruikers.Add(gebruiker);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, gebruiker);
+            // Stuur DTO terug
+            return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, MapToResponseDto(gebruiker));
         }
 
-        // DELETE: api/Gebruiker/5
+        // DELETE: api/Gebruiker/5 (Onveranderd, werkt met ID)
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGebruiker(int id)
         {
@@ -107,23 +134,16 @@ namespace backend.Controllers
 
             return NoContent();
         }
-
-        public class RegisterRequest
-        {
-            public string Emailadres { get; set; } = string.Empty;
-            public string Wachtwoord { get; set; } = string.Empty;
-            public string? Naam { get; set; }
-        }
-
-        public class LoginRequest
-        {
-            public string Emailadres { get; set; } = string.Empty;
-            public string Wachtwoord { get; set; } = string.Empty;
-        }
+        
+        // --- AUTHENTICATION ENDPOINTS (Gebruikt nu DTO's voor Login/Register) ---
+        
+        // Opmerking: Voor een schone architectuur zouden RegisterRequest en LoginRequest
+        // nu ook aparte DTO-klassen moeten zijn in de backend.Dtos namespace.
+        // We laten de huidige nested classes staan, maar gebruiken de DTO's voor de response.
 
         // POST: api/Gebruiker/register
         [HttpPost("register")]
-        public async Task<ActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<ActionResult<GebruikerResponseDto>> Register([FromBody] RegisterRequest request)
         {
             var existing = await _context.Gebruikers
                 .FirstOrDefaultAsync(g => g.Emailadres.ToLower() == request.Emailadres.ToLower());
@@ -133,6 +153,7 @@ namespace backend.Controllers
                 return BadRequest("E-mailadres is al geregistreerd.");
             }
 
+            // Input validatie zou hier al door DTO's moeten worden gedaan, maar we houden de check
             if (string.IsNullOrWhiteSpace(request.Wachtwoord))
             {
                 return BadRequest("Wachtwoord is verplicht.");
@@ -149,10 +170,11 @@ namespace backend.Controllers
             _context.Gebruikers.Add(gebruiker);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, gebruiker);
+            // Stuur DTO terug
+            return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, MapToResponseDto(gebruiker));
         }
 
-        // POST: api/Gebruiker/login
+        // POST: api/Gebruiker/login (Onveranderd, retourneert al een anoniem object)
         [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] LoginRequest loginRequest)
         {
@@ -186,6 +208,7 @@ namespace backend.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
+            // Retourneer een anoniem object dat overeenkomt met de DTO-structuur (veilig)
             return Ok(new
             {
                 message = "Login geslaagd!",
@@ -193,10 +216,10 @@ namespace backend.Controllers
             });
         }
 
-        // GET: api/Gebruiker/me
+        // GET: api/Gebruiker/me (GEBRUIKT DTO VOOR OUTPUT)
         [HttpGet("me")]
         [Authorize]
-        public async Task<ActionResult> GetCurrentUser()
+        public async Task<ActionResult<GebruikerResponseDto>> GetCurrentUser()
         {
             var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(idClaim) || !int.TryParse(idClaim, out var gebruikerId))
@@ -210,20 +233,11 @@ namespace backend.Controllers
                 return Unauthorized();
             }
 
-            return Ok(new
-            {
-                gebruikerId = gebruiker.GebruikerId,
-                naam = gebruiker.Naam,
-                emailadres = gebruiker.Emailadres,
-                role = gebruiker.Role ?? "KOPER",
-                straat = gebruiker.Straat,
-                huisnummer = gebruiker.Huisnummer,
-                postcode = gebruiker.Postcode,
-                woonplaats = gebruiker.Woonplaats
-            });
+            // Retourneer DTO
+            return MapToResponseDto(gebruiker);
         }
 
-        // POST: api/Gebruiker/logout
+        // POST: api/Gebruiker/logout (Onveranderd)
         [HttpPost("logout")]
         [Authorize]
         public async Task<IActionResult> Logout()
@@ -235,6 +249,21 @@ namespace backend.Controllers
         private bool GebruikerExists(int id)
         {
             return _context.Gebruikers.Any(e => e.GebruikerId == id);
+        }
+        
+        // De nested classes RegisterRequest en LoginRequest kunnen hier blijven staan,
+        // maar kunnen beter verplaatst worden naar de backend.Dtos map als aparte DTO's.
+        public class RegisterRequest
+        {
+            public string Emailadres { get; set; } = string.Empty;
+            public string Wachtwoord { get; set; } = string.Empty;
+            public string? Naam { get; set; }
+        }
+
+        public class LoginRequest
+        {
+            public string Emailadres { get; set; } = string.Empty;
+            public string Wachtwoord { get; set; } = string.Empty;
         }
     }
 }
