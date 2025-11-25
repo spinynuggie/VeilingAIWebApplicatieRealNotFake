@@ -8,3 +8,12 @@ export interface Product {
 export interface ProductDisplayProps {
   product: Product[];
 }
+
+export interface CreateProductInput {
+  productNaam: string;
+  productBeschrijving: string;
+  fotos: string;
+  aantalProduct: number;
+  minimumPrijs: number;
+  specificaties: string[];
+}
