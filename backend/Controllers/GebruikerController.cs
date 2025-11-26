@@ -18,11 +18,13 @@ namespace backend.Controllers
     {
         private readonly AppDbContext _context;
         private readonly PasswordHasher _passwordHasher;
+        private readonly ILogger<GebruikerController> _logger;
 
-        public GebruikerController(AppDbContext context, PasswordHasher passwordHasher)
+        public GebruikerController(AppDbContext context, PasswordHasher passwordHasher, ILogger<GebruikerController> logger)
         {
             _context = context;
             _passwordHasher = passwordHasher;
+            _logger = logger;
         }
 
         // Helper functie om de Entiteit naar DTO te mappen
@@ -66,6 +68,7 @@ namespace backend.Controllers
         }
 
         // PUT: api/Gebruiker/5 (GEBRUIKT DTO VOOR INPUT)
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> PutGebruiker(int id, GebruikerUpdateDto gebruikerDto)
         {
@@ -76,6 +79,7 @@ namespace backend.Controllers
                 return NotFound();
             }
             
+            _logger.LogInformation("PutGebruiker called for id {Id} with DTO: {@Dto}", id, gebruikerDto);
             // Map DTO velden naar de Entiteit (geen wachtwoord/role aanpassingen hier)
             gebruiker.Naam = gebruikerDto.Naam;
             gebruiker.Emailadres = gebruikerDto.Emailadres;

@@ -2,11 +2,6 @@ import type { User } from "@/types/user";
 
 const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
 
-function getCookie(name: string) {
-  if (typeof document === "undefined") return "";
-  const match = document.cookie.split("; ").find((c) => c.trim().startsWith(name + "="));
-  return match ? decodeURIComponent(match.split("=")[1]) : "";
-}
 
 export async function getGebruiker() {
   const res = await fetch(`${apiBase}/api/Gebruiker`, { credentials: "include" });
@@ -27,7 +22,7 @@ export async function getCurrentGebruiker(): Promise<User> {
 export async function updateGebruiker(field: string, value: string): Promise<void> {
   // Haal de huidige gebruiker (via /me of fallback)
   const gebruiker = await getCurrentGebruiker();
-
+  console.log("Huidige gebruiker voor update:", gebruiker);
   // Pas alleen het gevraagde veld aan
   if (field === "naam") gebruiker.naam = value;
   else if (field === "emailadres") gebruiker.emailadres = value;
@@ -49,25 +44,15 @@ export async function updateGebruiker(field: string, value: string): Promise<voi
 
   // Sommige backend versies verwachten (of kunnen accepteren) een volledig Gebruiker-object.
   // Bouw een compleet object zoals jouw voorbeeld (we vullen wachtwoord leeg en role uit cookie indien aanwezig).
-  const fullPayload = {
-    gebruikerId: (gebruiker.gebruikerId ?? Number(getCookie("gebruikerId"))) || 0,
-    naam: gebruiker.naam ?? "",
-    emailadres: gebruiker.emailadres ?? "",
-    wachtwoord: getCookie("wachtwoord") || "iets",
-    role: getCookie("role") || ("" as string),
-    straat: gebruiker.straat ?? "",
-    huisnummer: gebruiker.huisnummer ?? "",
-    postcode: gebruiker.postcode ?? "",
-    woonplaats: gebruiker.woonplaats ?? "",
-  };
+  
 
   // Stuur het volledige object naar de backend. De controller zal alleen de verwachte velden mappen,
   // maar als jouw backend echt een volledig object verlangt, wordt dit hier meegegeven.
-  const res = await fetch(`${apiBase}/api/Gebruiker/${fullPayload.gebruikerId}`, {
+  const res = await fetch(`${apiBase}/api/Gebruiker/${gebruiker.gebruikerId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify(fullPayload),
+    body: JSON.stringify(dto),
   });
 
   if (!res.ok) {

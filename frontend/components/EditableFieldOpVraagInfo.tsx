@@ -10,7 +10,7 @@ interface EditableFieldProps {
   value?: string;
   field: string; // veldnaam in user-object
   onValueChange?: (value: string) => void;
-  onSave?: (field: string, value: string) => void;
+  
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({
@@ -18,7 +18,6 @@ const EditableField: React.FC<EditableFieldProps> = ({
   defaultValue = "",
   value: propValue,
   onValueChange,
-  onSave,
   field,
 }) => {
   // initialize from `propValue` if provided, otherwise use `defaultValue`
@@ -50,18 +49,15 @@ const EditableField: React.FC<EditableFieldProps> = ({
 
   const handleBlur = () => {
     setIsEditing(false);
+    gebruikerService.updateGebruiker(field, value);
     
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setValue(newValue);
-    gebruikerService.updateGebruiker(field, value);
     onValueChange?.(newValue);
-    if (onSave) {
-      onSave(field, value);
-      
-    }
+    
   };
 
   return (

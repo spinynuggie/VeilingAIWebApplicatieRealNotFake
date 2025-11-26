@@ -15,10 +15,6 @@ export default function KlantProfile() {
   const toggleAll = () => setMovedAll((v) => !v);
   const { user, loading } = useAuth();
 
-  const handleUserFieldSave = async (field: string, value: string) => {
-    // Implement your save logic here
-  };
-
   return (
     <RequireAuth>
       <div style={{ position: "relative", minHeight: "100vh", overflow: "hidden" }}>
@@ -211,7 +207,6 @@ export default function KlantProfile() {
                     label="Naam"
                     field="naam"
                     value={user?.naam || ""}
-                    onSave={handleUserFieldSave}
                   />
                 </Box>
               </Grid>
@@ -222,7 +217,6 @@ export default function KlantProfile() {
                     label="Email"
                     field="emailadres"
                     value={user?.emailadres || ""}
-                    onSave={handleUserFieldSave}
                   />
                 </Box>
               </Grid>
@@ -233,7 +227,6 @@ export default function KlantProfile() {
                     label="Woonplaats"
                     field="woonplaats"
                     value={user?.woonplaats || ""}
-                    onSave={handleUserFieldSave}
                   />
                 </Box>
               </Grid>
@@ -244,7 +237,6 @@ export default function KlantProfile() {
                     label="Straat"
                     field="straat"
                     value={user?.straat || ""}
-                    onSave={handleUserFieldSave}
                   />
                 </Box>
               </Grid>
@@ -256,7 +248,6 @@ export default function KlantProfile() {
                       label="Postcode"
                       field="postcode"
                       value={user?.postcode || ""}
-                      onSave={handleUserFieldSave}
                     />
                   </Box>
                 </Box>
@@ -270,7 +261,6 @@ export default function KlantProfile() {
                       label="Huisnummer"
                       field="huisnummer"
                       value={user?.huisnummer || ""}
-                      onSave={handleUserFieldSave}
                     />
                   </Box>
 
