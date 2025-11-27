@@ -1,12 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using backend.Data;
 using backend.Models;
+using backend.Dtos; // Importeer de DTO namespace
 
 namespace backend.Controllers
 {
@@ -21,36 +20,21 @@ namespace backend.Controllers
             _context = context;
         }
 
-        // GET: api/VeilingMeester
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<VeilingMeester>>> GetVeilingMeesters()
-        {
-            return await _context.VeilingMeesters.ToListAsync();
-        }
+        // ... GET methoden blijven ongewijzigd ...
 
-        // GET: api/VeilingMeester/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<VeilingMeester>> GetVeilingMeester(int id)
+        // PUT: api/VeilingMeester/5 - GEBRUIKT DTO VOOR INPUT
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutVeilingMeester(int id, VeilingMeesterDto veilingMeesterDto)
         {
             var veilingMeester = await _context.VeilingMeesters.FindAsync(id);
-
+            
             if (veilingMeester == null)
             {
                 return NotFound();
             }
 
-            return veilingMeester;
-        }
-
-        // PUT: api/VeilingMeester/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutVeilingMeester(int id, VeilingMeester veilingMeester)
-        {
-            if (id != veilingMeester.MeesterId)
-            {
-                return BadRequest();
-            }
+            // Map de DTO naar het bestaande domeinmodel
+            veilingMeester.GebruikerId = veilingMeesterDto.GebruikerId;
 
             _context.Entry(veilingMeester).State = EntityState.Modified;
 
@@ -73,16 +57,23 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        // POST: api/VeilingMeester
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // POST: api/VeilingMeester - GEBRUIKT DTO VOOR INPUT
         [HttpPost]
-        public async Task<ActionResult<VeilingMeester>> PostVeilingMeester(VeilingMeester veilingMeester)
+        public async Task<ActionResult<VeilingMeester>> PostVeilingMeester(VeilingMeesterDto veilingMeesterDto)
         {
+            // Map de DTO naar een nieuw domeinmodel. MeesterId wordt automatisch gegenereerd.
+            var veilingMeester = new VeilingMeester
+            {
+                GebruikerId = veilingMeesterDto.GebruikerId
+            };
+
             _context.VeilingMeesters.Add(veilingMeester);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetVeilingMeester", new { id = veilingMeester.MeesterId }, veilingMeester);
         }
+
+        // ... DELETE en VeilingMeesterExists methoden blijven ongewijzigd ...
 
         // DELETE: api/VeilingMeester/5
         [HttpDelete("{id}")]

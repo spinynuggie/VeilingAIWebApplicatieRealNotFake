@@ -11,7 +11,7 @@ namespace backend.Dtos
         public required string Emailadres { get; set; }
 
         [Required(ErrorMessage = "Wachtwoord is verplicht.")]
-        [MinLength(6, ErrorMessage = "Wachtwoord moet minimaal 6 tekens bevatten.")]
+        [MinLength(12, ErrorMessage = "Wachtwoord moet minimaal 12 tekens bevatten.")]
         [MaxLength(100)]
         public required string Wachtwoord { get; set; }
         

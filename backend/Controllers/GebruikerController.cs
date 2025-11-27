@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using backend.Dtos; // DTOs zijn nu beschikbaar
+using backend.Dtos;
 using System.Linq;
 
 namespace backend.Controllers
@@ -67,22 +67,22 @@ namespace backend.Controllers
 
         // PUT: api/Gebruiker/5 (GEBRUIKT DTO VOOR INPUT)
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutGebruiker(int id, GebruikerUpdateDto gebruikerDto)
-        {
-            var gebruiker = await _context.Gebruikers.FindAsync(id);
-
-            if (gebruiker == null)
+            public async Task<IActionResult> PutGebruiker(int id, GebruikerUpdateDto gebruikerDto)
             {
-                return NotFound();
-            }
-            
-            // Map DTO velden naar de Entiteit (geen wachtwoord/role aanpassingen hier)
-            gebruiker.Naam = gebruikerDto.Naam;
-            gebruiker.Emailadres = gebruikerDto.Emailadres;
-            gebruiker.Straat = gebruikerDto.Straat;
-            gebruiker.Huisnummer = gebruikerDto.Huisnummer;
-            gebruiker.Postcode = gebruikerDto.Postcode;
-            gebruiker.Woonplaats = gebruikerDto.Woonplaats;
+                var gebruiker = await _context.Gebruikers.FindAsync(id);
+
+                if (gebruiker == null)
+                {
+                    return NotFound();
+                }
+                
+                // Map DTO velden naar de Entiteit (geen wachtwoord/role aanpassingen hier)
+                gebruiker.Naam = gebruikerDto.Naam;
+                gebruiker.Emailadres = gebruikerDto.Emailadres;
+                gebruiker.Straat = gebruikerDto.Straat;
+                gebruiker.Huisnummer = gebruikerDto.Huisnummer;
+                gebruiker.Postcode = gebruikerDto.Postcode;
+                gebruiker.Woonplaats = gebruikerDto.Woonplaats;
             
             _context.Entry(gebruiker).State = EntityState.Modified;
 

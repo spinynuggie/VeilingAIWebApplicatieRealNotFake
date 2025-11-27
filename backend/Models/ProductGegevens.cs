@@ -27,7 +27,7 @@ namespace backend.Models
         
         public decimal Huidigeprijs { get; set; }
         
-        public int veilingId { get; set; }
+        public int VeilingId { get; set; }
         
         public int VerkoperId { get; set; }
     }
