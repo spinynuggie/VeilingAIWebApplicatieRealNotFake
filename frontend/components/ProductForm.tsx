@@ -31,7 +31,7 @@ const InteractiveButton: React.FC<InteractiveButtonProps> = ({ baseStyle, childr
 };
 
 // --- TYPES ---
-interface ProductData {
+export interface ProductData {
   name: string;
   description: string;
   quantity: number | ""; 
@@ -40,19 +40,14 @@ interface ProductData {
   image: File | null;
 }
 
-export default function ProductForm() {
+interface ProductFormProps {
+  formData: ProductData;
+  setFormData: React.Dispatch<React.SetStateAction<ProductData>>;
+}
+
+export default function ProductForm({ formData, setFormData }: ProductFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isImageFocused, setIsImageFocused] = useState(false);
-
-  const [formData, setFormData] = useState<ProductData>({
-    name: "",
-    description: "",
-    quantity: "", 
-    price: "",
-    specifications: [], 
-    image: null,
-  });
-
   const [isAddingSpec, setIsAddingSpec] = useState(false);
   const [newSpecValue, setNewSpecValue] = useState("");
 
@@ -137,7 +132,6 @@ export default function ProductForm() {
     }
   };
 
-
   const handleImageClick = () => {
     fileInputRef.current?.click();
   };
@@ -154,7 +148,7 @@ export default function ProductForm() {
     console.log("Product opgeslagen:", formData);
   };
 
-  // --- STYLES ---
+  // --- STYLES (Ongewijzigd) ---
   const styles: { [key: string]: CSSProperties } = {
     card: {
       backgroundColor: "#D1FADF",
@@ -379,10 +373,8 @@ export default function ProductForm() {
       />
 
       <div style={styles.mainContent}>
-        
         <div style={styles.columnLeft}>
           <label style={{...styles.label, textAlign: "center"}}>Afbeelding Toevoegen</label>
-          
           <div 
             style={styles.imageUploadBox}
             onClick={handleImageClick}
@@ -438,7 +430,6 @@ export default function ProductForm() {
           </div>
 
           <label style={{...styles.label, textAlign: "center"}}>Maximum Prijs</label>
-          
           <div style={styles.priceWrapper}>
             <span style={styles.currencySymbol}>€</span>
             <input

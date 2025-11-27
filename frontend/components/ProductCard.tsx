@@ -1,15 +1,19 @@
 "use client";
 
 import React, { CSSProperties } from "react";
+import { ProductData } from "./ProductForm";
 
-export default function ProductCard() {
-  // --- STYLES ---
+interface ProductCardProps {
+  product: ProductData;
+}
+
+export default function ProductCard({ product }: ProductCardProps) {
   const styles: { [key: string]: CSSProperties } = {
     card: {
-      backgroundColor: "#D1FADF", // De lichte achtergrondkleur
+      backgroundColor: "#D1FADF",
       borderRadius: "15px",
       padding: "25px",
-      width: "350px", // Vaste breedte zoals een kaartje
+      width: "350px",
       boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
       fontFamily: "Arial, sans-serif",
       display: "flex",
@@ -21,22 +25,33 @@ export default function ProductCard() {
       fontSize: "24px",
       fontWeight: "bold",
       margin: "0 0 20px 0",
+      minHeight: "29px", 
     },
     imagePlaceholder: {
-      backgroundColor: "#90B498", // De donkere groene kleur
+      backgroundColor: "#90B498",
       width: "100%",
       height: "200px",
       borderRadius: "10px",
       marginBottom: "20px",
+      overflow: "hidden",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    previewImage: {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
     },
     description: {
       fontSize: "14px",
       lineHeight: "1.4",
       marginBottom: "15px",
+      minHeight: "40px",
     },
     divider: {
       border: "none",
-      borderTop: "2px solid #90B498", // Lijn kleur
+      borderTop: "2px solid #90B498",
       margin: "0 0 15px 0",
       width: "100%",
     },
@@ -46,7 +61,7 @@ export default function ProductCard() {
       marginBottom: "5px",
     },
     specList: {
-      margin: "0 0 30px 20px", // Beetje ruimte links voor bullets
+      margin: "0 0 30px 20px",
       padding: 0,
       fontSize: "14px",
     },
@@ -54,64 +69,93 @@ export default function ProductCard() {
       display: "flex",
       justifyContent: "space-between",
       gap: "10px",
-      marginTop: "auto", // Duwt de knoppen naar beneden
+      marginTop: "auto",
     },
     btnLight: {
-      backgroundColor: "#AEDCB8", // Iets lichtere groen voor Min/Max
+      backgroundColor: "#AEDCB8",
       border: "none",
       borderRadius: "8px",
       padding: "10px 0",
       fontSize: "16px",
-      flex: 1, // Zorgt dat ze even breed zijn
+      flex: 1,
       cursor: "pointer",
       textAlign: "center",
     },
     btnDark: {
-      backgroundColor: "#90B498", // Donkere groen voor Toevoegen
+      backgroundColor: "#90B498",
       border: "none",
       borderRadius: "8px",
       padding: "10px 15px",
       fontSize: "16px",
       cursor: "pointer",
-      flex: 1.2, // Iets breder dan de andere twee
+      flex: 1.2,
       textAlign: "center",
+    },
+    infoBox: {
+      backgroundColor: "#AEDCB8",
+      borderRadius: "8px",
+      padding: "10px 5px",
+      fontSize: "16px",
+      flex: 1,
+      textAlign: "center",
+      fontWeight: "bold",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      display: "flex", 
+      alignItems: "center",
+      justifyContent: "center",
     },
   };
 
   return (
     <div style={styles.card}>
-      {/* Titel */}
-      <h2 style={styles.title}>Product Naam</h2>
+      <h2 style={styles.title}>{product.name || "Product Naam"}</h2>
 
-      {/* Afbeelding Placeholder */}
-      <div style={styles.imagePlaceholder}></div>
+      <div style={styles.imagePlaceholder}>
+        {product.image ? (
+          <img
+            src={URL.createObjectURL(product.image)}
+            alt="Product"
+            style={styles.previewImage}
+          />
+        ) : (
+          <span style={{color: 'white'}}>Geen afbeelding</span>
+        )}
+      </div>
 
-      {/* Omschrijving */}
       <p style={styles.description}>
-        Hier komt een uitgebreide omschrijving van het product. indien deze mee is
-        gegeven kan je hier alle extra informatie bekijken om meer uit te vinden
-        over het product.
+        {product.description || "Hier komt een uitgebreide omschrijving van het product..."}
       </p>
 
-      {/* Lijn */}
       <hr style={styles.divider} />
 
-      {/* Specificaties */}
       <div style={styles.specTitle}>Product specificaties</div>
       <ul style={styles.specList}>
-        <li>info</li>
-        <li>info</li>
-        <li>info</li>
-        <li>info</li>
-        <li>etc..</li>
+        {product.specifications.length > 0 ? (
+          product.specifications.map((spec, index) => (
+            <li key={index}>{spec}</li>
+          ))
+        ) : (
+          <>
+          <li>Geen Specificaties Toegevoegd</li>
+          </>
+        )}
       </ul>
-
-      {/* Knoppen onderaan */}
+      
       <div style={styles.buttonGroup}>
-        <button style={styles.btnLight}>Max</button>
-        <button style={styles.btnLight}>Min</button>
+        <div style={styles.infoBox}>
+          {product.price ? `€ ${product.price}` : "Max"}
+        </div>
+        <div style={styles.infoBox}>
+          Min
+        </div>       
         <button style={styles.btnDark}>Toevoegen</button>
       </div>
     </div>
   );
 }
+
+
+
+
