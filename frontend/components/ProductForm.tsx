@@ -137,6 +137,11 @@ export default function ProductForm() {
     }
   };
 
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleImageKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
@@ -270,7 +275,6 @@ export default function ProductForm() {
       justifyContent: "center", 
       gap: "15px",
       width: "100%", 
-      // AANGEPAST: Padding rechts toegevoegd om de inhoud optisch naar links te duwen
       paddingRight: "25px", 
     },
     currencySymbol: {
@@ -322,11 +326,10 @@ export default function ProductForm() {
       fontWeight: "bold",
       display: "flex",
       alignItems: "center",
-      // AANGEPAST: Centreren van inhoud en volledige breedte
       justifyContent: "center", 
       gap: "10px",
       fontSize: "14px",
-      width: "100%", // Nu even breed als de input container
+      width: "100%", 
     },
     specInputWrapper: {
       display: "flex",
@@ -377,12 +380,12 @@ export default function ProductForm() {
 
       <div style={styles.mainContent}>
         
-        {/* LINKER KOLOM */}
         <div style={styles.columnLeft}>
           <label style={{...styles.label, textAlign: "center"}}>Afbeelding Toevoegen</label>
           
           <div 
             style={styles.imageUploadBox}
+            onClick={handleImageClick}
             tabIndex={0} 
             onKeyDown={handleImageKeyDown}
             onFocus={() => setIsImageFocused(true)}
@@ -451,7 +454,6 @@ export default function ProductForm() {
           </div>
         </div>
 
-        {/* RECHTER KOLOM */}
         <div style={styles.columnRight}>
           <label style={{...styles.label, textAlign: "center"}}>Beschrijving</label>
           <textarea
@@ -525,7 +527,6 @@ export default function ProductForm() {
             </InteractiveButton>
           )}
 
-          {/* KNOP ONDERAAN RECHTS - GECENTREERD */}
           <div style={{ marginTop: "auto", display: "flex", justifyContent: "center", paddingTop: "30px" }}>
             <InteractiveButton type="submit" baseStyle={styles.submitBtn}>
               Product Aanmaken
