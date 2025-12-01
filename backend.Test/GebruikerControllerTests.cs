@@ -20,6 +20,7 @@ public sealed class GebruikerControllerTests
     private AppDbContext _context;
     private GebruikerController _controller;
     private Mock<PasswordHasher> _mockPasswordHasher;
+    private readonly ILogger<GebruikerController> _logger;
 
 // ---
 
@@ -45,7 +46,7 @@ public sealed class GebruikerControllerTests
 
         // 4. Initialiseer de GebruikerController
         // De controller krijgt de mock database en de mock hasher mee
-        _controller = new GebruikerController(_context, _mockPasswordHasher.Object);
+        _controller = new GebruikerController(_context, _mockPasswordHasher.Object,ILogger<GebruikerController> logger);
 
         _context.Gebruikers.AddRange(new Gebruiker
         {
@@ -77,7 +78,7 @@ public sealed class GebruikerControllerTests
             Naam = "Gebruiker3",
             Emailadres = "gebruiker3@test.nl",
             Wachtwoord = "HashedWachtwoord3",
-            Role = "VERKOPER", // Een andere rol
+            //Role = "VERKOPER", // Een andere rol
             Woonplaats = "C",
             Straat = "S3",
             Postcode = "P3",

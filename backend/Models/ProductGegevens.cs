@@ -13,11 +13,11 @@ namespace backend.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ProductId { get; set; }
 
-        public string Fotos { get; set; } = string.Empty;
+        public string Fotos { get; set; }
 
-        public string ProductNaam { get; set; } = string.Empty;
+        public string ProductNaam { get; set; }
 
-        public string ProductBeschrijving { get; set; } = string.Empty;
+        public string ProductBeschrijving { get; set; }
         
         public int Hoeveelheid { get; set; }
         
