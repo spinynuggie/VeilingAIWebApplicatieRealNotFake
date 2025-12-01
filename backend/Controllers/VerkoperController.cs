@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using backend.Data;
 using backend.Models;
+using backend.Dtos; // Importeer de DTO namespace
 
 namespace backend.Controllers
 {
@@ -21,14 +21,14 @@ namespace backend.Controllers
             _context = context;
         }
 
-        // GET: api/Verkoper
+        // GET: api/Verkoper (Blijft ongewijzigd, retourneert het domeinmodel)
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Verkoper>>> GetVerkopers()
         {
             return await _context.Verkopers.ToListAsync();
         }
 
-        // GET: api/Verkoper/5
+        // GET: api/Verkoper/5 (Blijft ongewijzigd, retourneert het domeinmodel)
         [HttpGet("{id}")]
         public async Task<ActionResult<Verkoper>> GetVerkoper(int id)
         {
@@ -42,16 +42,24 @@ namespace backend.Controllers
             return verkoper;
         }
 
-        // PUT: api/Verkoper/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // PUT: api/Verkoper/5 - GEBRUIKT DTO VOOR INPUT
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutVerkoper(int id, Verkoper verkoper)
+        public async Task<IActionResult> PutVerkoper(int id, VerkoperDto verkoperDto)
         {
-            if (id != verkoper.VerkoperId)
+            // 1. Zoek het bestaande domeinmodel
+            var verkoper = await _context.Verkopers.FindAsync(id);
+
+            if (verkoper == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
+            // 2. Map de DTO velden naar het bestaande domeinmodel
+            verkoper.KvkNummer = verkoperDto.KvkNummer;
+            verkoper.Bedrijfsgegevens = verkoperDto.Bedrijfsgegevens;
+            verkoper.Adresgegevens = verkoperDto.Adresgegevens;
+            verkoper.FinancieleGegevens = verkoperDto.FinancieleGegevens;
+            
             _context.Entry(verkoper).State = EntityState.Modified;
 
             try
@@ -73,18 +81,29 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        // POST: api/Verkoper
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // POST: api/Verkoper - GEBRUIKT DTO VOOR INPUT
         [HttpPost]
-        public async Task<ActionResult<Verkoper>> PostVerkoper(Verkoper verkoper)
+        public async Task<ActionResult<Verkoper>> PostVerkoper(VerkoperDto verkoperDto)
         {
+            // 1. Map de DTO naar een nieuw domeinmodel
+            var verkoper = new Verkoper
+            {
+                KvkNummer = verkoperDto.KvkNummer,
+                Bedrijfsgegevens = verkoperDto.Bedrijfsgegevens,
+                Adresgegevens = verkoperDto.Adresgegevens,
+                FinancieleGegevens = verkoperDto.FinancieleGegevens
+                // VerkoperId wordt automatisch door de database ingesteld
+            };
+            
+            // 2. Voeg toe aan de context
             _context.Verkopers.Add(verkoper);
             await _context.SaveChangesAsync();
 
+            // 3. Retourneer het aangemaakte domeinmodel
             return CreatedAtAction("GetVerkoper", new { id = verkoper.VerkoperId }, verkoper);
         }
 
-        // DELETE: api/Verkoper/5
+        // DELETE: api/Verkoper/5 (Blijft ongewijzigd)
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVerkoper(int id)
         {
