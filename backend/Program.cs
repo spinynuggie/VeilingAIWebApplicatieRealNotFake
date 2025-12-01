@@ -62,7 +62,7 @@ using (var scope = app.Services.CreateScope())
     var passwordHasher = services.GetRequiredService<PasswordHasher>();
 
     const string adminEmail = "admin@example.com";
-    const string adminPassword = "baller1234";
+    const string adminPassword = "baller123456";
 
     if (!context.Gebruikers.Any(g => g.Emailadres == adminEmail))
     {
