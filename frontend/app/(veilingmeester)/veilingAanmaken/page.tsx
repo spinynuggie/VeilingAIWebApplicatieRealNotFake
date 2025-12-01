@@ -1,15 +1,11 @@
 "use client";
 
-import React from "react";
 import AppNavbar from "@/components/AppNavbar"; // Assuming you want the navbar here too
-import ProductSearchBar from "@/components/ProductSearchBar";
-import ProductCard from "@/components/ProductCard";
 import { useVeilingAanmaken } from "@/hooks/useVeilingAanmaken";
 import styles from "./veilingAanmaken.module.css";
 import { AvailableColumn } from "./Components/availableColumn";
 import DetailColumn from "./Components/detailColumn";
 import AuctionColumn from "./Components/auctionColumn";
-import { filter } from "framer-motion/client";
 
 const VeilingAanmakenPage = () => {
   const {
