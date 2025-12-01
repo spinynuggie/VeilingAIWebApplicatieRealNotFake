@@ -4,25 +4,43 @@ import { useEffect, useState } from "react";
 import { getProducts } from "../../services/productService";
 import { Product } from "@/types/product";
 import RequireAuth from "@/components/RequireAuth";
+import ProductCard from "@/components/ProductCard"; // De component die het product moet tonen
 
 export default function ProductList() {
-  const [products, setProducts] = useState<Product[]>([]);
+  // We hoeven niet alle producten op te slaan, alleen degene die we willen tonen
+  const [productOne, setProductOne] = useState<Product | undefined>(undefined);
 
   useEffect(() => {
-    getProducts().then(setProducts).catch(console.error);
+    // Haal alle producten op
+    getProducts()
+      .then((data) => {
+        // Zoek het specifieke product met productId 1
+        const p1 = data.find(p => p.productId === 1);
+        setProductOne(p1);
+      })
+      .catch(console.error);
   }, []);
 
   return (
     <RequireAuth>
       <div>
-        <h2>Producten ({products.length})</h2>
-        {products.map((p) => (
-          <div key={p.productId} style={{ padding: '10px', border: '1px solid #ccc', margin: '10px' }}>
-            <p>ID: {p.productId}</p>
-            <p>Naam: {p.productNaam}</p>
-            {p.fotos && <img src={p.fotos} alt={p.productNaam} width="100" />}
+        <h2>Productdetails</h2>
+
+        {/* Toon de ProductCard alleen als productOne is gevonden (niet undefined).
+          Het gevonden product (p1) wordt doorgegeven als de 'product' prop.
+        */}
+        {productOne ? (
+          <div
+            style={{
+              padding: '20px',
+              border: '1px solid #ccc',
+              margin: '20px 0',
+            }}
+          >
           </div>
-        ))}
+        ) : (
+          <p>Product met ID 1 wordt geladen of is niet gevonden...</p>
+        )}
       </div>
     </RequireAuth>
   );

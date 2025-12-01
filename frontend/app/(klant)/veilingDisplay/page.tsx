@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import VeilingDisplay from "../../components/VeilingDisplay";
-import { getVeilingen } from "../../services/veilingService";
+import VeilingDisplay from "../../../components/VeilingDisplay";
+import { getVeilingen } from "../../../services/veilingService";
 import Navbar from "@/components/NavBar";
 import SearchBar from "@/components/SearchBar"
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
