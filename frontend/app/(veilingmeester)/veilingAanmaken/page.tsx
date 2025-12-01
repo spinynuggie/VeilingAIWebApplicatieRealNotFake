@@ -1,127 +1,58 @@
 "use client";
 
+import React from "react";
+import AppNavbar from "@/components/AppNavbar"; // Assuming you want the navbar here too
 import ProductSearchBar from "@/components/ProductSearchBar";
 import ProductCard from "@/components/ProductCard";
 import { useVeilingAanmaken } from "@/hooks/useVeilingAanmaken";
-// Importeer de CSS Module
 import styles from "./veilingAanmaken.module.css";
+import { AvailableColumn } from "./Components/availableColumn";
+import DetailColumn from "./Components/detailColumn";
+import AuctionColumn from "./Components/auctionColumn";
+import { filter } from "framer-motion/client";
 
 const VeilingAanmakenPage = () => {
   const {
     loading,
-    // availableProducts, (niet direct nodig in render, filtered wel)
-    auctionProducts,
+    filteredAvailable,      // Gefilterde lijst links
+    filteredAuction,
     selectedProduct,
     setSelectedProduct,
-    handleSearch,
     handleAddToAuction,
     handleRemoveFromAuction,
-    filteredAvailable
+    handleSearchAvailable,
+    handleSearchAuction,
   } = useVeilingAanmaken();
-
   return (
-    <div className={styles.container}>
+    <main className={styles.pageContainer}>
+      <AppNavbar />
 
-      {/* --- KOLOM 1: BESCHIKBAAR --- */}
-      <div className={styles.column}>
-        <h3 className={styles.header}>Zoek naar producten</h3>
-        <ProductSearchBar onSearch={handleSearch} />
+      <div className={styles.mainWrapper}>
 
-        {loading ? (
-          <p style={{ textAlign: 'center' }}>Laden...</p>
-        ) : (
-          <div>
-            {filteredAvailable.map((prod) => (
-              <div
-                key={prod.productId}
-                className={styles.cardItem}
-                // We gebruiken inline style ALLEEN voor dynamische dingen (zoals de border kleur)
-                style={{
-                  borderColor: selectedProduct?.productId === prod.productId ? "#90B498" : "transparent"
-                }}
-              >
-                <div style={{ flex: 1, paddingRight: '10px' }}>
-                  <strong>{prod.productNaam}</strong><br />
-                  <span style={{ fontSize: '12px' }}>Aantal: {prod.hoeveelheid}</span>
-                </div>
+        {/* KOLOM 1: Nu schoon en leesbaar */}
+        <AvailableColumn
+            loading={loading}
+            products={filteredAvailable}
+            selectedId={selectedProduct?.productId}
+            onSearch={handleSearchAvailable}
+            onSelect={setSelectedProduct}
+        />
 
-                <button
-                  className={styles.actionButton}
-                  style={{ backgroundColor: "#888" }} // Specifieke kleur overschrijven
-                  onClick={() => setSelectedProduct(prod)}
-                >
-                  →
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* KOLOM 2 */}
+        <DetailColumn
+            product={selectedProduct}
+            onAdd={handleAddToAuction}
+        />
+
+        {/* KOLOM 3 */}
+        <AuctionColumn
+            products={filteredAuction}
+            onSearch={handleSearchAuction}
+            onRemove={handleRemoveFromAuction}
+        />
+
       </div>
-
-      {/* --- KOLOM 2: DETAIL KAART --- */}
-      <div style={{ width: "350px" }}>
-        {selectedProduct ? (
-          <ProductCard
-            mode="auction"
-            onAction={handleAddToAuction}
-            product={{
-              title: selectedProduct.productNaam,
-              description: selectedProduct.productBeschrijving,
-              image: selectedProduct.fotos,
-              specifications: [],
-              price: 0
-            }}
-          />
-        ) : (
-          <div className={styles.placeholder}>
-            Selecteer een product links
-          </div>
-        )}
-      </div>
-
-      {/* --- KOLOM 3: IN VEILING --- */}
-      <div className={styles.column}>
-        <h3 className={styles.header}>Producten in veiling</h3>
-        <ProductSearchBar onSearch={handleSearch} />
-
-        <div style={{ flexGrow: 1 }}>
-          {auctionProducts.length === 0 && (
-            <p style={{ textAlign: 'center', color: '#777', fontSize: '14px' }}>
-              Nog geen producten toegevoegd.
-            </p>
-          )}
-
-          {auctionProducts.map((prod) => (
-            <div key={prod.productId} className={styles.cardItem}>
-              <button
-                className={styles.actionButton}
-                style={{ backgroundColor: "#999", marginRight: "10px" }}
-                onClick={() => handleRemoveFromAuction(prod)}
-              >
-                ✕
-              </button>
-
-              <div style={{ flex: 1 }}>
-                <strong>{prod.productNaam}</strong><br />
-                <span style={{ fontSize: '12px' }}>
-                  Startprijs (Max): €{prod.startPrijs}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.footerButtons}>
-          <button className={styles.footerBtn}>Start</button>
-          <button className={styles.footerBtn}>Eind</button>
-          {/* Combineer basis class met specifieke createBtn class */}
-          <button className={`${styles.footerBtn} ${styles.createBtn}`}>
-            Aanmaken
-          </button>
-        </div>
-      </div>
-
-    </div>
+    </main>
   );
 };
 
