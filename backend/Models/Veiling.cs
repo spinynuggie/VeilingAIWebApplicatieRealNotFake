@@ -16,19 +16,17 @@ namespace backend.Models
         public int VeilingId { get; set; }
         
         [Required]
-        public string Naam { get; set; }
+        public string Naam { get; set; } = string.Empty;
         
-        public string Beschrijving { get; set; }
+        public string Beschrijving { get; set; } = string.Empty;
         
-        public string Image {get; set; }
+        public string Image {get; set; } = string.Empty;
         
         public int Starttijd { get; set; }
         
         public int Eindtijd { get; set; }
 
         public int VeilingMeesterId { get; set; }
-
-        public int ProductId { get; set; }
         
     }
 }

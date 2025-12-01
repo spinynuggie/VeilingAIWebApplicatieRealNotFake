@@ -2,7 +2,9 @@ import { Veiling } from '@/types/veiling';
 
 export async function getVeilingen(): Promise<Veiling[]> {
   const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
-  const res = await fetch(`${apiBase}/api/Veiling`);
+  const res = await fetch(`${apiBase}/api/Veiling`, {
+    credentials: "include",
+  });
   if (!res.ok) throw new Error("Ophalen mislukt");
   return res.json();
 }

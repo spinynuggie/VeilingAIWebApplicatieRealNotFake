@@ -11,8 +11,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251111150012_SyncModels")]
-    partial class SyncModels
+    [Migration("20251124085757_SyncModels_20251124")]
+    partial class SyncModels_20251124
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,6 +74,12 @@ namespace backend.Migrations
 
                     b.Property<string>("Postcode")
                         .HasColumnType("text");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("role");
 
                     b.Property<string>("Straat")
                         .HasColumnType("text");
@@ -173,9 +179,6 @@ namespace backend.Migrations
                     b.Property<string>("Naam")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
 
                     b.Property<int>("Starttijd")
                         .HasColumnType("integer");

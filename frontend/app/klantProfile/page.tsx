@@ -55,8 +55,8 @@ export default function KlantProfile() {
           alignItems: "center",
         }}
       >
-       
-        
+
+
         {/* Titel */}
         <Typography
           variant="h5"
@@ -240,7 +240,7 @@ export default function KlantProfile() {
               <Button
                 size="small"
                 variant="contained"
-                
+
                 onClick={toggleAll}
                 sx={{
                   width: '130px',
@@ -265,6 +265,6 @@ export default function KlantProfile() {
     </div>
 
     </div>
-    
+
   );
 }

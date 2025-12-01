@@ -1,12 +1,12 @@
-    using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using backend.Data;
 using backend.Models;
+using backend.Dtos;
 
 namespace backend.Controllers
 {
@@ -21,14 +21,14 @@ namespace backend.Controllers
             _context = context;
         }
 
-        // GET: api/Veiling
+        // GET: api/Veiling (Blijft ongewijzigd, retourneert het domeinmodel)
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Veiling>>> GetVeiling()
         {
             return await _context.Veiling.ToListAsync();
         }
 
-        // GET: api/Veiling/5
+        // GET: api/Veiling/5 (Blijft ongewijzigd, retourneert het domeinmodel)
         [HttpGet("{id}")]
         public async Task<ActionResult<Veiling>> GetVeiling(int id)
         {
@@ -42,15 +42,24 @@ namespace backend.Controllers
             return veiling;
         }
 
-        // PUT: api/Veiling/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // PUT: api/Veiling/5 - GEBRUIKT DTO VOOR INPUT
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutVeiling(int id, Veiling veiling)
+        public async Task<IActionResult> PutVeiling(int id, VeilingDto veilingDto)
         {
-            if (id != veiling.VeilingId)
+            // 1. Zoek het bestaande domeinmodel
+            var veiling = await _context.Veiling.FindAsync(id);
+            if (veiling == null)
             {
-                return BadRequest();
+                return NotFound();
             }
+            
+            // 2. Map de DTO velden naar het bestaande domeinmodel
+            veiling.Naam = veilingDto.Naam;
+            veiling.Beschrijving = veilingDto.Beschrijving;
+            veiling.Image = veilingDto.Image;
+            veiling.Starttijd = veilingDto.Starttijd;
+            veiling.Eindtijd = veilingDto.Eindtijd;
+            veiling.VeilingMeesterId = veilingDto.VeilingMeesterId;
 
             _context.Entry(veiling).State = EntityState.Modified;
 
@@ -73,18 +82,30 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        // POST: api/Veiling
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // POST: api/Veiling - GEBRUIKT DTO VOOR INPUT
         [HttpPost]
-        public async Task<ActionResult<Veiling>> PostVeiling(Veiling veiling)
+        public async Task<ActionResult<Veiling>> PostVeiling(VeilingDto veilingDto)
         {
+            // 1. Map de inkomende DTO naar een nieuw domeinmodel
+            var veiling = new Veiling
+            {
+                Naam = veilingDto.Naam,
+                Beschrijving = veilingDto.Beschrijving,
+                Image = veilingDto.Image,
+                Starttijd = veilingDto.Starttijd,
+                Eindtijd = veilingDto.Eindtijd,
+                VeilingMeesterId = veilingDto.VeilingMeesterId
+            };
+            
+            // 2. Voeg het domeinmodel toe en sla op
             _context.Veiling.Add(veiling);
             await _context.SaveChangesAsync();
 
+            // 3. Retourneer het aangemaakte Veiling domeinmodel
             return CreatedAtAction("GetVeiling", new { id = veiling.VeilingId }, veiling);
         }
 
-        // DELETE: api/Veiling/5
+        // DELETE: api/Veiling/5 (Blijft ongewijzigd)
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVeiling(int id)
         {

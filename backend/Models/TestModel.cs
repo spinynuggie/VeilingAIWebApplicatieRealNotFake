@@ -3,5 +3,5 @@
 public class TestModel
 {
     public int Id { get; set; }
-    public string TestName { get; set; }
+    public string TestName { get; set; } = string.Empty;
 }
