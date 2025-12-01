@@ -1,0 +1,93 @@
+.container {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 20px;
+  background-color: #F0FDF4;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.column {
+  background-color: #D1FADF;
+  border-radius: 15px;
+  padding: 20px;
+  width: 350px;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
+}
+
+.header {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.cardItem {
+  background-color: #E0E0E0;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 80px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  border: 2px solid transparent; /* Voor de border-color transitie */
+  transition: border-color 0.2s;
+}
+
+/* Specifieke stijl voor de knopjes (pijl en kruisje) */
+.actionButton {
+  border: none;
+  color: white;
+  border-radius: 5px;
+  width: 30px;
+  height: 50px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.footerButtons {
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+  padding-top: 20px;
+}
+
+.footerBtn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  background-color: #AEDCB8;
+  color: #000;
+}
+
+/* Extra klasse voor de groene 'Aanmaken' knop */
+.createBtn {
+  background-color: #90B498;
+  color: white;
+}
+
+/* De placeholder (het gestippelde vak) */
+.placeholder {
+  height: 500px;
+  border: 2px dashed #90B498;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  background-color: rgba(255, 255, 255, 0.5);
+}
