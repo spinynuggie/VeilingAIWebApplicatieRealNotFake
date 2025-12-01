@@ -41,7 +41,7 @@ export default function Page() {
         {/* RECHTER KANT: De Kaart */}
         <div style={{ flex: "0 0 auto" }}>
           {/* We geven de data door om te lezen */}
-          <ProductCard product={formData} />
+          <ProductCard mode="create" product={formData} />
         </div>
       </div>
     </main>
