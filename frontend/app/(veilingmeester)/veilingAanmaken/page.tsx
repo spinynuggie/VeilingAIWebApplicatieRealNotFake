@@ -258,6 +258,7 @@ const VeilingAanmakenPage = () => {
       {/* --- KOLOM 3: IN VEILING (ID 1) --- */}
       <div style={styles.column}>
         <h3 style={styles.header}>Producten in veiling</h3>
+        <ProductSearchBar onSearch={handleSearch} />
 
         <div style={{flexGrow: 1}}>
             {auctionProducts.length === 0 && <p style={{textAlign:'center', color:'#777', fontSize:'14px'}}>Nog geen producten toegevoegd.</p>}
