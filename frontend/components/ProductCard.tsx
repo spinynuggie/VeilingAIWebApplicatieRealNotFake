@@ -44,6 +44,9 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
 
   // --- MAPPING LOGICA ---
   // Hier kiezen we: "Hebben we 'title'? Nee? Pak dan 'productNaam'."
+  if (!product) {
+  return <div>Loading product…</div>;
+  }
   const displayTitle = product.title || product.productNaam || "Product Naam";
   const displayDesc = product.description || product.productBeschrijving || "Geen beschrijving beschikbaar.";
 
@@ -229,7 +232,7 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
                     placeholder="Min"
                     type="number"
                     value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)} 
+                    onChange={(e) => setInputValue(e.target.value)}
                 />
                 <button style={styles.btnDark} onClick={handleActionClick}>
                     Aanmaken
