@@ -3,30 +3,229 @@
 import Image from "next/image";
 import backgroundImage from "@/public/loginAssets/FloraHollandGebouw.svg";
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
-import EditableField from "@/components/EditableField";
-import EditableFieldOpVraagInfo from "@/components/EditableFieldOpVraagInfo";
-import { Box, Typography, Grid, Button } from "@mui/material";
-import { useState } from "react";
+import {
+  Box,
+  Typography,
+  Grid,
+  Button,
+  Divider,
+  TextField,
+  Alert,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
 import RequireAuth from "@/components/RequireAuth";
 import { useAuth } from "@/components/AuthProvider";
+import * as gebruikerService from "@/services/gebruikerService";
+import * as verkoperService from "@/services/verkoperService";
+
+type ProfileForm = {
+  naam: string;
+  emailadres: string;
+  woonplaats: string;
+  straat: string;
+  postcode: string;
+  huisnummer: string;
+};
+
+type BusinessForm = {
+  bedrijfsnaam: string;
+  kvkNummer: string;
+  woonplaats: string;
+  straat: string;
+  postcode: string;
+  huisnummer: string;
+};
+
+const blankProfile: ProfileForm = {
+  naam: "",
+  emailadres: "",
+  woonplaats: "",
+  straat: "",
+  postcode: "",
+  huisnummer: "",
+};
+
+const blankBusiness: BusinessForm = {
+  bedrijfsnaam: "",
+  kvkNummer: "",
+  woonplaats: "",
+  straat: "",
+  postcode: "",
+  huisnummer: "",
+};
+
+const formFromUser = (user: any | null): ProfileForm => ({
+  naam: user?.naam ?? "",
+  emailadres: user?.emailadres ?? "",
+  woonplaats: user?.woonplaats ?? "",
+  straat: user?.straat ?? "",
+  postcode: user?.postcode ?? "",
+  huisnummer: user?.huisnummer ?? "",
+});
+
+const fieldStyle = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "12px",
+    backgroundColor: "#fff",
+  },
+};
+
+const verkoperPayloadFromBusiness = (business: BusinessForm) => ({
+  kvkNummer: business.kvkNummer,
+  bedrijfsgegevens: JSON.stringify({ bedrijfsnaam: business.bedrijfsnaam }),
+  adresgegevens: JSON.stringify({
+    woonplaats: business.woonplaats,
+    straat: business.straat,
+    postcode: business.postcode,
+    huisnummer: business.huisnummer,
+  }),
+  financieleGegevens: "",
+});
 
 export default function KlantProfile() {
-  const [movedAll, setMovedAll] = useState(false);
-  const toggleAll = () => setMovedAll((v) => !v);
-  const { user, loading } = useAuth();
+  const { user, refreshUser } = useAuth();
+  const [formValues, setFormValues] = useState<ProfileForm>(blankProfile);
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isVerkoper, setIsVerkoper] = useState(false);
+  const [businessValues, setBusinessValues] = useState<BusinessForm>(blankBusiness);
+  const [verkoperId, setVerkoperId] = useState<number | null>(null);
+  const [businessSaving, setBusinessSaving] = useState(false);
+  const [businessFeedback, setBusinessFeedback] = useState<string | null>(null);
+  const [businessError, setBusinessError] = useState<string | null>(null);
+  const [sellerDialogOpen, setSellerDialogOpen] = useState(false);
+
+  useEffect(() => {
+    setFormValues(formFromUser(user));
+    setBusinessValues((prev) => ({
+      ...prev,
+      woonplaats: user?.woonplaats ?? "",
+      straat: user?.straat ?? "",
+      postcode: user?.postcode ?? "",
+      huisnummer: user?.huisnummer ?? "",
+    }));
+  }, [user]);
+
+  const hasChanges = useMemo(() => {
+    if (!user) return false;
+    return Object.entries(formValues).some(
+      ([key, value]) => (user as any)?.[key] ?? "" !== value
+    );
+  }, [formValues, user]);
+
+  const handleSave = async () => {
+    if (!user) return;
+    if (!hasChanges) {
+      setFeedback("Geen wijzigingen om op te slaan.");
+      setIsEditing(false);
+      return;
+    }
+    setSaving(true);
+    setFeedback(null);
+    setError(null);
+    try {
+      const updates = Object.entries(formValues).reduce<Partial<ProfileForm>>(
+        (acc, [key, value]) => {
+          if ((user as any)?.[key] ?? "" !== value) {
+            acc[key as keyof ProfileForm] = value;
+          }
+          return acc;
+        },
+        {}
+      );
+      const emailChanged = updates.emailadres !== undefined;
+
+      await gebruikerService.updateGebruikerFields(updates, user);
+      await refreshUser();
+      setFeedback(
+        emailChanged
+          ? "Gegevens opgeslagen. E-mail krijgt later een verificatie zodra mail beschikbaar is."
+          : "Gegevens opgeslagen."
+      );
+      setIsEditing(false);
+    } catch (err: any) {
+      setError(err?.message ?? "Opslaan mislukt.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setFormValues(formFromUser(user));
+    setIsEditing(false);
+    setFeedback(null);
+    setError(null);
+  };
+
+  const setField = (field: keyof ProfileForm, value: string) => {
+    setFormValues((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const setBusinessField = (field: keyof BusinessForm, value: string) => {
+    setBusinessValues((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleBusinessSave = async () => {
+    setBusinessSaving(true);
+    setBusinessFeedback(null);
+    setBusinessError(null);
+
+    if (!businessValues.kvkNummer || !businessValues.bedrijfsnaam) {
+      setBusinessError("Kvk-nummer en bedrijfsnaam zijn verplicht.");
+      setBusinessSaving(false);
+      return;
+    }
+
+    try {
+      const payload = verkoperPayloadFromBusiness(businessValues);
+      if (verkoperId) {
+        await verkoperService.updateVerkoper(verkoperId, payload);
+      } else {
+        const created = await verkoperService.createVerkoper(payload);
+        setVerkoperId(created.verkoperId);
+      }
+      setBusinessFeedback("Bedrijfsgegevens opgeslagen via backend Verkoper-controller.");
+    } catch (err: any) {
+      setBusinessError(err?.message ?? "Opslaan bedrijfsgegevens mislukt.");
+    } finally {
+      setBusinessSaving(false);
+    }
+  };
+
+  const handleBecomeSeller = () => {
+    setSellerDialogOpen(true);
+  };
+
+  const confirmBecomeSeller = () => {
+    setIsVerkoper(true);
+    setSellerDialogOpen(false);
+    setBusinessFeedback("Verkopersmodus geactiveerd. Vul je bedrijfsgegevens in en bevestig.");
+  };
 
   return (
     <RequireAuth>
-      <div style={{ position: "relative", minHeight: "100vh", overflow: "hidden" }}>
-        {/* Achtergrondafbeelding */}
-        <div
-          style={{
+      <Box
+        sx={{
+          position: "relative",
+          minHeight: "100vh",
+          overflow: "hidden",
+          background: "linear-gradient(135deg, #ffffff 0%, #e2ffe9 70%)",
+        }}
+      >
+        <Box
+          sx={{
             position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            zIndex: -1,
+            inset: 0,
+            zIndex: -2,
+            opacity: 0.14,
           }}
         >
           <Image
@@ -37,264 +236,462 @@ export default function KlantProfile() {
             quality={100}
             priority
           />
-        </div>
+        </Box>
 
         <Box
           sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: movedAll
-              ? "translate(-50%, -50%) translateX(350px)"
-              : "translate(-50%, -50%)",
-            transition: "transform 400ms ease",
-            boxSizing: "border-box",
-            width: "650px",
-            maxWidth: "90vw",
-            background: "linear-gradient(to bottom, #ffffff, #E2FFE9);",
-            borderRadius: "16px",
-            padding: "40px 52px",
-            boxShadow: "0 6px 16px rgba(0,0,0,0.18)",
+            position: "relative",
+            maxWidth: 1180,
+            mx: "auto",
+            px: { xs: 2, md: 4 },
+            py: { xs: 6, md: 10 },
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
+            gap: 3,
           }}
         >
-          {/* Titel */}
-          <Typography
-            variant="h5"
+          <Box
             sx={{
-              fontWeight: 700,
-              mb: 3,
-              textAlign: "center",
-            }}
-          >
-            Bedrijf
-            <br />
-            gegevens
-          </Typography>
-
-          {/* Velden */}
-          <Grid
-            container
-            spacing={2.5}
-            sx={{
-              width: "100%",
-              justifyContent: "center",
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "space-between",
               alignItems: "center",
+              gap: 2,
             }}
           >
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ width: "100%" }}>
-                <EditableField label="Bedrijf naam" />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Image
+                src={royalLogo}
+                alt="Royal Flora Holland Logo"
+                width={160}
+                height={65}
+                priority
+              />
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.4 }}>
+                  Klantprofiel
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Zie je gegevens bovenaan, bewerk ze en bevestig met een knop.
+                </Typography>
               </Box>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ width: "100%" }}>
-                <EditableField label="KvK nummer" />
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ width: "100%" }}>
-                <EditableField label="Woonplaats" />
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ width: "100%" }}>
-                <EditableField label="Straat" />
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ width: "100%" }}>
-                <EditableField label="Huisnummer" />
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ width: "100%", display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
-                {/* Keep postcode compact so the right column can sit on the same row */}
-                <Box sx={{ width: 260, minWidth: 0 }}>
-                  <EditableField label="Postcode" />
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
-
-
-          <div style={{ position: "relative", minHeight: "100vh", overflow: "hidden" }}>
-          {/* Achtergrondafbeelding */}
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              zIndex: -1,
-            }}
-          >
-            <Image
-              src={backgroundImage}
-              alt="achtergrondfoto van floraholland hoofdkantoor"
-              fill
-              style={{ objectFit: "cover", objectPosition: "center" }}
-              quality={100}
-              priority
+            </Box>
+            <Chip
+              label={isVerkoper ? "Bedrijfsaccount actief" : "Nog geen verkoper"}
+              color={isVerkoper ? "success" : "default"}
+              sx={{ fontWeight: 700, borderRadius: "10px" }}
             />
-          </div>
+          </Box>
 
           <Box
             sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: movedAll
-                ? "translate(-50%, -50%) translateX(-350px)"
-                : "translate(-50%, -50%)",
-              transition: "transform 400ms ease",
-              boxSizing: "border-box",
-              width: "650px",
-              maxWidth: "90vw",
-              background: "linear-gradient(to bottom, #ffffff, #E2FFE9);",
-              borderRadius: "16px",
-              padding: "40px 52px",
-              boxShadow: "0 6px 16px rgba(0,0,0,0.18)",
+              background: "linear-gradient(to bottom, #ffffff, #eaf8ef)",
+              borderRadius: "18px",
+              border: "1px solid rgba(7,64,37,0.08)",
+              boxShadow: "0 12px 30px rgba(0,0,0,0.14)",
+              p: { xs: 3, md: 4 },
               display: "flex",
               flexDirection: "column",
-              alignItems: "center",
+              gap: 2.5,
             }}
           >
-            {/* Button moved next to the Huisnummer field */}
-            {/* Logo */}
-            <Image
-              src={royalLogo}
-              alt="Royal Flora Holland Logo"
-              width={160}
-              height={65}
-              style={{ marginBottom: "12px" }}
-            />
-
-            {/* Titel */}
-            <Typography
-              variant="h5"
+            <Box
               sx={{
-                fontWeight: 700,
-                mb: 3,
-                textAlign: "center",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: { xs: "flex-start", md: "center" },
+                gap: 2,
+                flexWrap: "wrap",
               }}
             >
-              Klantgegevens
-            </Typography>
-
-            {/* Velden */}
-            <Grid
-              container
-              spacing={2.5}
-              sx={{
-                width: "100%",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ width: "100%" }}>
-                  <EditableFieldOpVraagInfo
-                    label="Naam"
-                    field="naam"
-                    value={user?.naam || ""}
-                  />
-                </Box>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ width: "100%" }}>
-                  <EditableFieldOpVraagInfo
-                    label="Email"
-                    field="emailadres"
-                    value={user?.emailadres || ""}
-                  />
-                </Box>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ width: "100%" }}>
-                  <EditableFieldOpVraagInfo
-                    label="Woonplaats"
-                    field="woonplaats"
-                    value={user?.woonplaats || ""}
-                  />
-                </Box>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ width: "100%" }}>
-                  <EditableFieldOpVraagInfo
-                    label="Straat"
-                    field="straat"
-                    value={user?.straat || ""}
-                  />
-                </Box>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ width: "100%", display: 'flex', alignItems: 'center' }}>
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <EditableFieldOpVraagInfo
-                      label="Postcode"
-                      field="postcode"
-                      value={user?.postcode || ""}
-                    />
-                  </Box>
-                </Box>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ width: "100%", display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 2 }}>
-                  {/* Huisnummer compact on the right, button narrow */}
-                  <Box sx={{ width: 110, minWidth: 0 }}>
-                    <EditableFieldOpVraagInfo
-                      label="Huisnummer"
-                      field="huisnummer"
-                      value={user?.huisnummer || ""}
-                    />
-                  </Box>
-
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.6 }}>
+                  Jouw gegevens
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Bewerk veilig en bevestig met een knop. Email krijgt later
+                  een verificatiecode.
+                </Typography>
+              </Box>
+              {!isEditing ? (
+                <Button
+                  variant="contained"
+                  onClick={() => setIsEditing(true)}
+                  sx={{
+                    backgroundColor: "#2e5b3f",
+                    borderRadius: "10px",
+                    textTransform: "none",
+                    fontWeight: 700,
+                    px: 2.6,
+                  }}
+                >
+                  Bewerk gegevens
+                </Button>
+              ) : (
+                <Box sx={{ display: "flex", gap: 1 }}>
                   <Button
-                    size="small"
-                    variant="contained"
-                    onClick={toggleAll}
+                    variant="text"
+                    onClick={handleCancel}
                     sx={{
-                      width: '130px',
-                      backgroundColor: "#111",
-                      borderRadius: "10px",
-                      color: "#fff",
-                      minWidth: 40,
-                      height: 36,
-                      mt: '25px',
-                      padding: '6px 8px',
-                      boxShadow: '0 6px 12px rgba(0,0,0,0.3)',
-                      '&:hover': { backgroundColor: '#000' },
+                      textTransform: "none",
+                      fontWeight: 700,
+                      px: 2,
                     }}
                   >
-                    {movedAll ? "verkoper X" : "verkoper"}
-                    {/* hier moet nog een als moveAll is waar en alle verkoper gegevens zijn ingevuld dat die persoon een verkoper word */}
+                    Annuleren
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={handleSave}
+                    disabled={saving}
+                    sx={{
+                      backgroundColor: "#2e5b3f",
+                      borderRadius: "10px",
+                      textTransform: "none",
+                      fontWeight: 700,
+                      px: 2.6,
+                    }}
+                  >
+                    {saving ? "Opslaan..." : "Bevestigen"}
                   </Button>
                 </Box>
+              )}
+            </Box>
+
+            <Grid container spacing={2.4}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Naam"
+                  value={formValues.naam}
+                  onChange={(e) => setField("naam", e.target.value)}
+                  disabled={!isEditing}
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  sx={fieldStyle}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="E-mail"
+                  value={formValues.emailadres}
+                  onChange={(e) => setField("emailadres", e.target.value)}
+                  disabled={!isEditing}
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  helperText="Verificatiecode versturen volgt zodra mailservice beschikbaar is."
+                  sx={fieldStyle}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Woonplaats"
+                  value={formValues.woonplaats}
+                  onChange={(e) => setField("woonplaats", e.target.value)}
+                  disabled={!isEditing}
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  sx={fieldStyle}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Straat"
+                  value={formValues.straat}
+                  onChange={(e) => setField("straat", e.target.value)}
+                  disabled={!isEditing}
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  sx={fieldStyle}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Postcode"
+                  value={formValues.postcode}
+                  onChange={(e) => setField("postcode", e.target.value)}
+                  disabled={!isEditing}
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  sx={fieldStyle}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Huisnummer"
+                  value={formValues.huisnummer}
+                  onChange={(e) => setField("huisnummer", e.target.value)}
+                  disabled={!isEditing}
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  sx={fieldStyle}
+                />
               </Grid>
             </Grid>
+
+            {(feedback || error) && (
+              <Box>
+                {feedback && (
+                  <Alert severity="success" sx={{ borderRadius: "10px", mb: error ? 1 : 0 }}>
+                    {feedback}
+                  </Alert>
+                )}
+                {error && (
+                  <Alert severity="error" sx={{ borderRadius: "10px" }}>
+                    {error}
+                  </Alert>
+                )}
+              </Box>
+            )}
           </Box>
 
-        </div>
+          {!isVerkoper ? (
+            <Box
+              sx={{
+                background: "linear-gradient(to bottom, #ffffff, #eaf8ef)",
+                borderRadius: "18px",
+                border: "1px solid rgba(7,64,37,0.08)",
+                boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
+                p: { xs: 3, md: 4 },
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                alignItems: "flex-start",
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                Verkoper worden?
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 640 }}>
+                Klik op de knop om je gebruikersaccount om te zetten naar een bedrijfsaccount. Je bevestigt dit in een popup; later komt er e-mailverificatie bij.
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={handleBecomeSeller}
+                sx={{
+                  backgroundColor: "#2e5b3f",
+                  borderRadius: "10px",
+                  textTransform: "none",
+                  fontWeight: 700,
+                  px: 2.6,
+                }}
+              >
+                Verkoper? Klik hier
+              </Button>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                background: "linear-gradient(to bottom, #ffffff, #eaf8ef)",
+                borderRadius: "18px",
+                border: "1px solid rgba(7,64,37,0.08)",
+                boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
+                p: { xs: 3, md: 4 },
+                display: "flex",
+                flexDirection: "column",
+                gap: 2.3,
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: { xs: "flex-start", md: "center" },
+                  gap: 1.5,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.6 }}>
+                    Bedrijfsgegevens
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Zelfde look-and-feel als login: helder, groen accent, en een duidelijke bevestigknop.
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setIsVerkoper(false)}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 700,
+                      borderRadius: "10px",
+                      px: 2.4,
+                    }}
+                  >
+                    Verkoper uit
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={handleBusinessSave}
+                    disabled={businessSaving}
+                    sx={{
+                      backgroundColor: "#2e5b3f",
+                      textTransform: "none",
+                      fontWeight: 700,
+                      borderRadius: "10px",
+                      px: 2.4,
+                    }}
+                  >
+                    {businessSaving ? "Opslaan..." : "Bevestigen"}
+                  </Button>
+                </Box>
+              </Box>
 
-      </div>
+              <Grid container spacing={2.4}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Bedrijfsnaam"
+                    placeholder="Vul je bedrijfsnaam in"
+                    value={businessValues.bedrijfsnaam}
+                    onChange={(e) => setBusinessField("bedrijfsnaam", e.target.value)}
+                    disabled={businessSaving}
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    sx={fieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="KvK-nummer"
+                    placeholder="00000000"
+                    value={businessValues.kvkNummer}
+                    onChange={(e) => setBusinessField("kvkNummer", e.target.value)}
+                    disabled={businessSaving}
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    sx={fieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Woonplaats"
+                    placeholder="Aalsmeer"
+                    value={businessValues.woonplaats}
+                    onChange={(e) => setBusinessField("woonplaats", e.target.value)}
+                    disabled={businessSaving}
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    sx={fieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Straat"
+                    placeholder="Zuidereinde"
+                    value={businessValues.straat}
+                    onChange={(e) => setBusinessField("straat", e.target.value)}
+                    disabled={businessSaving}
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    sx={fieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Postcode"
+                    placeholder="1234 AB"
+                    value={businessValues.postcode}
+                    onChange={(e) => setBusinessField("postcode", e.target.value)}
+                    disabled={businessSaving}
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    sx={fieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Huisnummer"
+                    placeholder="42"
+                    value={businessValues.huisnummer}
+                    onChange={(e) => setBusinessField("huisnummer", e.target.value)}
+                    disabled={businessSaving}
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    sx={fieldStyle}
+                  />
+                </Grid>
+              </Grid>
+
+              {(businessFeedback || businessError) && (
+                <Box>
+                  {businessFeedback && (
+                    <Alert severity="success" sx={{ borderRadius: "10px", mb: businessError ? 1 : 0 }}>
+                      {businessFeedback}
+                    </Alert>
+                  )}
+                  {businessError && (
+                    <Alert severity="error" sx={{ borderRadius: "10px" }}>
+                      {businessError}
+                    </Alert>
+                  )}
+                </Box>
+              )}
+
+              <Divider />
+              <Typography variant="body2" color="text.secondary">
+                Bedrijfsgegevens worden direct via de Verkoper-controller opgeslagen; breid de koppeling met je account uit zodra die logica gereed is.
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      </Box>
+      <SellerConfirmDialog
+        open={sellerDialogOpen}
+        onClose={() => setSellerDialogOpen(false)}
+        onConfirm={confirmBecomeSeller}
+      />
     </RequireAuth>
-
   );
 }
 
-
+// Custom confirmation modal (niet de standaard browser alert/prompt)
+function SellerConfirmDialog({
+  open,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        sx: {
+          borderRadius: "16px",
+          p: 1,
+          maxWidth: 420,
+          width: "100%",
+        },
+      }}
+    >
+      <DialogTitle sx={{ fontWeight: 800, pb: 1 }}>Word verkoper</DialogTitle>
+      <DialogContent>
+        <DialogContentText sx={{ color: "text.primary" }}>
+          Hiermee zet je je gebruikersaccount om naar een bedrijfsaccount. Later komt er e-mail verificatie bij. Bevestig om door te gaan.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+        <Button onClick={onClose} sx={{ textTransform: "none", fontWeight: 700 }}>
+          Annuleren
+        </Button>
+        <Button
+          variant="contained"
+          onClick={onConfirm}
+          sx={{
+            backgroundColor: "#2e5b3f",
+            borderRadius: "10px",
+            textTransform: "none",
+            fontWeight: 700,
+            px: 2.4,
+          }}
+        >
+          Bevestigen
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}

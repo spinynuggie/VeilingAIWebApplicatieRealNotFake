@@ -11,6 +11,7 @@ namespace backend.Data
         public DbSet<ProductGegevens>  ProductGegevens { get; set; }
         public DbSet<VeilingMeester> VeilingMeesters { get; set; }
         public DbSet<Verkoper>  Verkopers { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
