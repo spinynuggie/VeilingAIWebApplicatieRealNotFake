@@ -2,25 +2,23 @@
 
 import React, { CSSProperties, useState, useEffect } from "react";
 
-// Data type voor wat er op de kaart getoond wordt
 export interface ProductCardData {
   title: string;
   description: string;
   image: string | File | null;
   specifications: string[];
-  price?: string | number; // Huidige prijs (optioneel)
+  price?: string | number;
 }
 
 interface ProductCardProps {
   product: ProductCardData;
-  mode: 'auction' | 'create'; // Bepaal hier de modus
-  onAction?: (priceValue: number) => void; // Stuurt de ingevulde prijs terug
+  mode: 'auction' | 'create' | 'display'; // 'display' modus toegevoegd
+  onAction?: (priceValue: number) => void;
 }
 
 export default function ProductCard({ product, mode, onAction }: ProductCardProps) {
   const [inputValue, setInputValue] = useState<string>("");
 
-  // Reset input als het product verandert
   useEffect(() => {
     setInputValue("");
   }, [product]);
@@ -36,7 +34,6 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
     }
   };
 
-  // Helper voor afbeelding
   const getImageUrl = (img: string | File | null) => {
     if (!img) return null;
     if (typeof img === 'string') return img;
@@ -139,6 +136,16 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
         alignItems: 'center',
         justifyContent: 'center',
         color: '#555'
+    },
+    priceDisplay: {
+        backgroundColor: "#90B498",
+        borderRadius: "8px",
+        padding: "12px",
+        textAlign: "center",
+        fontWeight: "bold",
+        color: "white",
+        fontSize: "18px",
+        width: "100%"
     }
   };
 
@@ -176,8 +183,13 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
       </ul>
 
       <div style={styles.buttonGroup}>
-        {mode === 'auction' ? (
-            // --- AUCTION MODE: Alleen MAX invullen ---
+        {mode === 'display' ? (
+            // --- DISPLAY MODE: Toont alleen de prijs (indien beschikbaar) ---
+            <div style={styles.priceDisplay}>
+                {product.price ? `Prijs: €${product.price}` : "Informatie Kaart"}
+            </div>
+        ) : mode === 'auction' ? (
+            // --- AUCTION MODE ---
             <>
                 <input
                     style={styles.inputBox}
@@ -192,7 +204,7 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
                 </button>
             </>
         ) : (
-            // --- CREATE MODE: Alleen MIN invullen ---
+            // --- CREATE MODE ---
             <>
                 <div style={styles.infoBox}>Max</div>
                 <input

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Product } from "@/types/product";
 import { getProducts, updateProductAuctionData } from "@/services/productService";
 
-const CURRENT_VEILING_ID = 1;
+const CURRENT_VEILING_ID = 1 ;
 
 export function useVeilingAanmaken() {
   // --- LINKER KOLOM STATES ---
@@ -113,7 +113,7 @@ export function useVeilingAanmaken() {
 
   return {
     loading,
-    filteredAvailable,      
+    filteredAvailable,
     filteredAuction,
     selectedProduct,
     setSelectedProduct,

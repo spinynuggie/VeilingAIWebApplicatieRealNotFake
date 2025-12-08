@@ -14,11 +14,14 @@ import Profile  from "@/components/Profile";
 import SingleProduct from "@/components/SingleProduct";
 import { Box } from "@mui/material"
 import RequireAuth from "@/components/RequireAuth";
+import ProductCard from "@/components/ProductCard";
+import { filter } from "framer-motion/client";
 
 export default function VeilingDetailPage() {
   const [veiling, setVeiling] = useState<Veiling | null>(null);
   const [product, setProduct] = useState<any[]>([]);
   const [error, setError] = useState<string>("");
+
 
   // Get ID from URL path
   const pathname = usePathname();
@@ -51,9 +54,10 @@ export default function VeilingDetailPage() {
         setError(err.message);
       });
   }, [id]);
-
   if (error) return <p>Error: {error}</p>;
   if (!veiling) return <p>Loading... (looking for id: {id})</p>;
+
+   const filteredProducts = product.filter((p) => p.veilingId === veiling.veilingId);
 
   return (
     <RequireAuth>
@@ -80,9 +84,16 @@ export default function VeilingDetailPage() {
         paddingY: 4
         }}
       >
+<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center', paddingY: 4 }}>
+  {filteredProducts.length > 0 ? (
+    // Gebruik index [0] om alleen het eerste item uit de array te halen
+    <ProductCard mode="display" product={filteredProducts[0]} />
+  ) : (
+    <p>Geen producten gevonden voor deze veiling.</p>
+  )}
+</Box>
         <SingleProduct product={product}/>
-        <SingleProduct product={product}/>
-        <ProductDisplay product={product}/>
+        <ProductDisplay product={filteredProducts}/>
       </Box>
             <p>naam: {veiling.naam}; veilingId: {veiling.veilingId};</p>
     </div>
