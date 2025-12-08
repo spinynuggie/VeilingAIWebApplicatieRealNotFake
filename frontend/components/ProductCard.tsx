@@ -206,8 +206,7 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
 
       <div style={styles.buttonGroup}>
         {mode === 'display' ? (
-            <div style={styles.priceDisplay}>
-                {displayPrice !== undefined ? `Prijs: €${displayPrice}` : "Prijs op aanvraag"}
+            <div>
             </div>
         ) : mode === 'auction' ? (
             <>
@@ -230,7 +229,7 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
                     placeholder="Min"
                     type="number"
                     value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
+                    onChange={(e) => setInputValue(e.target.value)} 
                 />
                 <button style={styles.btnDark} onClick={handleActionClick}>
                     Aanmaken
@@ -241,3 +240,5 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
     </div>
   );
 }
+
+
