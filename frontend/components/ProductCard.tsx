@@ -2,17 +2,25 @@
 
 import React, { CSSProperties, useState, useEffect } from "react";
 
+// We breiden de interface uit zodat hij OOK de database velden herkent
 export interface ProductCardData {
-  title: string;
-  description: string;
-  image: string | File | null;
-  specifications: string[];
+  // De velden die je component al had
+  title?: string;
+  description?: string;
+  image?: string | File | null;
+  specifications?: string[];
   price?: string | number;
+
+  // De velden die uit jouw DATABASE komen (toegevoegd)
+  productNaam?: string;
+  productBeschrijving?: string;
+  huidigeprijs?: number;
+  fotos?: string;
 }
 
 interface ProductCardProps {
   product: ProductCardData;
-  mode: 'auction' | 'create' | 'display'; // 'display' modus toegevoegd
+  mode: 'auction' | 'create' | 'display';
   onAction?: (priceValue: number) => void;
 }
 
@@ -34,11 +42,26 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
     }
   };
 
-  const getImageUrl = (img: string | File | null) => {
+  // --- MAPPING LOGICA ---
+  // Hier kiezen we: "Hebben we 'title'? Nee? Pak dan 'productNaam'."
+  const displayTitle = product.title || product.productNaam || "Product Naam";
+  const displayDesc = product.description || product.productBeschrijving || "Geen beschrijving beschikbaar.";
+
+  // Prijs kan 0 zijn, dus we checken specifiek op undefined
+  const displayPrice = product.price !== undefined ? product.price : product.huidigeprijs;
+
+  // Afbeelding
+  const rawImage = product.image || product.fotos;
+
+  const getImageUrl = (img: string | File | null | undefined) => {
     if (!img) return null;
     if (typeof img === 'string') return img;
-    return URL.createObjectURL(img);
+    // Check of het een File object is (voor create mode)
+    if (img instanceof File) return URL.createObjectURL(img);
+    return null;
   };
+
+  const imageUrl = getImageUrl(rawImage);
 
   const styles: { [key: string]: CSSProperties } = {
     card: {
@@ -149,11 +172,10 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
     }
   };
 
-  const imageUrl = getImageUrl(product.image);
-
   return (
     <div style={styles.card}>
-      <h2 style={styles.title}>{product.title || "Product Naam"}</h2>
+      {/* GEBRUIK HIER DE display VARIABELEN */}
+      <h2 style={styles.title}>{displayTitle}</h2>
 
       <div style={styles.imagePlaceholder}>
         {imageUrl ? (
@@ -164,7 +186,7 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
       </div>
 
       <p style={styles.description}>
-        {product.description || "Hier komt een uitgebreide omschrijving van het product..."}
+        {displayDesc}
       </p>
 
       <hr style={styles.divider} />
@@ -184,27 +206,23 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
 
       <div style={styles.buttonGroup}>
         {mode === 'display' ? (
-            // --- DISPLAY MODE: Toont alleen de prijs (indien beschikbaar) ---
             <div style={styles.priceDisplay}>
-                {product.price ? `Prijs: €${product.price}` : "Informatie Kaart"}
+                {displayPrice !== undefined ? `Prijs: €${displayPrice}` : "Prijs op aanvraag"}
             </div>
         ) : mode === 'auction' ? (
-            // --- AUCTION MODE ---
             <>
                 <input
                     style={styles.inputBox}
-                    placeholder="Max"
+                    placeholder="Bod"
                     type="number"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                 />
-                <div style={styles.infoBox}>Min</div>
                 <button style={styles.btnDark} onClick={handleActionClick}>
-                    Toevoegen
+                    Bieden
                 </button>
             </>
         ) : (
-            // --- CREATE MODE ---
             <>
                 <div style={styles.infoBox}>Max</div>
                 <input
