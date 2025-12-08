@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using backend.Data;
 using backend.Models;
+using backend.Dtos;
 
 namespace backend.Controllers
 {
@@ -43,19 +44,31 @@ namespace backend.Controllers
         }
 
         // PUT: api/ProductGegevens/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutProductGegevens(int id, ProductGegevens productGegevens)
+        public async Task<IActionResult> PutProductGegevens(int id, ProductVeilingUpdateDto productUpdate)
         {
-            if (id != productGegevens.ProductId)
+            // 1. Check of ID in URL matcht met ID in body
+            if (id != productUpdate.ProductId)
             {
-                return BadRequest();
+                return BadRequest($"Product ID in URL ({id}) matcht niet met Body ({productUpdate.ProductId}).");
             }
 
-            _context.Entry(productGegevens).State = EntityState.Modified;
+            // 2. Haal het BESTAANDE product op uit de database
+            var existingProduct = await _context.ProductGegevens.FindAsync(id);
+
+            if (existingProduct == null)
+            {
+                return NotFound();
+            }
+
+            // 3. Update de velden
+            existingProduct.VeilingId = productUpdate.VeilingId;
+            existingProduct.StartPrijs = productUpdate.StartPrijs;
+            existingProduct.EindPrijs = productUpdate.EindPrijs;
 
             try
             {
+                // 4. Sla de wijzigingen op
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -72,7 +85,7 @@ namespace backend.Controllers
 
             return NoContent();
         }
-
+        
         // POST: api/ProductGegevens
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
