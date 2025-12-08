@@ -1,14 +1,15 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using backend.Data;
+using backend.Dtos;
 using backend.Models;
 using backend.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using backend.Dtos;
-using System.Linq;
+using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Controllers
 {
@@ -19,12 +20,31 @@ namespace backend.Controllers
         private readonly AppDbContext _context;
         private readonly PasswordHasher _passwordHasher;
         private readonly ILogger<GebruikerController> _logger;
+        private readonly IConfiguration _configuration;
+        private readonly bool _useSecureCookies;
+        private readonly SymmetricSecurityKey _signingKey;
+        private readonly string _jwtIssuer;
+        private readonly string _jwtAudience;
 
-        public GebruikerController(AppDbContext context, PasswordHasher passwordHasher, ILogger<GebruikerController> logger)
+        private const int AccessTokenMinutes = 15;
+        private const int RefreshTokenDays = 7;
+
+        public GebruikerController(
+            AppDbContext context,
+            PasswordHasher passwordHasher,
+            ILogger<GebruikerController> logger,
+            IConfiguration configuration)
         {
             _context = context;
             _passwordHasher = passwordHasher;
             _logger = logger;
+            _configuration = configuration;
+            _useSecureCookies = string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Production", StringComparison.OrdinalIgnoreCase);
+            _jwtIssuer = _configuration["Jwt:Issuer"] ?? "VeilingAI";
+            _jwtAudience = _configuration["Jwt:Audience"] ?? "VeilingAIUsers";
+
+            var key = _configuration["Jwt:Key"] ?? "dev-secret-change-me";
+            _signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         }
 
         // Helper functie om de Entiteit naar DTO te mappen
@@ -38,8 +58,98 @@ namespace backend.Controllers
                 Straat = gebruiker.Straat,
                 Huisnummer = gebruiker.Huisnummer,
                 Postcode = gebruiker.Postcode,
-                Woonplaats = gebruiker.Woonplaats
+                Woonplaats = gebruiker.Woonplaats,
+                Role = gebruiker.Role
             };
+        }
+
+        private string GenerateAccessToken(Gebruiker gebruiker)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, gebruiker.GebruikerId.ToString()),
+                new Claim(ClaimTypes.Email, gebruiker.Emailadres),
+                new Claim(ClaimTypes.Role, gebruiker.Role ?? "KOPER")
+            };
+
+            var creds = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _jwtIssuer,
+                audience: _jwtAudience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(AccessTokenMinutes),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private async Task<RefreshToken> CreateRefreshTokenAsync(int gebruikerId, RefreshToken? previous = null)
+        {
+            var refreshToken = new RefreshToken
+            {
+                GebruikerId = gebruikerId,
+                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+                ExpiresAt = DateTime.UtcNow.AddDays(RefreshTokenDays),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            if (previous != null)
+            {
+                previous.Revoked = true;
+                previous.ReplacedByToken = refreshToken.Token;
+            }
+
+            _context.RefreshTokens.Add(refreshToken);
+            await _context.SaveChangesAsync();
+            return refreshToken;
+        }
+
+        private void SetAuthCookies(string accessToken, RefreshToken refreshToken)
+        {
+            var accessOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = _useSecureCookies,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(AccessTokenMinutes)
+            };
+
+            var refreshOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = _useSecureCookies,
+                SameSite = SameSiteMode.Lax,
+                Expires = refreshToken.ExpiresAt
+            };
+
+            // CSRF double-submit token (non-HttpOnly)
+            var xsrfToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+            var xsrfOptions = new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = _useSecureCookies,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(AccessTokenMinutes)
+            };
+
+            Response.Cookies.Append("access_token", accessToken, accessOptions);
+            Response.Cookies.Append("refresh_token", refreshToken.Token, refreshOptions);
+            Response.Cookies.Append("XSRF-TOKEN", xsrfToken, xsrfOptions);
+        }
+
+        private void ClearAuthCookies()
+        {
+            var expired = new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddDays(-1),
+                Secure = _useSecureCookies,
+                SameSite = SameSiteMode.Lax
+            };
+
+            Response.Cookies.Append("access_token", string.Empty, expired);
+            Response.Cookies.Append("refresh_token", string.Empty, expired);
+            Response.Cookies.Append("XSRF-TOKEN", string.Empty, expired);
         }
 
         // GET: api/Gebruiker (GEBRUIKT DTO VOOR OUTPUT)
@@ -68,25 +178,25 @@ namespace backend.Controllers
         }
 
         // PUT: api/Gebruiker/5 (GEBRUIKT DTO VOOR INPUT)
-        
         [HttpPut("{id}")]
-            public async Task<IActionResult> PutGebruiker(int id, GebruikerUpdateDto gebruikerDto)
-            {
-                var gebruiker = await _context.Gebruikers.FindAsync(id);
+        [Authorize]
+        public async Task<IActionResult> PutGebruiker(int id, GebruikerUpdateDto gebruikerDto)
+        {
+            var gebruiker = await _context.Gebruikers.FindAsync(id);
 
-                if (gebruiker == null)
-                {
-                    return NotFound();
-                }
-                
-                // Map DTO velden naar de Entiteit (geen wachtwoord/role aanpassingen hier)
-                gebruiker.Naam = gebruikerDto.Naam;
-                gebruiker.Emailadres = gebruikerDto.Emailadres;
-                gebruiker.Straat = gebruikerDto.Straat;
-                gebruiker.Huisnummer = gebruikerDto.Huisnummer;
-                gebruiker.Postcode = gebruikerDto.Postcode;
-                gebruiker.Woonplaats = gebruikerDto.Woonplaats;
+            if (gebruiker == null)
+            {
+                return NotFound();
+            }
             
+            // Map DTO velden naar de Entiteit (geen wachtwoord/role aanpassingen hier)
+            gebruiker.Naam = gebruikerDto.Naam;
+            gebruiker.Emailadres = gebruikerDto.Emailadres;
+            gebruiker.Straat = gebruikerDto.Straat;
+            gebruiker.Huisnummer = gebruikerDto.Huisnummer;
+            gebruiker.Postcode = gebruikerDto.Postcode;
+            gebruiker.Woonplaats = gebruikerDto.Woonplaats;
+        
             _context.Entry(gebruiker).State = EntityState.Modified;
 
             try
@@ -118,7 +228,10 @@ namespace backend.Controllers
             _context.Gebruikers.Add(gebruiker);
             await _context.SaveChangesAsync();
 
-            // Stuur DTO terug
+            var accessToken = GenerateAccessToken(gebruiker);
+            var refreshToken = await CreateRefreshTokenAsync(gebruiker.GebruikerId);
+            SetAuthCookies(accessToken, refreshToken);
+
             return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, MapToResponseDto(gebruiker));
         }
 
@@ -173,7 +286,10 @@ namespace backend.Controllers
             _context.Gebruikers.Add(gebruiker);
             await _context.SaveChangesAsync();
 
-            // Stuur DTO terug
+            var accessToken = GenerateAccessToken(gebruiker);
+            var refreshToken = await CreateRefreshTokenAsync(gebruiker.GebruikerId);
+            SetAuthCookies(accessToken, refreshToken);
+
             return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, MapToResponseDto(gebruiker));
         }
 
@@ -199,23 +315,14 @@ namespace backend.Controllers
                 return Unauthorized("Ongeldig wachtwoord.");
             }
 
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, gebruiker.GebruikerId.ToString()),
-                new Claim(ClaimTypes.Email, gebruiker.Emailadres),
-                new Claim(ClaimTypes.Role, gebruiker.Role ?? "KOPER")
-            };
+            var accessToken = GenerateAccessToken(gebruiker);
+            var refreshToken = await CreateRefreshTokenAsync(gebruiker.GebruikerId);
+            SetAuthCookies(accessToken, refreshToken);
 
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-            // Retourneer een anoniem object dat overeenkomt met de DTO-structuur (veilig)
             return Ok(new
             {
                 message = "Login geslaagd!",
-                gebruiker = new { gebruiker.GebruikerId, gebruiker.Naam, gebruiker.Emailadres }
+                gebruiker = new { gebruiker.GebruikerId, gebruiker.Naam, gebruiker.Emailadres, Role = gebruiker.Role }
             });
         }
 
@@ -245,8 +352,47 @@ namespace backend.Controllers
         [Authorize]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var refreshToken = Request.Cookies["refresh_token"];
+            if (!string.IsNullOrWhiteSpace(refreshToken))
+            {
+                var tokenEntity = await _context.RefreshTokens.FirstOrDefaultAsync(r => r.Token == refreshToken);
+                if (tokenEntity != null)
+                {
+                    tokenEntity.Revoked = true;
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            ClearAuthCookies();
             return NoContent();
+        }
+
+        [HttpPost("refresh")]
+        public async Task<ActionResult> Refresh()
+        {
+            var refreshToken = Request.Cookies["refresh_token"];
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                return Unauthorized("Geen refresh token gevonden.");
+            }
+
+            var tokenEntity = await _context.RefreshTokens.FirstOrDefaultAsync(r => r.Token == refreshToken);
+            if (tokenEntity == null || tokenEntity.Revoked || tokenEntity.ExpiresAt < DateTime.UtcNow)
+            {
+                return Unauthorized("Refresh token ongeldig of verlopen.");
+            }
+
+            var gebruiker = await _context.Gebruikers.FindAsync(tokenEntity.GebruikerId);
+            if (gebruiker == null)
+            {
+                return Unauthorized();
+            }
+
+            var newAccessToken = GenerateAccessToken(gebruiker);
+            var newRefreshToken = await CreateRefreshTokenAsync(gebruiker.GebruikerId, tokenEntity);
+            SetAuthCookies(newAccessToken, newRefreshToken);
+
+            return Ok(new { message = "Token vernieuwd." });
         }
 
         private bool GebruikerExists(int id)

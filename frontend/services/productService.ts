@@ -1,4 +1,5 @@
 import { Product, CreateProductInput, UpdateProductAuctionInput } from '@/types/product';
+import { authFetch } from "./authService";
 
  const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
 
@@ -7,7 +8,7 @@ import { Product, CreateProductInput, UpdateProductAuctionInput } from '@/types/
 export async function updateProductAuctionData(payload: UpdateProductAuctionInput): Promise<void> {
   // Let op: Afhankelijk van je C# controller moet dit PUT of PATCH zijn.
   // Meestal is PUT standaard voor updates.
-  const res = await fetch(`${apiBase}/api/ProductGegevens/${payload.productId}`, {
+  const res = await authFetch(`${apiBase}/api/ProductGegevens/${payload.productId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -22,7 +23,7 @@ export async function updateProductAuctionData(payload: UpdateProductAuctionInpu
   });
 }
 export async function getProducts(): Promise<Product[]> {
-  const res = await fetch(`${apiBase}/api/ProductGegevens`, {
+  const res = await authFetch(`${apiBase}/api/ProductGegevens`, {
     cache: "no-store"
   });
 
@@ -34,7 +35,7 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function createProduct(payload: CreateProductInput): Promise<Product> {
-  const res = await fetch(`${apiBase}/api/ProductGegevens`, {
+  const res = await authFetch(`${apiBase}/api/ProductGegevens`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),

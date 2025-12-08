@@ -10,5 +10,6 @@ namespace backend.Dtos
         public string? Huisnummer { get; set; }
         public string? Postcode { get; set; }
         public string? Woonplaats { get; set; }
+        public string? Role { get; set; }
     }
 }

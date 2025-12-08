@@ -27,9 +27,12 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const hasAuthCookie = request.cookies.get("auth");
+  // Backend issues HttpOnly cookies named access_token + refresh_token.
+  // When neither is present we consider the user unauthenticated.
+  const hasSession =
+    request.cookies.get("access_token") ?? request.cookies.get("refresh_token");
 
-  if (!hasAuthCookie) {
+  if (!hasSession) {
     const loginUrl = new URL("/login", request.url);
     const nextPath = search ? `${pathname}${search}` : pathname;
     loginUrl.searchParams.set("next", nextPath);
@@ -53,4 +56,3 @@ export const config = {
     "/admin/:path*",
   ],
 };
-

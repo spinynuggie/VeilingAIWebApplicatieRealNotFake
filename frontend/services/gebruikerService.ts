@@ -1,17 +1,18 @@
 import type { User } from "@/types/user";
+import { authFetch } from "./authService";
 
 const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
 
 
 export async function getGebruiker() {
-  const res = await fetch(`${apiBase}/api/Gebruiker`, { credentials: "include" });
+  const res = await authFetch(`${apiBase}/api/Gebruiker`);
   if (!res.ok) throw new Error("Ophalen mislukt");
   return res.json() as Promise<User[]>;
 }
 
 export async function getCurrentGebruiker(): Promise<User> {
   // Probeer /me (require auth). Fallback naar eerste gebruiker uit lijst.
-  const meRes = await fetch(`${apiBase}/api/Gebruiker/me`, { credentials: "include" });
+  const meRes = await authFetch(`${apiBase}/api/Gebruiker/me`);
   if (meRes.ok) return meRes.json() as Promise<User>;
 
   const gebruikers = await getGebruiker();
@@ -48,10 +49,9 @@ export async function updateGebruiker(field: string, value: string): Promise<voi
 
   // Stuur het volledige object naar de backend. De controller zal alleen de verwachte velden mappen,
   // maar als jouw backend echt een volledig object verlangt, wordt dit hier meegegeven.
-  const res = await fetch(`${apiBase}/api/Gebruiker/${gebruiker.gebruikerId}`, {
+  const res = await authFetch(`${apiBase}/api/Gebruiker/${gebruiker.gebruikerId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify(dto),
   });
 

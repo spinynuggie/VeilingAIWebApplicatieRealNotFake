@@ -10,10 +10,22 @@ namespace backend.Data
     {
         public AppDbContext CreateDbContext(string[] args)
         {
-            // Try load from environment (e.g. DATABASE_URL). If not set, fall back to appsettings.json
+            // Try load from environment (e.g. DATABASE_URL). If not set, fall back to appsettings files.
             Env.Load();
-            var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+            var envConnectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
 
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true)
+                .AddJsonFile("appsettings.Development.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            var connectionString = envConnectionString ?? configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new InvalidOperationException("A database connection string is required.");
+            }
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
             optionsBuilder.UseNpgsql(connectionString);
