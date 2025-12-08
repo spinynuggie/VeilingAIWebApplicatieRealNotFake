@@ -105,6 +105,13 @@ namespace backend.Controllers
             return refreshToken;
         }
 
+        private async Task IssueTokensAsync(Gebruiker gebruiker, RefreshToken? previous = null)
+        {
+            var refreshToken = await CreateRefreshTokenAsync(gebruiker.GebruikerId, previous);
+            var accessToken = GenerateAccessToken(gebruiker);
+            SetAuthCookies(accessToken, refreshToken);
+        }
+
         private void SetAuthCookies(string accessToken, RefreshToken refreshToken)
         {
             var accessOptions = new CookieOptions
@@ -154,6 +161,7 @@ namespace backend.Controllers
 
         // GET: api/Gebruiker (GEBRUIKT DTO VOOR OUTPUT)
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<GebruikerResponseDto>>> GetGebruikers()
         {
             var gebruikers = await _context.Gebruikers.ToListAsync();
@@ -164,6 +172,7 @@ namespace backend.Controllers
 
         // GET: api/Gebruiker/5 (GEBRUIKT DTO VOOR OUTPUT)
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<GebruikerResponseDto>> GetGebruiker(int id)
         {
             var gebruiker = await _context.Gebruikers.FindAsync(id);
@@ -228,9 +237,7 @@ namespace backend.Controllers
             _context.Gebruikers.Add(gebruiker);
             await _context.SaveChangesAsync();
 
-            var accessToken = GenerateAccessToken(gebruiker);
-            var refreshToken = await CreateRefreshTokenAsync(gebruiker.GebruikerId);
-            SetAuthCookies(accessToken, refreshToken);
+            await IssueTokensAsync(gebruiker);
 
             return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, MapToResponseDto(gebruiker));
         }
@@ -315,9 +322,7 @@ namespace backend.Controllers
                 return Unauthorized("Ongeldig wachtwoord.");
             }
 
-            var accessToken = GenerateAccessToken(gebruiker);
-            var refreshToken = await CreateRefreshTokenAsync(gebruiker.GebruikerId);
-            SetAuthCookies(accessToken, refreshToken);
+            await IssueTokensAsync(gebruiker);
 
             return Ok(new
             {
@@ -388,9 +393,7 @@ namespace backend.Controllers
                 return Unauthorized();
             }
 
-            var newAccessToken = GenerateAccessToken(gebruiker);
-            var newRefreshToken = await CreateRefreshTokenAsync(gebruiker.GebruikerId, tokenEntity);
-            SetAuthCookies(newAccessToken, newRefreshToken);
+            await IssueTokensAsync(gebruiker, tokenEntity);
 
             return Ok(new { message = "Token vernieuwd." });
         }

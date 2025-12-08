@@ -3,52 +3,47 @@ import { authFetch } from "./authService";
 
 const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
 
-
 export async function getGebruiker() {
   const res = await authFetch(`${apiBase}/api/Gebruiker`);
   if (!res.ok) throw new Error("Ophalen mislukt");
   return res.json() as Promise<User[]>;
 }
 
-export async function getCurrentGebruiker(): Promise<User> {
-  // Probeer /me (require auth). Fallback naar eerste gebruiker uit lijst.
-  const meRes = await authFetch(`${apiBase}/api/Gebruiker/me`);
-  if (meRes.ok) return meRes.json() as Promise<User>;
-
-  const gebruikers = await getGebruiker();
-  if (!gebruikers || gebruikers.length === 0) throw new Error("Geen gebruiker gevonden");
-  return gebruikers[0];
+export async function getCurrentGebruiker(): Promise<User | null> {
+  const res = await authFetch(`${apiBase}/api/Gebruiker/me`);
+  if (res.status === 401) return null;
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Kon huidige gebruiker niet ophalen");
+  }
+  return res.json() as Promise<User>;
 }
 
-export async function updateGebruiker(field: string, value: string): Promise<void> {
-  // Haal de huidige gebruiker (via /me of fallback)
-  const gebruiker = await getCurrentGebruiker();
-  console.log("Huidige gebruiker voor update:", gebruiker);
-  // Pas alleen het gevraagde veld aan
-  if (field === "naam") gebruiker.naam = value;
-  else if (field === "emailadres") gebruiker.emailadres = value;
-  else if (field === "straat") gebruiker.straat = value;
-  else if (field === "huisnummer") gebruiker.huisnummer = value;
-  else if (field === "postcode") gebruiker.postcode = value;
-  else if (field === "woonplaats") gebruiker.woonplaats = value;
-  else throw new Error("Ongeldig veld");
+/**
+ * Eén enkele payload om gewijzigde velden te updaten.
+ * Houdt DB-load laag door het slechts eenmaal te sturen en niets te doen als er geen verschil is.
+ */
+export async function updateGebruikerFields(
+  partial: Partial<Pick<User, "naam" | "emailadres" | "straat" | "huisnummer" | "postcode" | "woonplaats">>,
+  currentUser?: User | null
+): Promise<User> {
+  const gebruiker = currentUser ?? (await getCurrentGebruiker());
+  if (!gebruiker) throw new Error("Niet ingelogd");
 
-  // Bouw DTO met de velden die backend verwacht
+  const hasChanges = Object.entries(partial).some(
+    ([key, value]) => (gebruiker as any)?.[key] ?? "" !== value
+  );
+  if (!hasChanges) return gebruiker;
+
   const dto = {
-    naam: gebruiker.naam ?? null,
-    emailadres: gebruiker.emailadres ?? null,
-    straat: gebruiker.straat ?? null,
-    huisnummer: gebruiker.huisnummer ?? null,
-    postcode: gebruiker.postcode ?? null,
-    woonplaats: gebruiker.woonplaats ?? null,
+    naam: partial.naam ?? gebruiker.naam ?? null,
+    emailadres: partial.emailadres ?? gebruiker.emailadres ?? "",
+    straat: partial.straat ?? gebruiker.straat ?? null,
+    huisnummer: partial.huisnummer ?? gebruiker.huisnummer ?? null,
+    postcode: partial.postcode ?? gebruiker.postcode ?? null,
+    woonplaats: partial.woonplaats ?? gebruiker.woonplaats ?? null,
   };
 
-  // Sommige backend versies verwachten (of kunnen accepteren) een volledig Gebruiker-object.
-  // Bouw een compleet object zoals jouw voorbeeld (we vullen wachtwoord leeg en role uit cookie indien aanwezig).
-  
-
-  // Stuur het volledige object naar de backend. De controller zal alleen de verwachte velden mappen,
-  // maar als jouw backend echt een volledig object verlangt, wordt dit hier meegegeven.
   const res = await authFetch(`${apiBase}/api/Gebruiker/${gebruiker.gebruikerId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -59,4 +54,11 @@ export async function updateGebruiker(field: string, value: string): Promise<voi
     const text = await res.text();
     throw new Error(text || "Bijwerken mislukt.");
   }
+
+  return { ...gebruiker, ...partial };
+}
+
+// Backwards compatibility helper for legacy callers
+export async function updateGebruiker(field: string, value: string): Promise<User> {
+  return updateGebruikerFields({ [field]: value } as any);
 }
