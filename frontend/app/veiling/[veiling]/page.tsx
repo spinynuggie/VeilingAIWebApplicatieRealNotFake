@@ -95,7 +95,7 @@ export default function VeilingDetailPage() {
           </Box>
 
           <SingleProduct product={allProducts}/>
-          <ProductDisplay product={filteredProducts}/>
+          <ProductDisplay product={filteredProducts.slice(1)} />
         </Box>
 
         <p>naam: {veiling.naam}; veilingId: {veiling.veilingId};</p>
