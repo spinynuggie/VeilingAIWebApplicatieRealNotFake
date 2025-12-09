@@ -113,6 +113,38 @@ export default function KlantProfile() {
   const [roleChanging, setRoleChanging] = useState(false);
   const roleLabel = user?.role ?? "Onbekend";
 
+  const businessFormFromResponse = (verkoper: verkoperService.VerkoperResponse): BusinessForm => {
+    let bedrijfsnaam = "";
+    try {
+      const parsed = JSON.parse(verkoper.bedrijfsgegevens ?? "{}");
+      bedrijfsnaam = parsed.bedrijfsnaam ?? "";
+    } catch {
+      bedrijfsnaam = "";
+    }
+
+    let adres = { woonplaats: "", straat: "", postcode: "", huisnummer: "" };
+    try {
+      const parsedAdres = JSON.parse(verkoper.adresgegevens ?? "{}");
+      adres = {
+        woonplaats: parsedAdres.woonplaats ?? "",
+        straat: parsedAdres.straat ?? "",
+        postcode: parsedAdres.postcode ?? "",
+        huisnummer: parsedAdres.huisnummer ?? "",
+      };
+    } catch {
+      // leave defaults
+    }
+
+    return {
+      bedrijfsnaam,
+      kvkNummer: verkoper.kvkNummer ?? "",
+      woonplaats: adres.woonplaats,
+      straat: adres.straat,
+      postcode: adres.postcode,
+      huisnummer: adres.huisnummer,
+    };
+  };
+
   useEffect(() => {
     setFormValues(formFromUser(user));
     setBusinessValues((prev) => ({
@@ -126,6 +158,27 @@ export default function KlantProfile() {
 
   useEffect(() => {
     setIsVerkoper(user?.role === "VERKOPER");
+  }, [user]);
+
+  useEffect(() => {
+    const loadVerkoper = async () => {
+      if (!user || user.role !== "VERKOPER") {
+        setVerkoperId(null);
+        return;
+      }
+      try {
+        const verkoper = await verkoperService.getMyVerkoper();
+        if (verkoper) {
+          setVerkoperId(verkoper.verkoperId);
+          setBusinessValues(businessFormFromResponse(verkoper));
+        } else {
+          setVerkoperId(null);
+        }
+      } catch (err: any) {
+        setBusinessError(err?.message ?? "Kon verkopergegevens niet ophalen.");
+      }
+    };
+    void loadVerkoper();
   }, [user]);
 
   const hasChanges = useMemo(() => {
@@ -200,13 +253,9 @@ export default function KlantProfile() {
 
     try {
       const payload = verkoperPayloadFromBusiness(businessValues);
-      if (verkoperId) {
-        await verkoperService.updateVerkoper(verkoperId, payload);
-      } else {
-        const created = await verkoperService.createVerkoper(payload);
-        setVerkoperId(created.verkoperId);
-      }
-      setBusinessFeedback("Bedrijfsgegevens opgeslagen via backend Verkoper-controller.");
+      const result = await verkoperService.upsertMyVerkoper(payload);
+      setVerkoperId(result.verkoperId);
+      setBusinessFeedback("Bedrijfsgegevens opgeslagen en gekoppeld aan je account.");
     } catch (err: any) {
       setBusinessError(err?.message ?? "Opslaan bedrijfsgegevens mislukt.");
     } finally {

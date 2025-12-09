@@ -15,6 +15,7 @@ export type VerkoperResponse = {
   bedrijfsgegevens: string;
   adresgegevens: string;
   financieleGegevens: string;
+  gebruikerId?: number;
 };
 
 const toDto = (payload: VerkoperPayload) => ({
@@ -47,4 +48,27 @@ export async function updateVerkoper(id: number, payload: VerkoperPayload): Prom
     const text = await res.text();
     throw new Error(text || "Bijwerken verkoper mislukt.");
   }
+}
+
+export async function getMyVerkoper(): Promise<VerkoperResponse | null> {
+  const res = await authFetch(`${apiBase}/api/Verkoper/me`);
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Ophalen verkoper mislukt.");
+  }
+  return res.json() as Promise<VerkoperResponse>;
+}
+
+export async function upsertMyVerkoper(payload: VerkoperPayload): Promise<VerkoperResponse> {
+  const res = await authFetch(`${apiBase}/api/Verkoper/me`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(toDto(payload)),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Opslaan verkoper mislukt.");
+  }
+  return res.json() as Promise<VerkoperResponse>;
 }

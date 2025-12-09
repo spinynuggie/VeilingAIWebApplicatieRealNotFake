@@ -16,5 +16,7 @@ namespace backend.Dtos
         public string Adresgegevens { get; set; } = string.Empty;
 
         public string FinancieleGegevens { get; set; } = string.Empty;
+
+        // GebruikerId wordt server-side bepaald; client hoeft deze niet te sturen
     }
 }

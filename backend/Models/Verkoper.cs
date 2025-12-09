@@ -21,5 +21,8 @@ namespace backend.Models
         public string Adresgegevens { get; set; } = string.Empty;
 
         public string FinancieleGegevens { get; set; } = string.Empty;
+
+        // Link naar gebruiker zodat bedrijfsgegevens bij het account horen
+        public int? GebruikerId { get; set; }
     }
 }
