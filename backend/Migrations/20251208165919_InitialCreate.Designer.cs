@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251208085940_AddRefreshTokens")]
-    partial class AddRefreshTokens
+    [Migration("20251208165919_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,7 +77,8 @@ namespace backend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Role")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("role");
 
                     b.Property<string>("Straat")
                         .HasColumnType("text");
