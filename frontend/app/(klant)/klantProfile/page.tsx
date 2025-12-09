@@ -3,7 +3,6 @@
 import Image from "next/image";
 import backgroundImage from "@/public/loginAssets/FloraHollandGebouw.svg";
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
-<<<<<<< Updated upstream
 import {
   Box,
   Typography,
@@ -20,13 +19,6 @@ import {
   DialogActions,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-=======
-import EditableField from "@/components/EditableField";
-import EditableFieldOpVraagInfo from "@/components/EditableFieldOpVraagInfo";
-import AppNavbar from "@/components/AppNavbar";
-import { Box, Typography, Grid, Button } from "@mui/material";
-import { useState } from "react";
->>>>>>> Stashed changes
 import RequireAuth from "@/components/RequireAuth";
 import { useAuth } from "@/components/AuthProvider";
 import * as gebruikerService from "@/services/gebruikerService";
@@ -298,7 +290,6 @@ export default function KlantProfile() {
 
   return (
     <RequireAuth>
-<<<<<<< Updated upstream
       <Box
         sx={{
           position: "relative",
@@ -309,13 +300,6 @@ export default function KlantProfile() {
       >
         <Box
           sx={{
-=======
-      <AppNavbar />
-      <div style={{ position: "relative", minHeight: "100vh", overflow: "hidden" }}>
-        {/* Achtergrondafbeelding */}
-        <div
-          style={{
->>>>>>> Stashed changes
             position: "fixed",
             inset: 0,
             zIndex: -2,
