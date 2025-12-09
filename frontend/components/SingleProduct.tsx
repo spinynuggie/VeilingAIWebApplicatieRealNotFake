@@ -1,30 +1,14 @@
 "use client";
 
-import { Product, ProductDisplayProps } from '@/types/product';
-import { useRouter } from "next/navigation";
+import { ProductDisplayProps } from '@/types/product';
 import { Box } from '@mui/material';
 
 export default function ProductDisplay({ product }: ProductDisplayProps) {
-  const router = useRouter();
-
   if (!product || product.length === 0) {
     return <p>Geen producten beschikbaar</p>;
   }
 
-  const handleProductClick = (productItem: Product) => {
-    console.log("Clicked product:", productItem);
-    console.log("ProductId:", productItem.productId);
-
-    if (!productItem.productId) {
-      console.error("No productId found in product object:", productItem);
-      return;
-    }
-
-    router.push(`/product/${productItem.productId}`);
-  };
-
-return (
-  <>
+  return (
     <Box
       sx={{
         display: "flex",
@@ -40,6 +24,5 @@ return (
     >
       <h1></h1>
     </Box>
-  </>
-);
-}``
+  );
+}

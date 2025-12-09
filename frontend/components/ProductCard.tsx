@@ -50,9 +50,6 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
   const displayTitle = product.title || product.productNaam || "Product Naam";
   const displayDesc = product.description || product.productBeschrijving || "Geen beschrijving beschikbaar.";
 
-  // Prijs kan 0 zijn, dus we checken specifiek op undefined
-  const displayPrice = product.price !== undefined ? product.price : product.huidigeprijs;
-
   // Afbeelding
   const rawImage = product.image || product.fotos;
 
@@ -243,5 +240,4 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
     </div>
   );
 }
-
 

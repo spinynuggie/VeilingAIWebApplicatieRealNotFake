@@ -1,4 +1,4 @@
-export type Role = "KOPER" | "VERKOPER" | "ADMIN";
+export type Role = "KOPER" | "VERKOPER" | "VEILINGMEESTER" | "ADMIN";
 
 export interface User {
   gebruikerId: number;
@@ -10,4 +10,3 @@ export interface User {
   postcode?: string | null;
   woonplaats?: string | null;
 }
-

@@ -28,6 +28,12 @@ namespace backend.Controllers
 
         private const int AccessTokenMinutes = 15;
         private const int RefreshTokenDays = 7;
+        private static readonly HashSet<string> AllowedRoles = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "KOPER",
+            "VERKOPER",
+            "VEILINGMEESTER"
+        };
 
         public GebruikerController(
             AppDbContext context,
@@ -219,6 +225,43 @@ namespace backend.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpPut("{id}/role")]
+        [Authorize]
+        public async Task<ActionResult<GebruikerResponseDto>> UpdateRole(int id, [FromBody] RoleUpdateDto dto)
+        {
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(idClaim) || !int.TryParse(idClaim, out var currentUserId))
+            {
+                return Unauthorized();
+            }
+
+            if (currentUserId != id)
+            {
+                return Forbid();
+            }
+
+            var normalizedRole = dto.Role?.ToUpperInvariant();
+            if (string.IsNullOrWhiteSpace(normalizedRole) || !AllowedRoles.Contains(normalizedRole))
+            {
+                return BadRequest("Ongeldige rol.");
+            }
+
+            var gebruiker = await _context.Gebruikers.FindAsync(id);
+            if (gebruiker == null)
+            {
+                return NotFound();
+            }
+
+            gebruiker.Role = normalizedRole;
+            _context.Entry(gebruiker).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            // Nieuwe tokens uitgeven zodat de Role-claim direct meekomt
+            await IssueTokensAsync(gebruiker);
+
+            return MapToResponseDto(gebruiker);
         }
 
         // POST: api/Gebruiker (GEBRUIKT DTO VOOR INPUT, VERVANGT OUDE POST)

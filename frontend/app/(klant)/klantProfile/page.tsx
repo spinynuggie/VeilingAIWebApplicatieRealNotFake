@@ -110,6 +110,8 @@ export default function KlantProfile() {
   const [businessFeedback, setBusinessFeedback] = useState<string | null>(null);
   const [businessError, setBusinessError] = useState<string | null>(null);
   const [sellerDialogOpen, setSellerDialogOpen] = useState(false);
+  const [roleChanging, setRoleChanging] = useState(false);
+  const roleLabel = user?.role ?? "Onbekend";
 
   useEffect(() => {
     setFormValues(formFromUser(user));
@@ -120,6 +122,10 @@ export default function KlantProfile() {
       postcode: user?.postcode ?? "",
       huisnummer: user?.huisnummer ?? "",
     }));
+  }, [user]);
+
+  useEffect(() => {
+    setIsVerkoper(user?.role === "VERKOPER");
   }, [user]);
 
   const hasChanges = useMemo(() => {
@@ -212,10 +218,33 @@ export default function KlantProfile() {
     setSellerDialogOpen(true);
   };
 
-  const confirmBecomeSeller = () => {
-    setIsVerkoper(true);
-    setSellerDialogOpen(false);
-    setBusinessFeedback("Verkopersmodus geactiveerd. Vul je bedrijfsgegevens in en bevestig.");
+  const confirmBecomeSeller = async () => {
+    setRoleChanging(true);
+    setBusinessError(null);
+    try {
+      await gebruikerService.updateRole("VERKOPER", user ?? undefined);
+      await refreshUser();
+      setBusinessFeedback("Rol aangepast naar verkoper. Vul je bedrijfsgegevens in en bevestig.");
+      setSellerDialogOpen(false);
+    } catch (err: any) {
+      setBusinessError(err?.message ?? "Rol veranderen mislukt.");
+    } finally {
+      setRoleChanging(false);
+    }
+  };
+
+  const handleDisableSeller = async () => {
+    setRoleChanging(true);
+    setBusinessError(null);
+    setBusinessFeedback(null);
+    try {
+      await gebruikerService.updateRole("KOPER", user ?? undefined);
+      await refreshUser();
+    } catch (err: any) {
+      setBusinessError(err?.message ?? "Rol wijzigen mislukt.");
+    } finally {
+      setRoleChanging(false);
+    }
   };
 
   return (
@@ -293,8 +322,8 @@ export default function KlantProfile() {
               </Box>
             </Box>
             <Chip
-              label={isVerkoper ? "Bedrijfsaccount actief" : "Nog geen verkoper"}
-              color={isVerkoper ? "success" : "default"}
+              label={`Rol: ${roleLabel}`}
+              color={isVerkoper ? "success" : roleLabel === "VEILINGMEESTER" ? "warning" : "default"}
               sx={{ fontWeight: 700, borderRadius: "10px" }}
             />
           </Box>
@@ -527,7 +556,8 @@ export default function KlantProfile() {
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <Button
                     variant="outlined"
-                    onClick={() => setIsVerkoper(false)}
+                    onClick={handleDisableSeller}
+                    disabled={roleChanging}
                     sx={{
                       textTransform: "none",
                       fontWeight: 700,
@@ -535,7 +565,7 @@ export default function KlantProfile() {
                       px: 2.4,
                     }}
                   >
-                    Verkoper uit
+                    {roleChanging ? "Bezig..." : "Verkoper uit"}
                   </Button>
                   <Button
                     variant="contained"
@@ -656,6 +686,7 @@ export default function KlantProfile() {
         open={sellerDialogOpen}
         onClose={() => setSellerDialogOpen(false)}
         onConfirm={confirmBecomeSeller}
+        loading={roleChanging}
       />
     </RequireAuth>
   );
@@ -666,10 +697,12 @@ function SellerConfirmDialog({
   open,
   onClose,
   onConfirm,
+  loading,
 }: {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  loading?: boolean;
 }) {
   return (
     <Dialog
@@ -697,6 +730,7 @@ function SellerConfirmDialog({
         <Button
           variant="contained"
           onClick={onConfirm}
+          disabled={loading}
           sx={{
             backgroundColor: "#2e5b3f",
             borderRadius: "10px",
@@ -705,7 +739,7 @@ function SellerConfirmDialog({
             px: 2.4,
           }}
         >
-          Bevestigen
+          {loading ? "Bezig..." : "Bevestigen"}
         </Button>
       </DialogActions>
     </Dialog>

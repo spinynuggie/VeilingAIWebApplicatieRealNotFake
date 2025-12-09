@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { getProducts } from "../../services/productService";
 import { Product } from "@/types/product";
 import RequireAuth from "@/components/RequireAuth";
-import ProductCard from "@/components/ProductCard"; // De component die het product moet tonen
 
 export default function ProductList() {
   // We hoeven niet alle producten op te slaan, alleen degene die we willen tonen

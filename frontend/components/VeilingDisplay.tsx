@@ -1,13 +1,10 @@
 "use client";
 
-import { useEffect, useState } from 'react';
 import { Veiling, VeilingDisplayProps } from '@/types/veiling';
 import { useRouter } from "next/navigation";
 import { Box } from '@mui/material';
-import { getProducts } from '@/services/productService';
 
 export default function VeilingDisplay({ veilingen }: VeilingDisplayProps) {
-  const [product, setProduct] = useState<any[]>([]);
   const router = useRouter();
 
 
@@ -56,9 +53,9 @@ export default function VeilingDisplay({ veilingen }: VeilingDisplayProps) {
           },
         }}
       >
-        {veilingen.map((v) => (
+        {veilingen.map((v, idx) => (
           <Box
-            key={v.veilingId || Math.random()}
+            key={v.veilingId ?? idx}
             onClick={() => handleVeilingClick(v)}
             sx={{
               display: "flex",

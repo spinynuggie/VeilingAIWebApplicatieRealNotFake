@@ -62,3 +62,21 @@ export async function updateGebruikerFields(
 export async function updateGebruiker(field: string, value: string): Promise<User> {
   return updateGebruikerFields({ [field]: value } as any);
 }
+
+export async function updateRole(role: User["role"], currentUser?: User | null): Promise<User> {
+  const gebruiker = currentUser ?? (await getCurrentGebruiker());
+  if (!gebruiker) throw new Error("Niet ingelogd");
+
+  const res = await authFetch(`${apiBase}/api/Gebruiker/${gebruiker.gebruikerId}/role`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ role }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Rol wijzigen mislukt.");
+  }
+
+  return (await res.json()) as User;
+}

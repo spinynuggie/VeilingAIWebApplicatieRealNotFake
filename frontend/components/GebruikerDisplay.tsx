@@ -1,6 +1,6 @@
 "use client";
 
-import {Gebruiker, GebruikerDisplayProps } from '@/types/gebruiker';
+import { GebruikerDisplayProps } from '@/types/gebruiker';
 export default function GebruikerDisplay({ gebruikers }: GebruikerDisplayProps) {
   // Bescherm tegen undefined
   if (!gebruikers || gebruikers.length === 0) {
