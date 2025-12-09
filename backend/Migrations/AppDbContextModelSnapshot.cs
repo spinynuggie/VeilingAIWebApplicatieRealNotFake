@@ -74,7 +74,8 @@ namespace backend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Role")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("role");
 
                     b.Property<string>("Straat")
                         .HasColumnType("text");
