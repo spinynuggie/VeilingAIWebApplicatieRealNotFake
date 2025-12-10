@@ -9,7 +9,7 @@ import { getProducts } from "@/services/productService";
 import Profile  from "@/components/Profile";
 import { Box } from "@mui/material"
 import RequireAuth from "@/components/RequireAuth";
-import ProductCard from "@/components/ProductCard";
+import ProductCard from "@/components/ProductCard/ProductCard";
 // Make sure to import the type to ensure type safety
 import { Product } from '@/types/product';
 

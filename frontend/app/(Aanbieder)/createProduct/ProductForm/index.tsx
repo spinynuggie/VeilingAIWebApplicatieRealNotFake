@@ -1,27 +1,9 @@
+// src/components/ProductForm/index.tsx
 "use client";
 
-import React, { useState, CSSProperties, ChangeEvent, FormEvent, KeyboardEvent } from "react";
-
-// --- INTERACTIVE BUTTON (Hetzelfde gebleven) ---
-interface InteractiveButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  baseStyle: CSSProperties;
-}
-
-const InteractiveButton: React.FC<InteractiveButtonProps> = ({ baseStyle, children, ...props }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const finalStyle: CSSProperties = {
-    ...baseStyle,
-    transition: "all 0.2s ease-in-out",
-    filter: isHovered ? "brightness(0.85)" : "brightness(1)",
-    transform: isHovered ? "scale(1.05)" : "scale(1)",
-    cursor: "pointer",
-  };
-  return (
-    <button style={finalStyle} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} {...props}>
-      {children}
-    </button>
-  );
-};
+import React, { useState, ChangeEvent, FormEvent, KeyboardEvent } from "react";
+import { InteractiveButton } from "./interactiveButton";
+import { styles } from "./styles";
 
 // --- TYPES ---
 export interface ProductData {
@@ -30,7 +12,7 @@ export interface ProductData {
   quantity: number | "";
   price: string;
   specifications: string[];
-  image: string; // <--- NU EEN STRING
+  image: string; // Keeping it as String URL
 }
 
 interface ProductFormProps {
@@ -39,7 +21,6 @@ interface ProductFormProps {
 }
 
 export default function ProductForm({ formData, setFormData }: ProductFormProps) {
-  // Geen refs meer nodig voor files
   const [isAddingSpec, setIsAddingSpec] = useState(false);
   const [newSpecValue, setNewSpecValue] = useState("");
 
@@ -112,165 +93,10 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     console.log("Product opgeslagen:", formData);
+    // Here you would add your API call
   };
 
-  // --- STYLES ---
-  const styles: { [key: string]: CSSProperties } = {
-    card: {
-      backgroundColor: "#D1FADF",
-      padding: "40px",
-      borderRadius: "20px",
-      width: "100%",
-      maxWidth: "900px",
-      boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
-      fontFamily: "Arial, sans-serif",
-      margin: "0 auto",
-      display: "flex",
-      flexDirection: "column",
-    },
-    titleInput: {
-      width: "100%",
-      backgroundColor: "#AEDCB8",
-      border: "none",
-      borderRadius: "10px",
-      padding: "15px",
-      fontSize: "18px",
-      textAlign: "center",
-      fontWeight: 500,
-      marginBottom: "30px",
-      outline: "none",
-      color: "#333",
-    },
-    mainContent: {
-      display: "flex",
-      justifyContent: "space-between",
-      gap: "50px",
-      width: "100%",
-    },
-    columnLeft: {
-      flex: 1,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-    },
-    columnRight: {
-      flex: 1,
-      display: "flex",
-      flexDirection: "column",
-    },
-    label: {
-      fontWeight: "bold",
-      fontSize: "18px",
-      marginBottom: "15px",
-      color: "#000",
-      width: "100%",
-    },
-    imagePreviewBox: {
-      width: "100%",
-      backgroundColor: "#90B498",
-      borderRadius: "10px",
-      height: "200px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      position: "relative",
-      overflow: "hidden",
-      color: "white",
-      marginBottom: "15px",
-    },
-    previewImage: {
-      width: "100%",
-      height: "100%",
-      objectFit: "cover",
-      position: "absolute",
-    },
-    textarea: {
-      width: "100%",
-      backgroundColor: "#AEDCB8",
-      border: "none",
-      borderRadius: "10px",
-      padding: "20px",
-      fontSize: "16px",
-      outline: "none",
-      resize: "none",
-      height: "250px",
-      marginBottom: "30px",
-    },
-    // ... andere styles hetzelfde ...
-    quantityWrapper: {
-      display: "flex",
-      gap: "15px",
-      alignItems: "center",
-      marginBottom: "30px",
-      justifyContent: "center",
-    },
-    btnSmall: {
-      width: "60px",
-      height: "50px",
-      backgroundColor: "#AEDCB8",
-      border: "none",
-      borderRadius: "10px",
-      fontSize: "24px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    quantityInput: {
-      width: "100px",
-      height: "50px",
-      backgroundColor: "#AEDCB8",
-      borderRadius: "10px",
-      border: "none",
-      textAlign: "center",
-      fontSize: "18px",
-      fontWeight: "bold",
-      outline: "none",
-      appearance: "textfield",
-    },
-    priceWrapper: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "15px",
-      width: "100%",
-      paddingRight: "25px",
-    },
-    currencySymbol: {
-      fontSize: "24px",
-      fontWeight: "bold",
-    },
-    priceInput: {
-      width: "160px",
-      height: "50px",
-      backgroundColor: "#AEDCB8",
-      border: "none",
-      borderRadius: "10px",
-      textAlign: "center",
-      fontSize: "18px",
-      outline: "none",
-    },
-    specList: {
-      paddingLeft: "0",
-      listStyle: "none",
-      marginBottom: "15px",
-      width: "100%",
-    },
-    specItem: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: "5px 0",
-      fontWeight: 500,
-    },
-    specBullet: { marginRight: "10px", fontWeight: "bold" },
-    removeSpecBtn: { background: "transparent", border: "none", color: "#d9534f", fontSize: "16px", fontWeight: "bold", marginLeft: "10px", padding: "5px", cursor: "pointer" },
-    addSpecBtn: { backgroundColor: "#AEDCB8", border: "none", borderRadius: "8px", padding: "15px 20px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", fontSize: "14px", width: "100%" },
-    specInputWrapper: { display: "flex", gap: "10px", width: "100%" },
-    specTextInput: { flex: 1, backgroundColor: "#fff", border: "2px solid #AEDCB8", borderRadius: "8px", padding: "10px", fontSize: "14px", outline: "none" },
-    specActionBtn: { width: "40px", border: "none", borderRadius: "8px", fontWeight: "bold", fontSize: "18px", display: "flex", alignItems: "center", justifyContent: "center" },
-    submitBtn: { backgroundColor: "#90B498", color: "#000", padding: "15px 30px", border: "none", borderRadius: "10px", fontWeight: "bold", fontSize: "16px", boxShadow: "0 2px 5px rgba(0,0,0,0.1)" },
-  };
-
+  // --- RENDER ---
   return (
     <form style={styles.card} onSubmit={handleSubmit}>
       <input
@@ -283,11 +109,10 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       />
 
       <div style={styles.mainContent}>
+        {/* LEFT COLUMN */}
         <div style={styles.columnLeft}>
 
-          <label style={{...styles.label, textAlign: "center"}}>Afbeelding URL</label>
-
-          {/* URL Input Veld */}
+          <label style={styles.label}>Afbeelding URL</label>
           <input
             type="text"
             name="image"
@@ -297,21 +122,20 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
             style={{...styles.titleInput, marginBottom: "15px", fontSize: "14px"}}
           />
 
-          {/* Preview Veld (alleen zichtbaar als er URL is) */}
           <div style={styles.imagePreviewBox}>
             {formData.image ? (
               <img
                 src={formData.image}
                 alt="Preview"
                 style={styles.previewImage}
-                onError={(e) => (e.currentTarget.style.display = 'none')} // Verberg als URL kapot is
+                onError={(e) => (e.currentTarget.style.display = 'none')}
               />
             ) : (
               <span>Preview...</span>
             )}
           </div>
 
-          <label style={{...styles.label, textAlign: "center"}}>Aantal Product</label>
+          <label style={styles.label}>Aantal Product</label>
           <div style={styles.quantityWrapper}>
             <InteractiveButton type="button" onClick={() => handleQuantityButton(-1)} baseStyle={styles.btnSmall}>-</InteractiveButton>
             <input
@@ -324,7 +148,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
             <InteractiveButton type="button" onClick={() => handleQuantityButton(1)} baseStyle={styles.btnSmall}>+</InteractiveButton>
           </div>
 
-          <label style={{...styles.label, textAlign: "center"}}>Maximum Prijs</label>
+          <label style={styles.label}>Maximum Prijs</label>
           <div style={styles.priceWrapper}>
             <span style={styles.currencySymbol}>€</span>
             <input
@@ -339,8 +163,9 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
           </div>
         </div>
 
+        {/* RIGHT COLUMN */}
         <div style={styles.columnRight}>
-          <label style={{...styles.label, textAlign: "center"}}>Beschrijving</label>
+          <label style={styles.label}>Beschrijving</label>
           <textarea
             name="description"
             placeholder="Beschrijving..."
@@ -349,7 +174,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
             style={styles.textarea}
           />
 
-          <label style={{...styles.label, textAlign: "center"}}>Product Specificaties</label>
+          <label style={styles.label}>Product Specificaties</label>
           <ul style={styles.specList}>
             {formData.specifications.length === 0 && <li style={{ color: "#666", fontStyle: "italic", marginBottom: "10px" }}>Nog geen specificaties...</li>}
             {formData.specifications.map((spec, index) => (

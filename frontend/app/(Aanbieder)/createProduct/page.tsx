@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import AppNavbar from "@/components/AppNavbar";
-import ProductForm, { ProductData } from "@/components/ProductForm";
-import ProductCard from "@/components/ProductCard";
+import ProductForm, { ProductData } from "@/app/(Aanbieder)/createProduct/ProductForm/index";
+import ProductCard from "@/app/(Aanbieder)/createProduct/ProductCard/index";
 
 export default function Page() {
   // HIER IS DE SINGLE SOURCE OF TRUTH
