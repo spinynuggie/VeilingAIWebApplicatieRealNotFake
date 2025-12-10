@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useState, useRef, CSSProperties, ChangeEvent, FormEvent, KeyboardEvent } from "react";
+import React, { useState, CSSProperties, ChangeEvent, FormEvent, KeyboardEvent } from "react";
 
-// --- INTERACTIVE BUTTON ---
+// --- INTERACTIVE BUTTON (Hetzelfde gebleven) ---
 interface InteractiveButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   baseStyle: CSSProperties;
 }
 
 const InteractiveButton: React.FC<InteractiveButtonProps> = ({ baseStyle, children, ...props }) => {
   const [isHovered, setIsHovered] = useState(false);
-
   const finalStyle: CSSProperties = {
     ...baseStyle,
     transition: "all 0.2s ease-in-out",
@@ -17,14 +16,8 @@ const InteractiveButton: React.FC<InteractiveButtonProps> = ({ baseStyle, childr
     transform: isHovered ? "scale(1.05)" : "scale(1)",
     cursor: "pointer",
   };
-
   return (
-    <button
-      style={finalStyle}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      {...props}
-    >
+    <button style={finalStyle} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} {...props}>
       {children}
     </button>
   );
@@ -37,7 +30,7 @@ export interface ProductData {
   quantity: number | "";
   price: string;
   specifications: string[];
-  image: File | null;
+  image: string; // <--- NU EEN STRING
 }
 
 interface ProductFormProps {
@@ -46,8 +39,7 @@ interface ProductFormProps {
 }
 
 export default function ProductForm({ formData, setFormData }: ProductFormProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isImageFocused, setIsImageFocused] = useState(false);
+  // Geen refs meer nodig voor files
   const [isAddingSpec, setIsAddingSpec] = useState(false);
   const [newSpecValue, setNewSpecValue] = useState("");
 
@@ -85,15 +77,11 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
   };
 
   const preventInvalidIntegerInput = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (["e", "E", "+", "-", ".", ","].includes(e.key)) {
-      e.preventDefault();
-    }
+    if (["e", "E", "+", "-", ".", ","].includes(e.key)) e.preventDefault();
   };
 
   const preventInvalidPriceInput = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (["e", "E", "+", "-"].includes(e.key)) {
-      e.preventDefault();
-    }
+    if (["e", "E", "+", "-"].includes(e.key)) e.preventDefault();
   };
 
   const saveSpecification = () => {
@@ -105,11 +93,6 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       setNewSpecValue("");
       setIsAddingSpec(false);
     }
-  };
-
-  const cancelSpecification = () => {
-    setNewSpecValue("");
-    setIsAddingSpec(false);
   };
 
   const handleSpecKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -126,29 +109,12 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
     }));
   };
 
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFormData((prev) => ({ ...prev, image: e.target.files![0] }));
-    }
-  };
-
-  const handleImageClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleImageKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      fileInputRef.current?.click();
-    }
-  };
-
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     console.log("Product opgeslagen:", formData);
   };
 
-  // --- STYLES (Ongewijzigd) ---
+  // --- STYLES ---
   const styles: { [key: string]: CSSProperties } = {
     card: {
       backgroundColor: "#D1FADF",
@@ -199,21 +165,18 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       color: "#000",
       width: "100%",
     },
-    imageUploadBox: {
+    imagePreviewBox: {
       width: "100%",
       backgroundColor: "#90B498",
       borderRadius: "10px",
-      height: "250px",
+      height: "200px",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      cursor: "pointer",
       position: "relative",
       overflow: "hidden",
       color: "white",
-      outline: isImageFocused ? "4px solid #AEDCB8" : "none",
-      outlineOffset: "2px",
-      marginBottom: "30px",
+      marginBottom: "15px",
     },
     previewImage: {
       width: "100%",
@@ -233,6 +196,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       height: "250px",
       marginBottom: "30px",
     },
+    // ... andere styles hetzelfde ...
     quantityWrapper: {
       display: "flex",
       gap: "15px",
@@ -298,67 +262,13 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       padding: "5px 0",
       fontWeight: 500,
     },
-    specBullet: {
-      marginRight: "10px",
-      fontWeight: "bold",
-    },
-    removeSpecBtn: {
-      background: "transparent",
-      border: "none",
-      color: "#d9534f",
-      fontSize: "16px",
-      fontWeight: "bold",
-      marginLeft: "10px",
-      padding: "5px",
-      cursor: "pointer",
-    },
-    addSpecBtn: {
-      backgroundColor: "#AEDCB8",
-      border: "none",
-      borderRadius: "8px",
-      padding: "15px 20px",
-      fontWeight: "bold",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "10px",
-      fontSize: "14px",
-      width: "100%",
-    },
-    specInputWrapper: {
-      display: "flex",
-      gap: "10px",
-      width: "100%",
-    },
-    specTextInput: {
-      flex: 1,
-      backgroundColor: "#fff",
-      border: "2px solid #AEDCB8",
-      borderRadius: "8px",
-      padding: "10px",
-      fontSize: "14px",
-      outline: "none",
-    },
-    specActionBtn: {
-      width: "40px",
-      border: "none",
-      borderRadius: "8px",
-      fontWeight: "bold",
-      fontSize: "18px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    submitBtn: {
-      backgroundColor: "#90B498",
-      color: "#000",
-      padding: "15px 30px",
-      border: "none",
-      borderRadius: "10px",
-      fontWeight: "bold",
-      fontSize: "16px",
-      boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-    },
+    specBullet: { marginRight: "10px", fontWeight: "bold" },
+    removeSpecBtn: { background: "transparent", border: "none", color: "#d9534f", fontSize: "16px", fontWeight: "bold", marginLeft: "10px", padding: "5px", cursor: "pointer" },
+    addSpecBtn: { backgroundColor: "#AEDCB8", border: "none", borderRadius: "8px", padding: "15px 20px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", fontSize: "14px", width: "100%" },
+    specInputWrapper: { display: "flex", gap: "10px", width: "100%" },
+    specTextInput: { flex: 1, backgroundColor: "#fff", border: "2px solid #AEDCB8", borderRadius: "8px", padding: "10px", fontSize: "14px", outline: "none" },
+    specActionBtn: { width: "40px", border: "none", borderRadius: "8px", fontWeight: "bold", fontSize: "18px", display: "flex", alignItems: "center", justifyContent: "center" },
+    submitBtn: { backgroundColor: "#90B498", color: "#000", padding: "15px 30px", border: "none", borderRadius: "10px", fontWeight: "bold", fontSize: "16px", boxShadow: "0 2px 5px rgba(0,0,0,0.1)" },
   };
 
   return (
@@ -374,69 +284,53 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
 
       <div style={styles.mainContent}>
         <div style={styles.columnLeft}>
-          <label style={{...styles.label, textAlign: "center"}}>Afbeelding Toevoegen</label>
-          <div
-            style={styles.imageUploadBox}
-            onClick={handleImageClick}
-            tabIndex={0}
-            onKeyDown={handleImageKeyDown}
-            onFocus={() => setIsImageFocused(true)}
-            onBlur={() => setIsImageFocused(false)}
-            role="button"
-            aria-label="Klik of druk op Enter om een afbeelding te uploaden"
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              style={{ display: "none" }}
-            />
+
+          <label style={{...styles.label, textAlign: "center"}}>Afbeelding URL</label>
+
+          {/* URL Input Veld */}
+          <input
+            type="text"
+            name="image"
+            placeholder="https://..."
+            value={formData.image}
+            onChange={handleChange}
+            style={{...styles.titleInput, marginBottom: "15px", fontSize: "14px"}}
+          />
+
+          {/* Preview Veld (alleen zichtbaar als er URL is) */}
+          <div style={styles.imagePreviewBox}>
             {formData.image ? (
               <img
-                src={URL.createObjectURL(formData.image)}
+                src={formData.image}
                 alt="Preview"
                 style={styles.previewImage}
+                onError={(e) => (e.currentTarget.style.display = 'none')} // Verberg als URL kapot is
               />
             ) : (
-              <span>Klik om te uploaden</span>
+              <span>Preview...</span>
             )}
           </div>
 
           <label style={{...styles.label, textAlign: "center"}}>Aantal Product</label>
           <div style={styles.quantityWrapper}>
-            <InteractiveButton
-              type="button"
-              onClick={() => handleQuantityButton(-1)}
-              baseStyle={styles.btnSmall}
-            >
-              -
-            </InteractiveButton>
+            <InteractiveButton type="button" onClick={() => handleQuantityButton(-1)} baseStyle={styles.btnSmall}>-</InteractiveButton>
             <input
               type="number"
-              placeholder="..."
               value={formData.quantity}
               onChange={handleQuantityInput}
               onKeyDown={preventInvalidIntegerInput}
               style={styles.quantityInput}
             />
-            <InteractiveButton
-              type="button"
-              onClick={() => handleQuantityButton(1)}
-              baseStyle={styles.btnSmall}
-            >
-              +
-            </InteractiveButton>
+            <InteractiveButton type="button" onClick={() => handleQuantityButton(1)} baseStyle={styles.btnSmall}>+</InteractiveButton>
           </div>
 
-          <label style={{...styles.label, textAlign: "center"}}>Minimum Prijs</label>
+          <label style={{...styles.label, textAlign: "center"}}>Maximum Prijs</label>
           <div style={styles.priceWrapper}>
             <span style={styles.currencySymbol}>€</span>
             <input
               type="text"
               inputMode="decimal"
               name="price"
-              placeholder="..."
               value={formData.price}
               onChange={handlePriceChange}
               onKeyDown={preventInvalidPriceInput}
@@ -457,71 +351,27 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
 
           <label style={{...styles.label, textAlign: "center"}}>Product Specificaties</label>
           <ul style={styles.specList}>
-            {formData.specifications.length === 0 && (
-              <li style={{ color: "#666", fontStyle: "italic", marginBottom: "10px" }}>
-                Nog geen specificaties...
-              </li>
-            )}
+            {formData.specifications.length === 0 && <li style={{ color: "#666", fontStyle: "italic", marginBottom: "10px" }}>Nog geen specificaties...</li>}
             {formData.specifications.map((spec, index) => (
               <li key={index} style={styles.specItem}>
-                <div style={{display: 'flex', alignItems: 'center'}}>
-                    <span style={styles.specBullet}>•</span>
-                    <span>{spec}</span>
-                </div>
-                <InteractiveButton
-                  type="button"
-                  onClick={() => removeSpecification(index)}
-                  baseStyle={styles.removeSpecBtn}
-                  title="Verwijder"
-                >
-                  ✕
-                </InteractiveButton>
+                <div style={{display: 'flex', alignItems: 'center'}}><span style={styles.specBullet}>•</span><span>{spec}</span></div>
+                <InteractiveButton type="button" onClick={() => removeSpecification(index)} baseStyle={styles.removeSpecBtn}>✕</InteractiveButton>
               </li>
             ))}
           </ul>
 
           {isAddingSpec ? (
             <div style={styles.specInputWrapper}>
-              <input
-                autoFocus
-                type="text"
-                value={newSpecValue}
-                onChange={(e) => setNewSpecValue(e.target.value)}
-                onKeyDown={handleSpecKeyDown}
-                placeholder="Typ specificatie..."
-                style={styles.specTextInput}
-              />
-              <InteractiveButton
-                type="button"
-                onClick={saveSpecification}
-                baseStyle={{...styles.specActionBtn, backgroundColor: '#90B498'}}
-                title="Opslaan"
-              >
-                ✓
-              </InteractiveButton>
-              <InteractiveButton
-                type="button"
-                onClick={cancelSpecification}
-                baseStyle={{...styles.specActionBtn, backgroundColor: '#ffb3b3'}}
-                title="Annuleren"
-              >
-                ✕
-              </InteractiveButton>
+              <input autoFocus type="text" value={newSpecValue} onChange={(e) => setNewSpecValue(e.target.value)} onKeyDown={handleSpecKeyDown} placeholder="Typ specificatie..." style={styles.specTextInput} />
+              <InteractiveButton type="button" onClick={saveSpecification} baseStyle={{...styles.specActionBtn, backgroundColor: '#90B498'}}>✓</InteractiveButton>
+              <InteractiveButton type="button" onClick={() => setIsAddingSpec(false)} baseStyle={{...styles.specActionBtn, backgroundColor: '#ffb3b3'}}>✕</InteractiveButton>
             </div>
           ) : (
-            <InteractiveButton
-              type="button"
-              onClick={() => setIsAddingSpec(true)}
-              baseStyle={styles.addSpecBtn}
-            >
-              <span style={{ fontSize: "18px", marginRight: "10px" }}>+</span> Specificatie toevoegen
-            </InteractiveButton>
+            <InteractiveButton type="button" onClick={() => setIsAddingSpec(true)} baseStyle={styles.addSpecBtn}><span style={{ fontSize: "18px", marginRight: "10px" }}>+</span> Specificatie toevoegen</InteractiveButton>
           )}
 
           <div style={{ marginTop: "auto", display: "flex", justifyContent: "center", paddingTop: "30px" }}>
-            <InteractiveButton type="submit" baseStyle={styles.submitBtn}>
-              Product Aanmaken
-            </InteractiveButton>
+            <InteractiveButton type="submit" baseStyle={styles.submitBtn}>Product Aanmaken</InteractiveButton>
           </div>
         </div>
       </div>

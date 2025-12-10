@@ -13,7 +13,7 @@ export default function Page() {
     quantity: "",
     price: "",
     specifications: [],
-    image: null,
+    image: "",
   });
 
   return (

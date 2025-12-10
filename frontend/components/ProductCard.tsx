@@ -2,16 +2,13 @@
 
 import React, { CSSProperties, useState, useEffect } from "react";
 
-// We breiden de interface uit zodat hij OOK de database velden herkent
 export interface ProductCardData {
-  // De velden die je component al had
   name?: string;
   description?: string;
   image?: string | File | null;
   specifications?: string[];
   price?: string | number;
 
-  // De velden die uit jouw DATABASE komen (toegevoegd)
   productNaam?: string;
   productBeschrijving?: string;
   huidigeprijs?: number;
@@ -31,36 +28,45 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
     setInputValue("");
   }, [product]);
 
+  // HIER IS DE LOGICA AANGEPAST
   const handleActionClick = () => {
     if (onAction) {
-        const val = parseFloat(inputValue);
-        if(isNaN(val)) {
-            alert("Vul een geldig bedrag in");
-            return;
+        if (mode === 'create') {
+            // IN CREATE MODE: Gebruik de prijs uit het formulier (de prop)
+            // We hoeven niet meer in een lokaal inputveld te kijken.
+            const priceFromForm = product.price || product.huidigeprijs || 0;
+            const val = typeof priceFromForm === 'string' ? parseFloat(priceFromForm) : Number(priceFromForm);
+
+            onAction(isNaN(val) ? 0 : val);
+        } else {
+            // IN AUCTION MODE: Gebruik wel het lokale inputveld (voor het bod)
+            const val = parseFloat(inputValue);
+            if(isNaN(val)) {
+                alert("Vul een geldig bedrag in");
+                return;
+            }
+            onAction(val);
         }
-        onAction(val);
     }
   };
 
-  // --- MAPPING LOGICA ---
-  // Hier kiezen we: "Hebben we 'title'? Nee? Pak dan 'productNaam'."
   if (!product) {
-  return <div>Loading product…</div>;
+    return <div>Loading product…</div>;
   }
+
   const displayTitle = product.name || product.productNaam || "Product Naam";
   const displayDesc = product.description || product.productBeschrijving || "Geen beschrijving beschikbaar.";
 
-  // Afbeelding
-  const rawImage = product.image || product.fotos;
+  // De prijs om te tonen (uit formulier of DB)
+  const displayPrice = product.price || product.huidigeprijs;
 
+  const rawImage = product.image || product.fotos;
   const getImageUrl = (img: string | File | null | undefined) => {
     if (!img) return null;
     if (typeof img === 'string') return img;
-    // Check of het een File object is (voor create mode)
     if (img instanceof File) return URL.createObjectURL(img);
     return null;
   };
-
   const imageUrl = getImageUrl(rawImage);
 
   const styles: { [key: string]: CSSProperties } = {
@@ -147,19 +153,6 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
       fontWeight: "bold",
       width: "60px",
     },
-    infoBox: {
-        backgroundColor: "#AEDCB8",
-        borderRadius: "8px",
-        padding: "10px 5px",
-        fontSize: "16px",
-        flex: 1,
-        textAlign: "center",
-        fontWeight: "bold",
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#555'
-    },
     priceDisplay: {
         backgroundColor: "#90B498",
         borderRadius: "8px",
@@ -174,7 +167,6 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
 
   return (
     <div style={styles.card}>
-    {/* GEBRUIK HIER DE display VARIABELEN */}
       <h2 style={styles.title}>{displayTitle}</h2>
 
       <div style={styles.imagePlaceholder}>
@@ -204,11 +196,21 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
         )}
       </ul>
 
+      {/*
+         PRIJS DISPLAY
+         Dit toont de prijs die je in het formulier (links) hebt ingevuld.
+      */}
+      <div style={{ marginBottom: "15px" }}>
+        <div style={styles.priceDisplay}>
+           € {displayPrice || "0.00"}
+        </div>
+      </div>
+
       <div style={styles.buttonGroup}>
         {mode === 'display' ? (
-            <div>
-            </div>
+            <div></div>
         ) : mode === 'auction' ? (
+            // Veiling Modus: Wel input nodig om te bieden
             <>
                 <input
                     style={styles.inputBox}
@@ -222,23 +224,13 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
                 </button>
             </>
         ) : (
-            <>
-                <div style={styles.infoBox}>Max</div>
-                <input
-                    style={styles.inputBox}
-                    placeholder="Min"
-                    type="number"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                />
-                <button style={styles.btnDark} onClick={handleActionClick}>
-                    Aanmaken
-                </button>
-            </>
+            // Create Modus: GEEN input meer, alleen de knop.
+            // De prijs staat al in het groene blok hierboven.
+            <button style={styles.btnDark} onClick={handleActionClick}>
+                Aanmaken
+            </button>
         )}
       </div>
     </div>
   );
 }
-
-
