@@ -3,7 +3,7 @@
 import { useState } from "react";
 import AppNavbar from "@/components/AppNavbar";
 import ProductForm, { ProductData } from "@/app/(Aanbieder)/createProduct/ProductForm/index";
-import ProductCard from "@/app/(Aanbieder)/createProduct/ProductCard/index";
+import ProductCard from "@/components/ProductCard/index";
 
 export default function Page() {
   // HIER IS DE SINGLE SOURCE OF TRUTH

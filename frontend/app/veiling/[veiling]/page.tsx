@@ -12,7 +12,7 @@
   import Profile  from "@/components/Profile";
   import { Box } from "@mui/material"
   import RequireAuth from "@/components/RequireAuth";
-  import ProductCard from "@/components/ProductCard/ProductCard";
+  import ProductCard from "@/components/ProductCard/index";
   import {VeilingKlok} from "@/components/VeilingKlok";
 
   export default function VeilingDetailPage() {

@@ -104,13 +104,11 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
               Bieden
             </button>
           </>
-        ) : (
-          // Create Mode: Just the button
-          <button style={styles.btnDark} onClick={handleActionClick}>
-            Aanmaken
-          </button>
+        ): (
+<></>
         )}
       </div>
     </div>
   );
 }
+
