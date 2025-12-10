@@ -6,7 +6,6 @@ import styles from "../veilingAanmaken.module.css";
 import { AvailableColumn } from "../Components/availableColumn";
 import DetailColumn from "../Components/detailColumn";
 import AuctionColumn from "../Components/auctionColumn";
-import { usePathname } from "next/navigation";
 
 const VeilingAanmakenPage = () => {
   const {
@@ -20,9 +19,6 @@ const VeilingAanmakenPage = () => {
     handleSearchAvailable,
     handleSearchAuction,
   } = useVeilingAanmaken();
-
-  const pathname = usePathname();
-  const id = parseInt(pathname.split('/').pop() || '0');
 
   return (
     <main className={styles.pageContainer}>

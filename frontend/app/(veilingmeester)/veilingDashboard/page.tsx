@@ -37,14 +37,13 @@ export default function Landing() {
                 }
                 right={
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                   
+
                     <Profile />
                   </div>
                 }
               />
                <button
                       onClick={() => {
-                        // Navigeer naar de create-veilingen pagina (pas pad aan indien nodig)
                         try {
                           router.push("/veilingAanmaken");
                         } catch (e) {
@@ -69,13 +68,13 @@ export default function Landing() {
               {/* Rij voor huidige veilingen*/}
               <div style={{ padding: "30px" }}>
                 <h2 style={{ marginBottom: "10px", marginTop:"0" }}>Produkten die geveld kunnen worden</h2>
-                <VeilingDisplay veilingen={veilingen} />
+                <VeilingDisplay veilingen={veilingen} mode = "veilingAanmaken" />
               </div>
-      
+
               {/* opkomende veilingen */}
               <div style={{ padding: "30px" }}>
                 <h2 style={{ marginBottom: "20px", marginTop: "-10px"}}>Toekomstige veilingen - tijdelijk copie van huidige veilingen</h2>
-                <VeilingDisplay veilingen={veilingen} />
+                <VeilingDisplay veilingen={veilingen} mode = "veilingAanmaken" />
               </div>
             </div>
     //</RequireAuth>

@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { Product } from "@/types/product";
 import { getProducts, updateProductAuctionData } from "@/services/productService";
-
-const CURRENT_VEILING_ID = 1 ;
+import { usePathname } from "next/navigation";
 
 export function useVeilingAanmaken() {
+
+  const pathname = usePathname();
+  const id = parseInt(pathname.split('/').pop() || '0');
+  const CURRENT_VEILING_ID = id;
+
   // --- LINKER KOLOM STATES ---
   const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
   const [filteredAvailable, setFilteredAvailable] = useState<Product[]>([]);
