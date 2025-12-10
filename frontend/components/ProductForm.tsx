@@ -34,7 +34,7 @@ const InteractiveButton: React.FC<InteractiveButtonProps> = ({ baseStyle, childr
 export interface ProductData {
   name: string;
   description: string;
-  quantity: number | ""; 
+  quantity: number | "";
   price: string;
   specifications: string[];
   image: File | null;
@@ -102,8 +102,8 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
         ...prev,
         specifications: [...prev.specifications, newSpecValue.trim()],
       }));
-      setNewSpecValue(""); 
-      setIsAddingSpec(false); 
+      setNewSpecValue("");
+      setIsAddingSpec(false);
     }
   };
 
@@ -185,7 +185,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       flex: 1,
       display: "flex",
       flexDirection: "column",
-      alignItems: "center", 
+      alignItems: "center",
     },
     columnRight: {
       flex: 1,
@@ -200,10 +200,10 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       width: "100%",
     },
     imageUploadBox: {
-      width: "100%", 
+      width: "100%",
       backgroundColor: "#90B498",
       borderRadius: "10px",
-      height: "250px", 
+      height: "250px",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -230,8 +230,8 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       fontSize: "16px",
       outline: "none",
       resize: "none",
-      height: "250px", 
-      marginBottom: "30px", 
+      height: "250px",
+      marginBottom: "30px",
     },
     quantityWrapper: {
       display: "flex",
@@ -266,10 +266,10 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
     priceWrapper: {
       display: "flex",
       alignItems: "center",
-      justifyContent: "center", 
+      justifyContent: "center",
       gap: "15px",
-      width: "100%", 
-      paddingRight: "25px", 
+      width: "100%",
+      paddingRight: "25px",
     },
     currencySymbol: {
       fontSize: "24px",
@@ -295,7 +295,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
-      padding: "5px 0", 
+      padding: "5px 0",
       fontWeight: 500,
     },
     specBullet: {
@@ -320,10 +320,10 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       fontWeight: "bold",
       display: "flex",
       alignItems: "center",
-      justifyContent: "center", 
+      justifyContent: "center",
       gap: "10px",
       fontSize: "14px",
-      width: "100%", 
+      width: "100%",
     },
     specInputWrapper: {
       display: "flex",
@@ -375,10 +375,10 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       <div style={styles.mainContent}>
         <div style={styles.columnLeft}>
           <label style={{...styles.label, textAlign: "center"}}>Afbeelding Toevoegen</label>
-          <div 
+          <div
             style={styles.imageUploadBox}
             onClick={handleImageClick}
-            tabIndex={0} 
+            tabIndex={0}
             onKeyDown={handleImageKeyDown}
             onFocus={() => setIsImageFocused(true)}
             onBlur={() => setIsImageFocused(false)}
@@ -429,7 +429,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
             </InteractiveButton>
           </div>
 
-          <label style={{...styles.label, textAlign: "center"}}>Maximum Prijs</label>
+          <label style={{...styles.label, textAlign: "center"}}>Minimum Prijs</label>
           <div style={styles.priceWrapper}>
             <span style={styles.currencySymbol}>€</span>
             <input
@@ -469,7 +469,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
                     <span>{spec}</span>
                 </div>
                 <InteractiveButton
-                  type="button" 
+                  type="button"
                   onClick={() => removeSpecification(index)}
                   baseStyle={styles.removeSpecBtn}
                   title="Verwijder"
@@ -492,16 +492,16 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
                 style={styles.specTextInput}
               />
               <InteractiveButton
-                type="button" 
-                onClick={saveSpecification} 
+                type="button"
+                onClick={saveSpecification}
                 baseStyle={{...styles.specActionBtn, backgroundColor: '#90B498'}}
                 title="Opslaan"
               >
                 ✓
               </InteractiveButton>
               <InteractiveButton
-                type="button" 
-                onClick={cancelSpecification} 
+                type="button"
+                onClick={cancelSpecification}
                 baseStyle={{...styles.specActionBtn, backgroundColor: '#ffb3b3'}}
                 title="Annuleren"
               >

@@ -5,7 +5,7 @@ import React, { CSSProperties, useState, useEffect } from "react";
 // We breiden de interface uit zodat hij OOK de database velden herkent
 export interface ProductCardData {
   // De velden die je component al had
-  title?: string;
+  name?: string;
   description?: string;
   image?: string | File | null;
   specifications?: string[];
@@ -47,7 +47,7 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
   if (!product) {
   return <div>Loading product…</div>;
   }
-  const displayTitle = product.title || product.productNaam || "Product Naam";
+  const displayTitle = product.name || product.productNaam || "Product Naam";
   const displayDesc = product.description || product.productBeschrijving || "Geen beschrijving beschikbaar.";
 
   // Afbeelding
@@ -174,7 +174,7 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
 
   return (
     <div style={styles.card}>
-      {/* GEBRUIK HIER DE display VARIABELEN */}
+    {/* GEBRUIK HIER DE display VARIABELEN */}
       <h2 style={styles.title}>{displayTitle}</h2>
 
       <div style={styles.imagePlaceholder}>
@@ -240,4 +240,5 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
     </div>
   );
 }
+
 
