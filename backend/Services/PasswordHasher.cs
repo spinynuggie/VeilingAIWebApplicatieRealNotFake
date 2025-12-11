@@ -9,7 +9,7 @@ namespace backend.Services
         private const int SaltSize = 16; // 128-bit
         private const int HashSize = 32; // 256-bit
 
-        public string Hash(string password)
+        public virtual string Hash(string password)
         {
             if (string.IsNullOrWhiteSpace(password))
             {
@@ -26,7 +26,7 @@ namespace backend.Services
             return Convert.ToBase64String(combined);
         }
 
-        public bool Verify(string password, string stored)
+        public virtual bool Verify(string password, string stored)
         {
             if (string.IsNullOrWhiteSpace(stored))
             {

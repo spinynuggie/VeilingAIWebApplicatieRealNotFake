@@ -1,11 +1,10 @@
-// backend.Tests/GebruikerControllerTests.cs
-
 using backend.Controllers;
 using backend.Data;
 using backend.Dtos;
 using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
@@ -52,10 +51,14 @@ public sealed class GebruikerControllerTests
         // Setup configuration mock values
         _mockConfiguration.Setup(c => c["Jwt:Issuer"]).Returns("VeilingAI");
         _mockConfiguration.Setup(c => c["Jwt:Audience"]).Returns("VeilingAIUsers");
-        _mockConfiguration.Setup(c => c["Jwt:Key"]).Returns("dev-secret-change-me");
+        _mockConfiguration.Setup(c => c["Jwt:Key"]).Returns("dev-secret-key-change-me-to-be-at-least-256-bits-long-for-hs256");
 
         // 4. Initialiseer de GebruikerController
         _controller = new GebruikerController(_context, _mockPasswordHasher.Object, _mockLogger.Object, _mockConfiguration.Object);
+        
+        // Setup HttpContext for cookie operations
+        var httpContext = new DefaultHttpContext();
+        _controller.ControllerContext.HttpContext = httpContext;
 
         _context.Gebruikers.AddRange(new Gebruiker
         {
@@ -331,7 +334,7 @@ public sealed class GebruikerControllerTests
         // Assert
         Assert.IsInstanceOfType(result, typeof(OkObjectResult));
         
-        var okResult = result.Result as OkObjectResult;
+        var okResult = result as OkObjectResult;
         Assert.IsNotNull(okResult.Value);
     }
 
@@ -349,9 +352,9 @@ public sealed class GebruikerControllerTests
         var result = await _controller.Login(loginRequest);
     
         // Assert
-        Assert.IsInstanceOfType(result.Result, typeof(NotFoundObjectResult));
+        Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
         
-        var notFoundResult = result.Result as NotFoundObjectResult;
+        var notFoundResult = result as NotFoundObjectResult;
         Assert.AreEqual("Gebruiker niet gevonden.", notFoundResult.Value);
     }
 
@@ -372,9 +375,9 @@ public sealed class GebruikerControllerTests
         var result = await _controller.Login(loginRequest);
     
         // Assert
-        Assert.IsInstanceOfType(result.Result, typeof(UnauthorizedObjectResult));
+        Assert.IsInstanceOfType(result, typeof(UnauthorizedObjectResult));
         
-        var unauthorizedResult = result.Result as UnauthorizedObjectResult;
+        var unauthorizedResult = result as UnauthorizedObjectResult;
         Assert.AreEqual("Ongeldig wachtwoord.", unauthorizedResult.Value);
     }
 }
