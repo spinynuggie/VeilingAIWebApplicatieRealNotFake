@@ -7,9 +7,11 @@ import { ProductCardProps } from "./types";
 
 export default function ProductCard({ product, mode, onAction }: ProductCardProps) {
   const [inputValue, setInputValue] = useState<string>("");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setInputValue("");
+    setMounted(true);
+    return () => setInputValue("");
   }, [product]);
 
   const handleActionClick = () => {
@@ -38,7 +40,13 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
   // --- MAPPING LOGICA ---
   const displayTitle = product.name || product.productNaam || "Product Naam";
   const displayDesc = product.description || product.productBeschrijving || "Geen beschrijving beschikbaar.";
-  const displayPrice = product.price || product.huidigeprijs;
+  
+  // Get the price from the most appropriate field - prioritize eindPrijs as minimum price
+  const displayPrice = 
+    product.eindPrijs !== undefined ? product.eindPrijs : 
+    product.startPrijs !== undefined ? product.startPrijs :
+    product.price !== undefined ? product.price :
+    product.huidigeprijs !== undefined ? product.huidigeprijs : 0;
 
   // Handle Image (String URL or File object)
   const rawImage = product.image || product.fotos;
@@ -81,12 +89,39 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
         )}
       </ul>
 
-      {/* PRICE DISPLAY */}
-      <div style={{ marginBottom: "15px" }}>
-        <div style={styles.priceDisplay}>
-          € {displayPrice || "0.00"}
+      {/* PRICE DISPLAY - Only render after mounting to prevent hydration mismatch */}
+      {mounted && (
+        <div style={{ marginBottom: "15px" }}>
+          {mode === 'display' ? (
+            // Show both prices side by side when viewing a product
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+              <div style={styles.priceDisplay}>
+                <div style={{ fontSize: '12px', marginBottom: '5px', color: '#666', textAlign: 'center' }}>startprijs</div>
+                <div>
+                  {product.startPrijs !== undefined && product.startPrijs !== null && product.startPrijs !== 0 ? 
+                    `€${typeof product.startPrijs === 'number' ? product.startPrijs.toFixed(2) : product.startPrijs}` : 
+                    'price not assigned'
+                  }
+                </div>
+              </div>
+              <div style={styles.priceDisplay}>
+                <div style={{ fontSize: '12px', marginBottom: '5px', color: '#666', textAlign: 'center' }}>eindprijs</div>
+                <div>
+                  {product.eindPrijs !== undefined && product.eindPrijs !== null && product.eindPrijs !== 0 ? 
+                    `€${typeof product.eindPrijs === 'number' ? product.eindPrijs.toFixed(2) : product.eindPrijs}` : 
+                    'price not assigned'
+                  }
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Show minimum price for create and auction modes
+            <div style={styles.priceDisplay}>
+              Min prijs: € {typeof displayPrice === 'number' ? displayPrice.toFixed(2) : displayPrice || "0.00"}
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       <div style={styles.buttonGroup}>
         {mode === 'display' ? (
@@ -95,13 +130,13 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
           <>
             <input
               style={styles.inputBox}
-              placeholder="Bod"
+              placeholder="Startprijs"
               type="number"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
             />
             <button style={styles.btnDark} onClick={handleActionClick}>
-              Bieden
+              Toevoegen
             </button>
           </>
         ): (

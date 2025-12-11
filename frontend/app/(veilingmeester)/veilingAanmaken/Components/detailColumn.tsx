@@ -19,11 +19,13 @@ export default function DetailColumn({ product, onAdd }: DetailColumnProps) {
           mode="auction"
           onAction={onAdd}
           product={{
-            title: product.productNaam,
+            name: product.productNaam,
             description: product.productBeschrijving,
             image: product.fotos,
             specifications: product.specificaties || [], // Fallback als array leeg is
-            price: 0 // Prijs is niet relevant voor weergave in auction mode (wordt input)
+            price: 0, // Prijs is niet relevant voor weergave in auction mode (wordt input)
+            startPrijs: product.startPrijs,
+            eindPrijs: product.eindPrijs
           }}
         />
       ) : (

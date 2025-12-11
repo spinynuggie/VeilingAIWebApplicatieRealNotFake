@@ -12,6 +12,8 @@ export interface ProductCardData {
   productNaam?: string;
   productBeschrijving?: string;
   huidigeprijs?: number;
+  eindPrijs?: number;
+  startPrijs?: number;
   fotos?: string;
 }
 

@@ -4,6 +4,9 @@
 import React, { useState, ChangeEvent, FormEvent, KeyboardEvent } from "react";
 import { InteractiveButton } from "./interactiveButton";
 import { styles } from "./styles";
+import { useAuth } from "@/components/AuthProvider";
+import { createProduct } from "@/services/productService";
+import { Alert, Snackbar, CircularProgress } from "@mui/material";
 
 // --- TYPES ---
 export interface ProductData {
@@ -23,6 +26,10 @@ interface ProductFormProps {
 export default function ProductForm({ formData, setFormData }: ProductFormProps) {
   const [isAddingSpec, setIsAddingSpec] = useState(false);
   const [newSpecValue, setNewSpecValue] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const { user } = useAuth();
 
   // --- HANDLERS ---
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -90,15 +97,116 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
     }));
   };
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    console.log("Product opgeslagen:", formData);
-    // Here you would add your API call
+  const validateForm = (): boolean => {
+    if (!formData.name.trim()) {
+      setError("Naam is verplicht");
+      return false;
+    }
+    
+    if (!formData.quantity) {
+      setError("Aantal is verplicht");
+      return false;
+    } else if (Number(formData.quantity) <= 0) {
+      setError("Aantal moet groter zijn dan 0");
+      return false;
+    }
+    
+    if (!formData.price) {
+      setError("Prijs is verplicht");
+      return false;
+    } else if (isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
+      setError("Voer een geldig bedrag in");
+      return false;
+    }
+    
+    if (!formData.image) {
+      setError("Afbeelding URL is verplicht");
+      return false;
+    } else if (!isValidUrl(formData.image)) {
+      setError("Voer een geldige URL in");
+      return false;
+    }
+    
+    return true;
   };
+
+  const isValidUrl = (url: string): boolean => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+    
+    if (!validateForm()) return;
+    
+    if (!user) {
+      setError("Je moet ingelogd zijn om een product aan te maken");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      
+      const productData = {
+        productNaam: formData.name,
+        productBeschrijving: formData.description || "Geen beschrijving",
+        fotos: formData.image,
+        hoeveelheid: Number(formData.quantity),
+        startPrijs: 0, // Keep startPrijs as 0
+        eindPrijs: parseFloat(formData.price), // Store the price in eindPrijs
+        verkoperId: user.gebruikerId,
+      };
+
+      await createProduct(productData);
+      setSuccess("Product succesvol aangemaakt!");
+      
+      // Clear the form
+      setFormData({
+        name: "",
+        description: "",
+        quantity: "",
+        price: "",
+        specifications: [],
+        image: "",
+      });
+      
+    } catch (err: any) {
+      console.error("Error creating product:", err);
+      setError(err.message || "Er is een fout opgetreden bij het aanmaken van het product");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const showAlert = (message: string, severity: "error" | "success") => (
+    <Snackbar
+      open={true}
+      autoHideDuration={6000}
+      onClose={() => severity === "error" ? setError(null) : setSuccess(null)}
+      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+    >
+      <Alert 
+        onClose={() => severity === "error" ? setError(null) : setSuccess(null)} 
+        severity={severity} 
+        sx={{ width: '100%' }}
+      >
+        {message}
+      </Alert>
+    </Snackbar>
+  );
 
   // --- RENDER ---
   return (
     <form style={styles.card} onSubmit={handleSubmit}>
+      {error && showAlert(error, "error")}
+      {success && showAlert(success, "success")}
       <input
         type="text"
         name="name"
@@ -112,7 +220,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
         {/* LEFT COLUMN */}
         <div style={styles.columnLeft}>
 
-          <label style={styles.label}>Afbeelding URL</label>
+          <label style={styles.label}>Afbeelding URL*</label>
           <input
             type="text"
             name="image"
@@ -135,7 +243,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
             )}
           </div>
 
-          <label style={styles.label}>Aantal Product</label>
+          <label style={styles.label}>Aantal Product*</label>
           <div style={styles.quantityWrapper}>
             <InteractiveButton type="button" onClick={() => handleQuantityButton(-1)} baseStyle={styles.btnSmall}>-</InteractiveButton>
             <input
@@ -148,7 +256,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
             <InteractiveButton type="button" onClick={() => handleQuantityButton(1)} baseStyle={styles.btnSmall}>+</InteractiveButton>
           </div>
 
-          <label style={styles.label}>Maximum Prijs</label>
+          <label style={styles.label}>Minimum Prijs*</label>
           <div style={styles.priceWrapper}>
             <span style={styles.currencySymbol}>€</span>
             <input
@@ -196,7 +304,17 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
           )}
 
           <div style={{ marginTop: "auto", display: "flex", justifyContent: "center", paddingTop: "30px" }}>
-            <InteractiveButton type="submit" baseStyle={styles.submitBtn}>Product Aanmaken</InteractiveButton>
+            <InteractiveButton 
+            type="submit" 
+            baseStyle={styles.submitBtn}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Product Aanmaken'
+            )}
+          </InteractiveButton>
           </div>
         </div>
       </div>

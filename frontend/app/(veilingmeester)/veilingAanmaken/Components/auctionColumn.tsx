@@ -39,8 +39,13 @@ export default function AuctionColumn({ products, onSearch, onRemove }: AuctionC
 
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 'bold' }}>{prod.productNaam}</div>
-              <div style={{ fontSize: '13px' }}>
-                Startprijs: €{prod.startPrijs}
+              <div style={{ fontSize: '13px', display: 'flex', justifyContent: 'space-between', gap: '10px', marginTop: '5px' }}>
+                <div>
+                  Startprijs: {prod.startPrijs !== 0 ? `€${prod.startPrijs.toFixed(2)}` : 'price not assigned'}
+                </div>
+                <div>
+                  Eindprijs: {prod.eindPrijs !== 0 ? `€${prod.eindPrijs.toFixed(2)}` : 'price not assigned'}
+                </div>
               </div>
             </div>
           </div>
