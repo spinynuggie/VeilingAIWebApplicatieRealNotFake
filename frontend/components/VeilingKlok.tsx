@@ -114,7 +114,7 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
 
   return (
     <Box sx={{
-      backgroundColor: '#ffffff',
+      backgroundColor: '#f0ffe8',
       borderRadius: '20px',
       padding: '32px',
       boxShadow: '0 6px 25px rgba(0, 0, 0, 0.1)',
@@ -156,7 +156,23 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
         onFocus={handleFocus}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        sx={{ width: '180px' }} 
+        sx={{ width: '180px', '& .MuiOutlinedInput-root': {
+      '& fieldset': {
+        borderColor: '#4a7c4a',
+      },
+      '&:hover fieldset': {
+        borderColor: '#3d6b3d',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: '#4a7c4a',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      color: '#4a7c4a',
+      '&.Mui-focused': {
+        color: '#4a7c4a',
+      }
+    } }} 
         disabled={auctionEnded}
       />
 
@@ -165,7 +181,7 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
         size="large"
         onClick={handleBid}
         disabled={!isActive || auctionEnded || parseInt(quantity || '0', 10) <= 0}
-        sx={{ width: '180px', height: '44px', fontWeight: 600 }}
+        sx={{ width: '180px', height: '44px', fontWeight: 600, backgroundColor: '#4a7c4a'}}
       >
         {auctionEnded ? 'Veiling gesloten' : `Bied € ${currentPrice.toFixed(2)}`}
       </Button>
@@ -176,11 +192,11 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
           p: 2, 
           backgroundColor: '#f0f9ff', 
           borderRadius: '8px',
-          border: '2px solid #0ea5e9',
+          border: '2px solid #4a7c4a',
           width: '100%',
           textAlign: 'center'
         }}>
-          <span style={{ color: '#0ea5e9', fontWeight: 700, fontSize: '18px' }}>
+          <span style={{ color: '#4a7c4a', fontWeight: 700, fontSize: '18px' }}>
             {bidMessage}
           </span>
         </Box>

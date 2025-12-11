@@ -3,7 +3,7 @@ import { CSSProperties } from "react";
 
 export const styles: { [key: string]: CSSProperties } = {
   card: {
-    backgroundColor: "#D1FADF",
+    backgroundColor: "#f0ffe8",
     borderRadius: "12px",
     padding: "20px", // Reduced padding
     width: "320px", // Slightly more compact width
