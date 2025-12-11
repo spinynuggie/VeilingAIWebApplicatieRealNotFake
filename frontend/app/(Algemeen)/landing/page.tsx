@@ -1,99 +1,39 @@
 "use client";
+
 import Image from "next/image";
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
-import AppNavbar from "@/components/AppNavbar";
+import dynamic from "next/dynamic";
+import styles from "./landing.module.css";
+
+// Dynamically import AppNavbar with SSR disabled
+const AppNavbar = dynamic(
+  () => import("@/components/AppNavbar"),
+  { ssr: false, loading: () => <div style={{ height: '64px' }} /> }
+);
 
 export default function Landing() {
   return (
-    <div className="landing-container">
+    <div className={styles.landingContainer}>
       <AppNavbar />
 
-      <main className="hero-section">
-        <div className="logo">
-          <Image src={royalLogo} alt="Royal FloraHolland Logo" priority className="logo-img" />
+      <main className={styles.heroSection}>
+        <div className={styles.logo}>
+          <Image 
+            src={royalLogo} 
+            alt="Royal FloraHolland Logo" 
+            priority 
+            className={styles.logoImg} 
+          />
         </div>
 
-        <h1 className="hero-title">
+        <h1 className={styles.heroTitle}>
           De grootste<br />
           internationale<br />
           sierteeltmarktplaats
         </h1>
 
-        <button className="cta-button">Meer informatie</button>
+        <button className={styles.ctaButton}>Meer informatie</button>
       </main>
-
-      <style jsx>{`
-        .landing-container {
-          min-height: 100vh;
-          width: 100%;
-          max-width: none;
-          display: flex;
-          flex-direction: column;
-          background: linear-gradient(to bottom, #d4f1d4, #e8f5e8);
-          font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-          color: #2d5f3f;
-          overflow-x: hidden;
-        }
-
-        .hero-section {
-          flex: 1;
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          text-align: center;
-          padding: 4rem 2rem;
-        }
-
-        .logo {
-          margin-bottom: 4rem;
-        }
-
-        .logo-img :global(img) {
-          height: auto;
-          width: auto;
-        }
-
-        .hero-title {
-          font-size: 4.5rem;
-          font-weight: 700;
-          color: #000;
-          line-height: 1.2;
-          margin-bottom: 3rem;
-          max-width: 1000px;
-        }
-
-        .cta-button {
-          background-color: #2d5f3f;
-          color: #fff;
-          padding: 1rem 3rem;
-          font-size: 1.1rem;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 500;
-          transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .cta-button:hover {
-          background-color: #21492f;
-        }
-
-        @media (max-width: 768px) {
-          .hero-title {
-            font-size: 2.5rem;
-          }
-
-          .navbar-right {
-            gap: 1rem;
-          }
-
-          .logo-img :global(img) {
-            height: 60px;
-          }
-        }
-      `}</style>
     </div>
   );
 }

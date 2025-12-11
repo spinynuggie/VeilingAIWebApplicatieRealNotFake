@@ -1,7 +1,7 @@
 "use client";
 
 import AppNavbar from "@/components/AppNavbar"; // Assuming you want the navbar here too
-import { useVeilingAanmaken } from "@/hooks/useVeilingAanmaken";
+import { useVeilingAanmaken } from "./hooks/useVeilingAanmaken";
 import styles from "./veilingAanmaken.module.css";
 import { AvailableColumn } from "./Components/availableColumn";
 import DetailColumn from "./Components/detailColumn";

@@ -1,13 +1,24 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Navbar from "./NavBar";
 import { useAuth } from "./AuthProvider";
 
 export default function AppNavbar() {
+  const [isClient, setIsClient] = useState(false);
   const { user, logout } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Prevent rendering on server to avoid hydration mismatch
+  if (!isClient) {
+    return <div style={{ height: '64px', width: '100%' }} />; // Match your navbar height
+  }
 
   const isLoggedIn = !!user;
   const isSellerOrAdmin = user && (user.role === "VERKOPER" || user.role === "ADMIN");

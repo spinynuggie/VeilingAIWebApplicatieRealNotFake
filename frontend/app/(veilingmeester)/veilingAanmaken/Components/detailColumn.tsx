@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import ProductCard from "@/components/ProductCard/ProductCard";
+import ProductCard from "@/components/ProductCard/index";
 import { Product } from "@/types/product";
 // We importeren de CSS module uit de bovenliggende map
 import styles from "../veilingAanmaken.module.css";

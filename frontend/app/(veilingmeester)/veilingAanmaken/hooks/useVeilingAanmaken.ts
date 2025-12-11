@@ -1,10 +1,11 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { Product } from "@/types/product";
 import { getProducts, updateProductAuctionData } from "@/services/productService";
 import { usePathname } from "next/navigation";
 
 export function useVeilingAanmaken() {
-
   const pathname = usePathname();
   const id = parseInt(pathname.split('/').pop() || '0');
   const CURRENT_VEILING_ID = id;
@@ -15,7 +16,6 @@ export function useVeilingAanmaken() {
 
   // --- RECHTER KOLOM STATES ---
   const [auctionProducts, setAuctionProducts] = useState<Product[]>([]);
-  // NIEUW: Aparte filter state voor rechts
   const [filteredAuction, setFilteredAuction] = useState<Product[]>([]);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -33,7 +33,7 @@ export function useVeilingAanmaken() {
         setFilteredAvailable(leftList);
 
         setAuctionProducts(rightList);
-        setFilteredAuction(rightList); // Initialiseer filter ook
+        setFilteredAuction(rightList);
       } catch (error) {
         console.error(error);
       } finally {
@@ -51,7 +51,7 @@ export function useVeilingAanmaken() {
     ));
   };
 
-  // 2b. ZOEKEN RECHTS (NIEUW)
+  // 2b. ZOEKEN RECHTS
   const handleSearchAuction = (term: string) => {
     const lowerTerm = term.toLowerCase();
     setFilteredAuction(auctionProducts.filter((p) =>
@@ -75,12 +75,12 @@ export function useVeilingAanmaken() {
         // Update Links
         const newAvailable = availableProducts.filter(p => p.productId !== selectedProduct.productId);
         setAvailableProducts(newAvailable);
-        setFilteredAvailable(newAvailable); // Update ook filter direct
+        setFilteredAvailable(newAvailable);
 
         // Update Rechts
         const newAuctionList = [...auctionProducts, updatedProduct];
         setAuctionProducts(newAuctionList);
-        setFilteredAuction(newAuctionList); // Update ook filter direct
+        setFilteredAuction(newAuctionList);
 
         setSelectedProduct(null);
     } catch (e) {
@@ -103,12 +103,12 @@ export function useVeilingAanmaken() {
         // Update Rechts
         const newAuctionList = auctionProducts.filter(p => p.productId !== productToRemove.productId);
         setAuctionProducts(newAuctionList);
-        setFilteredAuction(newAuctionList); // Update filter
+        setFilteredAuction(newAuctionList);
 
         // Update Links
         const newAvailable = [...availableProducts, resetProduct];
         setAvailableProducts(newAvailable);
-        setFilteredAvailable(newAvailable); // Update filter
+        setFilteredAvailable(newAvailable);
 
     } catch (e) {
         console.error(e);
