@@ -1,10 +1,13 @@
 using System.Text;
+using System.Linq;
 using backend.Data;
 using backend.Services;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using backend.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +38,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<PasswordHasher>();
+builder.Services.AddSingleton<AuctionRealtimeService>();
+builder.Services.AddSignalR();
+builder.Services.AddResponseCompression(options =>
+{
+    // Enable compression for SignalR JSON payloads to shave latency/bandwidth.
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+});
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -75,6 +85,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseResponseCompression();
 app.UseRouting();
 app.UseCors("AllowFrontend");
 
@@ -103,6 +114,7 @@ app.Use(async (context, next) =>
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<AuctionHub>("/hubs/auction");
 
 // Admin user!!
 using (var scope = app.Services.CreateScope())

@@ -37,7 +37,7 @@ export default function AppNavbar() {
             <Link href="/dashboard" className="navbar-left-link">
               Dashboard
             </Link>
-            <Link href="/profiel" className="navbar-left-link">
+            <Link href="/klantProfile" className="navbar-left-link">
               Profiel
             </Link>
           </>
