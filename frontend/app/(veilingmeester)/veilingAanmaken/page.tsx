@@ -6,6 +6,9 @@ import styles from "./veilingAanmaken.module.css";
 import { AvailableColumn } from "./Components/availableColumn";
 import DetailColumn from "./Components/detailColumn";
 import AuctionColumn from "./Components/auctionColumn";
+import RequireAuth from "@/components/RequireAuth";
+
+
 
 const VeilingAanmakenPage = () => {
   const {
@@ -20,6 +23,7 @@ const VeilingAanmakenPage = () => {
     handleSearchAuction,
   } = useVeilingAanmaken();
   return (
+    <RequireAuth roles={["ADMIN", "VEILINGMEESTER"]}>
     <main className={styles.pageContainer}>
       <AppNavbar />
 
@@ -49,6 +53,7 @@ const VeilingAanmakenPage = () => {
 
       </div>
     </main>
+    </RequireAuth>
   );
 };
 

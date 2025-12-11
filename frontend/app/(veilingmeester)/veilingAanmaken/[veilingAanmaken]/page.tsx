@@ -7,6 +7,7 @@ import { AvailableColumn } from "../Components/availableColumn";
 import DetailColumn from "../Components/detailColumn";
 import AuctionColumn from "../Components/auctionColumn";
 import { Alert, Snackbar } from "@mui/material";
+import RequireAuth from "@/components/RequireAuth";
 
 const VeilingAanmakenPage = () => {
   const {
@@ -24,6 +25,7 @@ const VeilingAanmakenPage = () => {
   } = useVeilingAanmaken();
 
   return (
+    <RequireAuth roles={["ADMIN", "VERKOPER"]}>
     <main className={styles.pageContainer}>
       {error && (
         <Snackbar
@@ -69,6 +71,7 @@ const VeilingAanmakenPage = () => {
 
       </div>
     </main>
+    </RequireAuth>
   );
 };
 

@@ -5,13 +5,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getVeilingen } from "@/services/veilingService";
 import type { Veiling } from "@/types/veiling";
-
 import VeilingDisplay from "../../../components/VeilingDisplay";
 import Navbar from "@/components/NavBar";
 import SearchBar from "@/components/SearchBar"
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
-
 import Profile from "@/components/Profile";
+
 
 export default function Landing() {
   const router = useRouter();
@@ -25,7 +24,7 @@ export default function Landing() {
   }, []);
 
   return (
-    //<RequireAuth roles={["ADMIN", "VERKOPER"]}>
+    <RequireAuth roles={["ADMIN", "VERKOPER"]}>
       <div style={{ backgroundColor: "white" }}>
               <Navbar
                 style={{ backgroundColor: "#C8FFD6"}}
@@ -77,6 +76,6 @@ export default function Landing() {
                 <VeilingDisplay veilingen={veilingen} mode = "veilingAanmaken" />
               </div>
             </div>
-    //</RequireAuth>
+    </RequireAuth>
   );
 }

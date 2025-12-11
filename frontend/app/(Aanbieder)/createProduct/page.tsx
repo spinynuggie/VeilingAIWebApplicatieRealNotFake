@@ -4,6 +4,7 @@ import { useState } from "react";
 import AppNavbar from "@/components/AppNavbar";
 import ProductForm, { ProductData } from "@/app/(Aanbieder)/createProduct/ProductForm/index";
 import ProductCard from "@/components/ProductCard/index";
+import RequireAuth from "@/components/RequireAuth";
 
 export default function Page() {
   // HIER IS DE SINGLE SOURCE OF TRUTH
@@ -17,6 +18,7 @@ export default function Page() {
   });
 
   return (
+<RequireAuth roles={["ADMIN", "VERKOPER"]}>
     <main style={{ minHeight: "100vh", backgroundColor: "#ffffff" }}>
       <AppNavbar />
 
@@ -45,5 +47,6 @@ export default function Page() {
         </div>
       </div>
     </main>
+    </RequireAuth>
   );
 }
