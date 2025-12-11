@@ -28,7 +28,7 @@ namespace backend.Models
         public string? Postcode { get; set; }
 
         public string? Woonplaats { get; set; }
-        [Column("role")]
+        [Column("Role")]
         public string? Role { get; set; }
     }
 }
