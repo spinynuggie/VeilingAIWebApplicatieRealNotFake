@@ -16,7 +16,7 @@ var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "VeilingAI";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "VeilingAIUsers";
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
 
-// --- Add CORS ---
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -28,7 +28,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// --- Add controllers, DB context, etc. ---
+// add controllers, dbcontext, swagger, authentication, authorization, password hasher
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -72,15 +72,13 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// --- Use middleware ---
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// ✅ Enable CORS before authorization and mapping controllers
 app.UseRouting();
 app.UseCors("AllowFrontend");
 
-// Simple double-submit CSRF check for state-changing requests
+// double-submit CSRF check for state-changing requests
 app.Use(async (context, next) =>
 {
     if (HttpMethods.IsPost(context.Request.Method) ||
@@ -106,7 +104,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// Seed an admin user for demo purposes
+// Admin user!!
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
