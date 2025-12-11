@@ -7,13 +7,13 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace backend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class LowerUpperCase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Aankoop",
+                name: "aankoop",
                 columns: table => new
                 {
                     AankoopId = table.Column<int>(type: "integer", nullable: false)
@@ -26,7 +26,7 @@ namespace backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Aankoop", x => x.AankoopId);
+                    table.PrimaryKey("PK_aankoop", x => x.AankoopId);
                 });
 
             migrationBuilder.CreateTable(
@@ -42,7 +42,7 @@ namespace backend.Migrations
                     Huisnummer = table.Column<string>(type: "text", nullable: true),
                     Postcode = table.Column<string>(type: "text", nullable: true),
                     Woonplaats = table.Column<string>(type: "text", nullable: true),
-                    role = table.Column<string>(type: "text", nullable: true)
+                    Role = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -89,19 +89,6 @@ namespace backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TestModels",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    TestName = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TestModels", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "veiling",
                 columns: table => new
                 {
@@ -141,7 +128,8 @@ namespace backend.Migrations
                     KvkNummer = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Bedrijfsgegevens = table.Column<string>(type: "text", nullable: false),
                     Adresgegevens = table.Column<string>(type: "text", nullable: false),
-                    FinancieleGegevens = table.Column<string>(type: "text", nullable: false)
+                    FinancieleGegevens = table.Column<string>(type: "text", nullable: false),
+                    GebruikerId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -153,7 +141,7 @@ namespace backend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Aankoop");
+                name: "aankoop");
 
             migrationBuilder.DropTable(
                 name: "gebruiker");
@@ -163,9 +151,6 @@ namespace backend.Migrations
 
             migrationBuilder.DropTable(
                 name: "refresh_tokens");
-
-            migrationBuilder.DropTable(
-                name: "TestModels");
 
             migrationBuilder.DropTable(
                 name: "veiling");

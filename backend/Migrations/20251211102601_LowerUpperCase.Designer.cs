@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251208165919_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251211102601_LowerUpperCase")]
+    partial class LowerUpperCase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,7 +50,7 @@ namespace backend.Migrations
 
                     b.HasKey("AankoopId");
 
-                    b.ToTable("Aankoop");
+                    b.ToTable("aankoop");
                 });
 
             modelBuilder.Entity("backend.Models.Gebruiker", b =>
@@ -77,8 +77,7 @@ namespace backend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Role")
-                        .HasColumnType("text")
-                        .HasColumnName("role");
+                        .HasColumnType("text");
 
                     b.Property<string>("Straat")
                         .HasColumnType("text");
@@ -172,23 +171,6 @@ namespace backend.Migrations
                     b.ToTable("refresh_tokens");
                 });
 
-            modelBuilder.Entity("backend.Models.TestModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("TestName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TestModels");
-                });
-
             modelBuilder.Entity("backend.Models.Veiling", b =>
                 {
                     b.Property<int>("VeilingId")
@@ -258,6 +240,9 @@ namespace backend.Migrations
                     b.Property<string>("FinancieleGegevens")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int?>("GebruikerId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("KvkNummer")
                         .IsRequired()

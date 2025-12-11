@@ -11,5 +11,5 @@ namespace backend.Dtos
         public string? Postcode { get; set; }
         public string? Woonplaats { get; set; }
         public string? Role { get; set; }
-    }
+       }
 }

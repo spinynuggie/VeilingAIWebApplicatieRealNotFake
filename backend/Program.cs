@@ -1,10 +1,13 @@
 using System.Text;
+using System.Linq;
 using backend.Data;
 using backend.Services;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using backend.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +19,7 @@ var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "VeilingAI";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "VeilingAIUsers";
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
 
-// --- Add CORS ---
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -28,13 +31,20 @@ builder.Services.AddCors(options =>
     });
 });
 
-// --- Add controllers, DB context, etc. ---
+// add controllers, dbcontext, swagger, authentication, authorization, password hasher
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<PasswordHasher>();
+builder.Services.AddSingleton<AuctionRealtimeService>();
+builder.Services.AddSignalR();
+builder.Services.AddResponseCompression(options =>
+{
+    // Enable compression for SignalR JSON payloads to shave latency/bandwidth.
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+});
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -72,15 +82,14 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// --- Use middleware ---
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// ✅ Enable CORS before authorization and mapping controllers
+app.UseResponseCompression();
 app.UseRouting();
 app.UseCors("AllowFrontend");
 
-// Simple double-submit CSRF check for state-changing requests
+// double-submit CSRF check for state-changing requests
 app.Use(async (context, next) =>
 {
     if (HttpMethods.IsPost(context.Request.Method) ||
@@ -105,8 +114,9 @@ app.Use(async (context, next) =>
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<AuctionHub>("/hubs/auction");
 
-// Seed an admin user for demo purposes
+// Admin user!!
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

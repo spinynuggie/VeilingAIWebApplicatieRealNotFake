@@ -47,7 +47,7 @@ namespace backend.Migrations
 
                     b.HasKey("AankoopId");
 
-                    b.ToTable("Aankoop");
+                    b.ToTable("aankoop");
                 });
 
             modelBuilder.Entity("backend.Models.Gebruiker", b =>
@@ -74,8 +74,7 @@ namespace backend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Role")
-                        .HasColumnType("text")
-                        .HasColumnName("role");
+                        .HasColumnType("text");
 
                     b.Property<string>("Straat")
                         .HasColumnType("text");
@@ -167,23 +166,6 @@ namespace backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("refresh_tokens");
-                });
-
-            modelBuilder.Entity("backend.Models.TestModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("TestName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TestModels");
                 });
 
             modelBuilder.Entity("backend.Models.Veiling", b =>
