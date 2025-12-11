@@ -17,6 +17,9 @@ export function useVeilingAanmaken() {
   // --- RECHTER KOLOM STATES ---
   const [auctionProducts, setAuctionProducts] = useState<Product[]>([]);
   const [filteredAuction, setFilteredAuction] = useState<Product[]>([]);
+  
+  // --- ERROR STATE ---
+  const [error, setError] = useState<string | null>(null);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,12 +65,20 @@ export function useVeilingAanmaken() {
   // 3. TOEVOEGEN (Links -> Rechts)
   const handleAddToAuction = async (maxPrice: number) => {
     if (!selectedProduct) return;
+    
+    // Validation: startprijs must be at least 1.00 higher than eindprijs
+    const eindPrijs = selectedProduct.eindPrijs || 0;
+    if (maxPrice < eindPrijs + 1.00) {
+      setError('Startprijs moet minimaal 1.00 hoger zijn dan eind prijs');
+      return;
+    }
+    
     try {
         await updateProductAuctionData({
             productId: selectedProduct.productId,
             veilingId: CURRENT_VEILING_ID,
             startPrijs: maxPrice,
-            eindPrijs: 0
+            eindPrijs: selectedProduct.eindPrijs // Preserve the existing eindPrijs
         });
 
         const updatedProduct = { ...selectedProduct, veilingId: CURRENT_VEILING_ID, startPrijs: maxPrice };
@@ -121,6 +132,8 @@ export function useVeilingAanmaken() {
     filteredAuction,
     selectedProduct,
     setSelectedProduct,
+    error,
+    setError,
     handleSearchAvailable,
     handleSearchAuction,
     handleAddToAuction,

@@ -6,6 +6,7 @@ import styles from "../veilingAanmaken.module.css";
 import { AvailableColumn } from "../Components/availableColumn";
 import DetailColumn from "../Components/detailColumn";
 import AuctionColumn from "../Components/auctionColumn";
+import { Alert, Snackbar } from "@mui/material";
 
 const VeilingAanmakenPage = () => {
   const {
@@ -14,6 +15,8 @@ const VeilingAanmakenPage = () => {
     filteredAuction,
     selectedProduct,
     setSelectedProduct,
+    error,
+    setError,
     handleAddToAuction,
     handleRemoveFromAuction,
     handleSearchAvailable,
@@ -22,6 +25,22 @@ const VeilingAanmakenPage = () => {
 
   return (
     <main className={styles.pageContainer}>
+      {error && (
+        <Snackbar
+          open={true}
+          autoHideDuration={6000}
+          onClose={() => setError(null)}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert 
+            onClose={() => setError(null)} 
+            severity="error" 
+            sx={{ width: '100%' }}
+          >
+            {error}
+          </Alert>
+        </Snackbar>
+      )}
       <AppNavbar />
 
       <div className={styles.mainWrapper}>
