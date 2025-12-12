@@ -1,5 +1,5 @@
 {
-  description = "Veilingproject – Next.js (React + TS) + .NET 9 + PostgreSQL";
+  description = "Veilingproject – Next.js + .NET 9 + PostgreSQL";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -20,37 +20,37 @@
       {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-            # ── Frontend: React + Next.js + TypeScript ─────────────────────
-            nodejs_22 # Latest stable (npm included)
-            nodePackages.npm # Explicit npm (just in case)
-            nodePackages.typescript
-            nodePackages.typescript-language-server # TS/JS LSP
+            # Frontend
+            nodejs_22
+            nodePackages.typescript-language-server
             nodePackages.prettier
-            nodePackages.vscode-langservers-extracted # HTML/CSS/JSON/ESLint
+            nodePackages.vscode-langservers-extracted
 
-            # ── Backend: .NET 9 ─────────────────────────────────────────────
-            dotnet-sdk_9 # .NET 9.0 SDK (latest)
-            omnisharp-roslyn # C# LSP for Neovim
-            netcoredbg # .NET debugger (optional)
+            # Backend
+            dotnet-sdk_9
+            dotnet-ef
+            omnisharp-roslyn
+            netcoredbg
 
-            # ── Database & Infrastructure ───────────────────────────────────
+            # Docker + PostgreSQL
+            docker
             docker-compose
-            postgresql # gives you `psql`
+            postgresql
 
-            # ── General tools ───────────────────────────────────────────────
+            # General
             git
-            curl
             jq
           ];
 
+          # This is the magic line
           shellHook = ''
+            export PATH="$PATH:./frontend/node_modules/.bin"
+            export PATH="$PATH:./backend/node_modules/.bin"  # if you ever have CLI tools there
+
             echo ""
-            echo "Veilingproject Dev Environment"
-            echo "Frontend → npm run dev          (in frontend/)"
-            echo "Backend  → dotnet watch run     (in backend/)"
-            echo "DB       → docker-compose up -d"
-            echo ""
-            echo "Node $(node --version)  •  npm $(npm --version)  •  .NET $(dotnet --version)"
+            echo "Veilingproject ready!"
+            echo "Frontend: cd frontend && npm install && npm run dev"
+            echo "Backend:  cd backend && dotnet watch"
             echo ""
           '';
         };
