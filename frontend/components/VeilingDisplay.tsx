@@ -17,7 +17,7 @@ export default function VeilingDisplay({
   const router = useRouter();
 
   if (!veilingen || veilingen.length === 0) {
-    return <p>Geen veilingen beschikbaar</p>;
+      return <p>Geen veilingen gevonden</p>;
   }
 
   const handleVeilingClick = (veiling: Veiling) => {

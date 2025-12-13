@@ -1,0 +1,14 @@
+# The Project Killers (MUST IGNORE)
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build folders
+dist/
+build/
+.next/
+out/
+
+# Version control
+.git/
