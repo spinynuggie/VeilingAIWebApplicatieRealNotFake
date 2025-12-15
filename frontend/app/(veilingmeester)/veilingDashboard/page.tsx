@@ -42,11 +42,14 @@ export default function Landing() {
                 }
               />
                <button
-                      onClick={() => {
+                      onClick={async () => {
                         try {
-                          router.push("/veilingAanmaken");
+                          const veilingen = await getVeilingen();
+                          const existingIds = veilingen.map((v: Veiling) => Number(v.veilingId));
+                          const nextId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+                          router.push(`/veilingAanmaken/${nextId}`);
                         } catch (e) {
-                          console.log("Navigate to create page", e);
+                          console.error("Navigate to create page", e);
                         }
                       }}
                       style={{
