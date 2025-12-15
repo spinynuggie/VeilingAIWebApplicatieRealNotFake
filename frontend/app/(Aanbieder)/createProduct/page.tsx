@@ -13,40 +13,39 @@ export default function Page() {
     description: "",
     quantity: "",
     price: "",
-    specifications: [],
+    specifications: [],    // For ProductCard (Strings)
+    specificationIds: [],  // For Backend (Numbers)
     image: "",
   });
 
   return (
-<RequireAuth roles={["ADMIN", "VERKOPER"]}>
-    <main style={{ minHeight: "100vh", backgroundColor: "#ffffff" }}>
-      <AppNavbar />
+    <RequireAuth roles={["ADMIN", "VERKOPER"]}>
+      <main style={{ minHeight: "100vh", backgroundColor: "#ffffff" }}>
+        <AppNavbar />
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "flex-start",
-          gap: "60px",
-          padding: "60px 40px",
-          maxWidth: "1400px",
-          margin: "0 auto",
-          flexWrap: "wrap",
-        }}
-      >
-        {/* LINKER KANT: Het Formulier */}
-        <div style={{ flex: "1", minWidth: "500px" }}>
-          {/* We geven de data en de update-functie door */}
-          <ProductForm formData={formData} setFormData={setFormData} />
-        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            gap: "60px",
+            padding: "60px 40px",
+            maxWidth: "1400px",
+            margin: "0 auto",
+            flexWrap: "wrap",
+          }}
+        >
+          {/* LINKER KANT: Het Formulier */}
+          <div style={{ flex: "1", minWidth: "500px" }}>
+            <ProductForm formData={formData} setFormData={setFormData} />
+          </div>
 
-        {/* RECHTER KANT: De Kaart */}
-        <div style={{ flex: "0 0 auto" }}>
-          {/* We geven de data door om te lezen */}
-          <ProductCard mode="create" product={formData} />
+          {/* RECHTER KANT: De Kaart */}
+          <div style={{ flex: "0 0 auto" }}>
+            <ProductCard mode="create" product={formData} />
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
     </RequireAuth>
   );
 }

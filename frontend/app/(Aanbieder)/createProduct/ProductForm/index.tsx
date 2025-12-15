@@ -1,12 +1,10 @@
-// src/components/ProductForm/index.tsx
-"use client";
-
 import React, { useState, ChangeEvent, FormEvent, KeyboardEvent } from "react";
 import { InteractiveButton } from "./interactiveButton";
 import { styles } from "./styles";
 import { useAuth } from "@/components/AuthProvider";
 import { createProduct } from "@/services/productService";
 import { Alert, Snackbar, CircularProgress } from "@mui/material";
+import SpecificatiesMenu from "./specificatiesMenu";
 
 // --- TYPES ---
 export interface ProductData {
@@ -14,8 +12,9 @@ export interface ProductData {
   description: string;
   quantity: number | "";
   price: string;
-  specifications: string[];
-  image: string; // Keeping it as String URL
+  specifications: string[]; // For visual preview (ProductCard)
+  specificationIds: number[]; // For Backend Logic
+  image: string; 
 }
 
 interface ProductFormProps {
@@ -24,8 +23,6 @@ interface ProductFormProps {
 }
 
 export default function ProductForm({ formData, setFormData }: ProductFormProps) {
-  const [isAddingSpec, setIsAddingSpec] = useState(false);
-  const [newSpecValue, setNewSpecValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -72,71 +69,23 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
     if (["e", "E", "+", "-"].includes(e.key)) e.preventDefault();
   };
 
-  const saveSpecification = () => {
-    if (newSpecValue.trim() !== "") {
-      setFormData((prev) => ({
-        ...prev,
-        specifications: [...prev.specifications, newSpecValue.trim()],
-      }));
-      setNewSpecValue("");
-      setIsAddingSpec(false);
-    }
-  };
-
-  const handleSpecKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      saveSpecification();
-    }
-  };
-
-  const removeSpecification = (indexToRemove: number) => {
-    setFormData((prev) => ({
+  // ✅ New Handler for the Dropdown Menu
+  const handleSpecificationsChange = (ids: number[], names: string[]) => {
+    setFormData(prev => ({
       ...prev,
-      specifications: prev.specifications.filter((_, index) => index !== indexToRemove),
+      specificationIds: ids,       // Store IDs for Backend
+      specifications: names        // Store Names for ProductCard preview
     }));
   };
 
   const validateForm = (): boolean => {
-    if (!formData.name.trim()) {
-      setError("Naam is verplicht");
-      return false;
-    }
-    
-    if (!formData.quantity) {
-      setError("Aantal is verplicht");
-      return false;
-    } else if (Number(formData.quantity) <= 0) {
-      setError("Aantal moet groter zijn dan 0");
-      return false;
-    }
-    
-    if (!formData.price) {
-      setError("Prijs is verplicht");
-      return false;
-    } else if (isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
-      setError("Voer een geldig bedrag in");
-      return false;
-    }
-    
-    if (!formData.image) {
-      setError("Afbeelding URL is verplicht");
-      return false;
-    } else if (!isValidUrl(formData.image)) {
-      setError("Voer een geldige URL in");
-      return false;
-    }
-    
+    if (!formData.name.trim()) { setError("Naam is verplicht"); return false; }
+    if (!formData.quantity) { setError("Aantal is verplicht"); return false; }
+    if (Number(formData.quantity) <= 0) { setError("Aantal moet groter zijn dan 0"); return false; }
+    if (!formData.price) { setError("Prijs is verplicht"); return false; }
+    if (isNaN(Number(formData.price)) || Number(formData.price) <= 0) { setError("Voer een geldig bedrag in"); return false; }
+    if (!formData.image) { setError("Afbeelding URL is verplicht"); return false; }
     return true;
-  };
-
-  const isValidUrl = (url: string): boolean => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -154,13 +103,15 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
     try {
       setIsSubmitting(true);
       
+      // ✅ Prepare Payload matching your Backend DTO
       const productData = {
         productNaam: formData.name,
         productBeschrijving: formData.description || "Geen beschrijving",
         fotos: formData.image,
         hoeveelheid: Number(formData.quantity),
-        startPrijs: 0, // Keep startPrijs as 0
-        eindPrijs: parseFloat(formData.price), // Store the price in eindPrijs
+        startPrijs: 0, 
+        eindPrijs: parseFloat(formData.price), // Assuming this is logic for auctions
+        specificatieIds: formData.specificationIds, // ✅ SENDING IDs TO BACKEND
         verkoperId: user.gebruikerId,
       };
 
@@ -174,12 +125,13 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
         quantity: "",
         price: "",
         specifications: [],
+        specificationIds: [],
         image: "",
       });
       
     } catch (err: any) {
       console.error("Error creating product:", err);
-      setError(err.message || "Er is een fout opgetreden bij het aanmaken van het product");
+      setError(err.message || "Er is een fout opgetreden");
     } finally {
       setIsSubmitting(false);
     }
@@ -192,17 +144,12 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       onClose={() => severity === "error" ? setError(null) : setSuccess(null)}
       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
     >
-      <Alert 
-        onClose={() => severity === "error" ? setError(null) : setSuccess(null)} 
-        severity={severity} 
-        sx={{ width: '100%' }}
-      >
+      <Alert onClose={() => severity === "error" ? setError(null) : setSuccess(null)} severity={severity} sx={{ width: '100%' }}>
         {message}
       </Alert>
     </Snackbar>
   );
 
-  // --- RENDER ---
   return (
     <form style={styles.card} onSubmit={handleSubmit}>
       {error && showAlert(error, "error")}
@@ -219,7 +166,6 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       <div style={styles.mainContent}>
         {/* LEFT COLUMN */}
         <div style={styles.columnLeft}>
-
           <label style={styles.label}>Afbeelding URL*</label>
           <input
             type="text"
@@ -229,7 +175,6 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
             onChange={handleChange}
             style={{...styles.titleInput, marginBottom: "15px", fontSize: "14px"}}
           />
-
           <div style={styles.imagePreviewBox}>
             {formData.image ? (
               <img
@@ -238,9 +183,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
                 style={styles.previewImage}
                 onError={(e) => (e.currentTarget.style.display = 'none')}
               />
-            ) : (
-              <span>Preview...</span>
-            )}
+            ) : ( <span>Preview...</span> )}
           </div>
 
           <label style={styles.label}>Aantal Product*</label>
@@ -282,39 +225,22 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
             style={styles.textarea}
           />
 
-          <label style={styles.label}>Product Specificaties</label>
-          <ul style={styles.specList}>
-            {formData.specifications.length === 0 && <li style={{ color: "#666", fontStyle: "italic", marginBottom: "10px" }}>Nog geen specificaties...</li>}
-            {formData.specifications.map((spec, index) => (
-              <li key={index} style={styles.specItem}>
-                <div style={{display: 'flex', alignItems: 'center'}}><span style={styles.specBullet}>•</span><span>{spec}</span></div>
-                <InteractiveButton type="button" onClick={() => removeSpecification(index)} baseStyle={styles.removeSpecBtn}>✕</InteractiveButton>
-              </li>
-            ))}
-          </ul>
-
-          {isAddingSpec ? (
-            <div style={styles.specInputWrapper}>
-              <input autoFocus type="text" value={newSpecValue} onChange={(e) => setNewSpecValue(e.target.value)} onKeyDown={handleSpecKeyDown} placeholder="Typ specificatie..." style={styles.specTextInput} />
-              <InteractiveButton type="button" onClick={saveSpecification} baseStyle={{...styles.specActionBtn, backgroundColor: '#90B498'}}>✓</InteractiveButton>
-              <InteractiveButton type="button" onClick={() => setIsAddingSpec(false)} baseStyle={{...styles.specActionBtn, backgroundColor: '#ffb3b3'}}>✕</InteractiveButton>
-            </div>
-          ) : (
-            <InteractiveButton type="button" onClick={() => setIsAddingSpec(true)} baseStyle={styles.addSpecBtn}><span style={{ fontSize: "18px", marginRight: "10px" }}>+</span> Specificatie toevoegen</InteractiveButton>
-          )}
+          {/* ✅ The Dropdown Menu */}
+          <div>
+            <SpecificatiesMenu 
+              onChange={handleSpecificationsChange}
+              selectedIdsProp={formData.specificationIds} 
+            />
+          </div>
 
           <div style={{ marginTop: "auto", display: "flex", justifyContent: "center", paddingTop: "30px" }}>
             <InteractiveButton 
-            type="submit" 
-            baseStyle={styles.submitBtn}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              'Product Aanmaken'
-            )}
-          </InteractiveButton>
+              type="submit" 
+              baseStyle={styles.submitBtn}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Product Aanmaken'}
+            </InteractiveButton>
           </div>
         </div>
       </div>

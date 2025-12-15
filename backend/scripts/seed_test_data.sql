@@ -1,4 +1,4 @@
-DO $$
+dDO $$
 DECLARE
   gid1 integer;
   gid2 integer;

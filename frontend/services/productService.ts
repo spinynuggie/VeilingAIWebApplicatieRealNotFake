@@ -43,6 +43,12 @@ export async function createProduct(payload: CreateProductInput): Promise<Produc
 
 
 
-  if (!res.ok) throw new Error('Aanmaken mislukt');
+    if (!res.ok) {
+    // 👇 READ THE SERVER RESPONSE
+    const errorText = await res.text();
+    console.error("Backend Error Details:", errorText);
+    throw new Error(`Server Error: ${res.status} - ${errorText}`);
+  }
+
   return res.json();
 }
