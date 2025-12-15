@@ -14,14 +14,15 @@ namespace backend.Dtos
         public string Beschrijving { get; set; } = string.Empty;
         
         public string Image { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Locatie is verplicht.")]
+        public string Locatie { get; set; } = string.Empty;
         
         [Required(ErrorMessage = "Starttijd is verplicht.")]
-        [Range(0, int.MaxValue, ErrorMessage = "Starttijd moet een positief getal zijn.")]
-        public int Starttijd { get; set; }
+        public DateTimeOffset Starttijd { get; set; }
         
         [Required(ErrorMessage = "Eindtijd is verplicht.")]
-        [Range(0, int.MaxValue, ErrorMessage = "Eindtijd moet een positief getal zijn.")]
-        public int Eindtijd { get; set; }
+        public DateTimeOffset Eindtijd { get; set; }
 
         [Required(ErrorMessage = "VeilingMeesterId is verplicht.")]
         public int VeilingMeesterId { get; set; }

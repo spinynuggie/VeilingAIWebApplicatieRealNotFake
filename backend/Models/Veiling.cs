@@ -16,11 +16,11 @@ namespace backend.Models
         public int VeilingId { get; set; }
         
         [Required]
-        public string Naam { get; set; }
+        public string Naam { get; set; } = string.Empty;
         
-        public string Beschrijving { get; set; }
+        public string Beschrijving { get; set; } = string.Empty;
         
-        public string Image {get; set; }
+        public string Image {get; set; } = string.Empty;
         
         public DateTimeOffset Starttijd { get; set; }
         
@@ -28,7 +28,7 @@ namespace backend.Models
 
         public int VeilingMeesterId { get; set; }
         
-        public string Locatie { get; set; }
+        public string Locatie { get; set; } = string.Empty;
         
     }
 }

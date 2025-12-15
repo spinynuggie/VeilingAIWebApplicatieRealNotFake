@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using backend.Controllers;
 using backend.Data;
@@ -61,8 +62,9 @@ namespace backend.Test
                     Naam = "Test Auction 1",
                     Image = "auction1.jpg",
                     Beschrijving = "Test auction description",
-                    Starttijd = 10,
-                    Eindtijd = 20,
+                    Locatie = "Aalsmeer",
+                    Starttijd = new DateTimeOffset(2025, 1, 1, 10, 0, 0, TimeSpan.Zero),
+                    Eindtijd = new DateTimeOffset(2025, 1, 1, 12, 0, 0, TimeSpan.Zero),
                     VeilingMeesterId = 1
                 },
                 new backend.Models.Veiling
@@ -71,8 +73,9 @@ namespace backend.Test
                     Naam = "Special Auction",
                     Image = "auction2.jpg",
                     Beschrijving = "Special auction description",
-                    Starttijd = 30,
-                    Eindtijd = 40,
+                    Locatie = "Naaldwijk",
+                    Starttijd = new DateTimeOffset(2025, 2, 1, 10, 0, 0, TimeSpan.Zero),
+                    Eindtijd = new DateTimeOffset(2025, 2, 1, 12, 0, 0, TimeSpan.Zero),
                     VeilingMeesterId = 2
                 }
             );

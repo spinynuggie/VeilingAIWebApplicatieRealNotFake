@@ -42,8 +42,9 @@ namespace backend.Test
                     Naam = "Electronics",
                     Beschrijving = "Gadgets",
                     Image = "img1.jpg",
-                    Starttijd = 10,
-                    Eindtijd = 20,
+                    Locatie = "Aalsmeer",
+                    Starttijd = new DateTimeOffset(2025, 1, 1, 10, 0, 0, TimeSpan.Zero),
+                    Eindtijd = new DateTimeOffset(2025, 1, 1, 12, 0, 0, TimeSpan.Zero),
                     VeilingMeesterId = 1
                 },
                 new Veiling
@@ -52,8 +53,9 @@ namespace backend.Test
                     Naam = "Art",
                     Beschrijving = "Paintings",
                     Image = "img2.jpg",
-                    Starttijd = 30,
-                    Eindtijd = 40,
+                    Locatie = "Rijnsburg",
+                    Starttijd = new DateTimeOffset(2025, 2, 1, 10, 0, 0, TimeSpan.Zero),
+                    Eindtijd = new DateTimeOffset(2025, 2, 1, 12, 0, 0, TimeSpan.Zero),
                     VeilingMeesterId = 2
                 }
             );
@@ -104,8 +106,9 @@ namespace backend.Test
                 Naam = "Books",
                 Beschrijving = "Novels",
                 Image = "img3.jpg",
-                Starttijd = 50,
-                Eindtijd = 60,
+                Locatie = "Naaldwijk",
+                Starttijd = new DateTimeOffset(2025, 3, 1, 10, 0, 0, TimeSpan.Zero),
+                Eindtijd = new DateTimeOffset(2025, 3, 1, 12, 0, 0, TimeSpan.Zero),
                 VeilingMeesterId = 3
             };
 
@@ -131,8 +134,9 @@ namespace backend.Test
                 Naam = "X",
                 Beschrijving = "Y",
                 Image = "Z",
-                Starttijd = 1,
-                Eindtijd = 2,
+                Locatie = "Aalsmeer",
+                Starttijd = new DateTimeOffset(2025, 4, 1, 10, 0, 0, TimeSpan.Zero),
+                Eindtijd = new DateTimeOffset(2025, 4, 1, 12, 0, 0, TimeSpan.Zero),
                 VeilingMeesterId = 1
             };
 
@@ -148,8 +152,9 @@ namespace backend.Test
                 Naam = "Electronics Updated",
                 Beschrijving = "Gadgets+",
                 Image = "img1u.jpg",
-                Starttijd = 15,
-                Eindtijd = 25,
+                Locatie = "Online",
+                Starttijd = new DateTimeOffset(2025, 1, 1, 11, 0, 0, TimeSpan.Zero),
+                Eindtijd = new DateTimeOffset(2025, 1, 1, 13, 0, 0, TimeSpan.Zero),
                 VeilingMeesterId = 5
             };
 
@@ -160,8 +165,9 @@ namespace backend.Test
             Assert.AreEqual("Electronics Updated", updated.Naam);
             Assert.AreEqual("Gadgets+", updated.Beschrijving);
             Assert.AreEqual("img1u.jpg", updated.Image);
-            Assert.AreEqual(15, updated.Starttijd);
-            Assert.AreEqual(25, updated.Eindtijd);
+            Assert.AreEqual("Online", updated.Locatie);
+            Assert.AreEqual(new DateTimeOffset(2025, 1, 1, 11, 0, 0, TimeSpan.Zero), updated.Starttijd);
+            Assert.AreEqual(new DateTimeOffset(2025, 1, 1, 13, 0, 0, TimeSpan.Zero), updated.Eindtijd);
             Assert.AreEqual(5, updated.VeilingMeesterId);
         }
 
@@ -183,4 +189,3 @@ namespace backend.Test
         }
     }
 }
-
