@@ -17,6 +17,7 @@ namespace backend.Data
         }
         public DbSet<backend.Models.Aankoop> Aankoop { get; set; } = default!;
         public DbSet<backend.Models.Veiling> Veiling { get; set; } = default!;
-        public DbSet<backend.Models.Specificaties> Specificaties { get; set; } = default!;
+        public DbSet<backend.Models.Specificatie> Specificaties { get; set; } = default!;
+        public DbSet<backend.Models.ProductSpecificatie> ProductSpecificaties { get; set; } = default!;
     }
 }

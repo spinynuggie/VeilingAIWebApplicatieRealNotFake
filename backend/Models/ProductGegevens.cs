@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace backend.Models
 {
@@ -30,5 +31,8 @@ namespace backend.Models
         public int VeilingId { get; set; }
         
         public int VerkoperId { get; set; }
+
+        // Navigation property voor meer op meer relatie
+        public ICollection<ProductSpecificatie> ProductSpecificaties { get; set; }
     }
 }

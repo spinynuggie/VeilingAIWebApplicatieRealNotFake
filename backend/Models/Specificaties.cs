@@ -1,9 +1,23 @@
-namespace backend.Models;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
-public class Specificaties
+namespace backend.Models
 {
-    public int productId { get; set; }
-    public int specificatieId { get; set; }
-    public string naam { get; set; }
-    public string beschrijving { get; set; }
+    [Table("specificaties")]
+    public class Specificatie
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int SpecificatieId { get; set; }
+
+        [Required]
+        public string Naam { get; set; }
+
+        [Required]
+        public string Beschrijving { get; set; }
+
+        // Navigation property for many-to-many relationship
+        public ICollection<ProductSpecificatie> ProductSpecificaties { get; set; }
+    }
 }
