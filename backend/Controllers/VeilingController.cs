@@ -57,8 +57,8 @@ namespace backend.Controllers
             veiling.Naam = veilingDto.Naam;
             veiling.Beschrijving = veilingDto.Beschrijving;
             veiling.Image = veilingDto.Image;
-            veiling.Starttijd = veilingDto.Starttijd;
-            veiling.Eindtijd = veilingDto.Eindtijd;
+            veiling.Starttijd = DateTimeOffset.FromUnixTimeSeconds(veilingDto.Starttijd);
+            veiling.Eindtijd   = DateTimeOffset.FromUnixTimeSeconds(veilingDto.Eindtijd);
             veiling.VeilingMeesterId = veilingDto.VeilingMeesterId;
 
             _context.Entry(veiling).State = EntityState.Modified;
@@ -92,8 +92,8 @@ namespace backend.Controllers
                 Naam = veilingDto.Naam,
                 Beschrijving = veilingDto.Beschrijving,
                 Image = veilingDto.Image,
-                Starttijd = veilingDto.Starttijd,
-                Eindtijd = veilingDto.Eindtijd,
+                Starttijd = DateTimeOffset.FromUnixTimeSeconds(veilingDto.Starttijd),
+                Eindtijd   = DateTimeOffset.FromUnixTimeSeconds(veilingDto.Eindtijd),
                 VeilingMeesterId = veilingDto.VeilingMeesterId
             };
             

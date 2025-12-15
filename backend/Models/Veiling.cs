@@ -22,11 +22,13 @@ namespace backend.Models
         
         public string Image {get; set; }
         
-        public int Starttijd { get; set; }
+        public DateTimeOffset Starttijd { get; set; }
         
-        public int Eindtijd { get; set; }
+        public DateTimeOffset Eindtijd { get; set; }
 
         public int VeilingMeesterId { get; set; }
+        
+        public string Locatie { get; set; }
         
     }
 }

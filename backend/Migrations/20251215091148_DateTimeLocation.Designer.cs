@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using backend.Data;
@@ -11,9 +12,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251215091148_DateTimeLocation")]
+    partial class DateTimeLocation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,10 +183,14 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Eindtijd")
-                        .HasColumnType("integer");
+                    b.Property<DateTimeOffset>("Eindtijd")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Locatie")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -191,8 +198,8 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Starttijd")
-                        .HasColumnType("integer");
+                    b.Property<DateTimeOffset>("Starttijd")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("VeilingMeesterId")
                         .HasColumnType("integer");
