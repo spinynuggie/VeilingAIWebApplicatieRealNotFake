@@ -19,12 +19,6 @@ public class SpecificatiesController : ControllerBase
         _context = context;
     }
 
-    [HttpGet]
-    public asynt Task<ActionResult<SpecificatiesResponseDto>> GetSpecificatie()
-    {
-        return await _context.Specificatie.ToListAsync();
-    }
-
     [HttpPost]
     public async Task<ActionResult<SpecificatiesCreateDto>> CreateSpecificatie(
         [FromBody] SpecificatiesCreateDto specificatieCreateDto)
