@@ -12,13 +12,16 @@ public class SpecificatiesController : ControllerBase
 {
     private readonly AppDbContext _context;
 
+
+
     public SpecificatiesController(AppDbContext context)
     {
         _context = context;
     }
 
     [HttpPost]
-    public async Task<ActionResult<SpecificatiesCreateDto>> CreateSpecificatie([FromBody] SpecificatiesCreateDto specificatieCreateDto)
+    public async Task<ActionResult<SpecificatiesCreateDto>> CreateSpecificatie(
+        [FromBody] SpecificatiesCreateDto specificatieCreateDto)
     {
         var specificatie = new Specificatie
         {
@@ -34,34 +37,18 @@ public class SpecificatiesController : ControllerBase
         return CreatedAtAction(nameof(CreateSpecificatie), specificatieCreateDto);
     }
 
-    [HttpPost("link-to-product")]
-    public async Task<ActionResult> LinkSpecificatieToProduct(int productId, int specificatieId)
+    [HttpGet]
+    public async Task<ActionResult<List<SpecificatiesResponseDto>>> GetSpecificaties()
     {
-        var product = await _context.ProductGegevens.FindAsync(productId);
-        var specificatie = await _context.Specificaties.FindAsync(specificatieId);
+        var specificaties = await _context.Specificaties.ToListAsync();
 
-        if (product == null || specificatie == null)
+        var response = specificaties.Select(s => new SpecificatiesResponseDto
         {
-            return NotFound("Product of specificatie niet gevonden");
-        }
+            SpecificatieId = s.SpecificatieId,
+            Naam = s.Naam,
+            Beschrijving = s.Beschrijving,
+        }).ToList();
 
-        var existingLink = await _context.ProductSpecificaties
-            .FirstOrDefaultAsync(ps => ps.ProductId == productId && ps.SpecificatieId == specificatieId);
-
-        if (existingLink != null)
-        {
-            return BadRequest("Deze specificatie is al gekoppeld aan dit product");
-        }
-
-        var productSpecificatie = new ProductSpecificatie
-        {
-            ProductId = productId,
-            SpecificatieId = specificatieId
-        };
-
-        _context.ProductSpecificaties.Add(productSpecificatie);
-        await _context.SaveChangesAsync();
-
-        return Ok("Specificatie succesvol gekoppeld aan product");
+        return Ok(response);
     }
 }

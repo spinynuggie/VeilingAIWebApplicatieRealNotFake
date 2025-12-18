@@ -26,6 +26,7 @@ namespace backend.Controllers
         private readonly string _jwtIssuer;
         private readonly string _jwtAudience;
 
+
         private const int AccessTokenMinutes = 15;
         private const int RefreshTokenDays = 7;
         private static readonly HashSet<string> AllowedRoles = new(StringComparer.OrdinalIgnoreCase)

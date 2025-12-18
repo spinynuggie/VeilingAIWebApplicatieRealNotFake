@@ -11,6 +11,7 @@ namespace backend.Models
         public int Id { get; set; }
 
         public int ProductId { get; set; }
+
         public int SpecificatieId { get; set; }
     }
 }

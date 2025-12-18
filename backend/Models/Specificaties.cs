@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Collections.Generic;
+using System.Collections.Generic;   
 
 namespace backend.Models
 {
@@ -16,8 +16,6 @@ namespace backend.Models
 
         [Required]
         public string Beschrijving { get; set; }
-
-        // Navigation property for many-to-many relationship
-        public ICollection<ProductSpecificatie> ProductSpecificaties { get; set; }
+        
     }
 }

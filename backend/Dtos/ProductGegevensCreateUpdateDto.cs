@@ -17,7 +17,7 @@ namespace backend.Dtos
         public int Hoeveelheid { get; set; }
         
         [Range(0.01, double.MaxValue)]
-        public decimal StartPrijs { get; set; }
-        
+        public decimal Eindprijs { get; set; }
+        public List<int> SpecificatieIds { get; set; } = new List<int>();
     }
 }

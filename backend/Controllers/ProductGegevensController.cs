@@ -87,14 +87,44 @@ namespace backend.Controllers
         }
         
         // POST: api/ProductGegevens
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754// POST: api/ProductGegevens
         [HttpPost]
-        public async Task<ActionResult<ProductGegevens>> PostProductGegevens(ProductGegevens productGegevens)
+        public async Task<ActionResult<ProductGegevens>> PostProductGegevens(ProductGegevensCreateUpdateDto productDto)
         {
-            _context.ProductGegevens.Add(productGegevens);
-            await _context.SaveChangesAsync();
+            // 1. Map the DTO to the Entity
+            var product = new ProductGegevens
+            {
+                ProductNaam = productDto.ProductNaam,
+                ProductBeschrijving = productDto.ProductBeschrijving,
+                Fotos = productDto.Fotos,
+                Hoeveelheid = productDto.Hoeveelheid,
+                EindPrijs = productDto.Eindprijs
+                // Don't map SpecificatieIds here, they don't exist on the Product table
+            };
 
-            return CreatedAtAction("GetProductGegevens", new { id = productGegevens.ProductId }, productGegevens);
+            // 2. Save the Product first (This generates the ProductId)
+            _context.ProductGegevens.Add(product);
+            await _context.SaveChangesAsync(); 
+
+            // 3. Now loop through the IDs and create the links in the Join Table
+            if (productDto.SpecificatieIds != null && productDto.SpecificatieIds.Count > 0)
+            {
+                foreach (var specId in productDto.SpecificatieIds)
+                {
+                    var productSpecificatie = new ProductSpecificatie
+                    {
+                        ProductId = product.ProductId, // Use the ID created in Step 2
+                        SpecificatieId = specId
+                    };
+            
+                    _context.ProductSpecificaties.Add(productSpecificatie);
+                }
+        
+                // 4. Save the links
+                await _context.SaveChangesAsync();
+            }
+
+            return CreatedAtAction("GetProductGegevens", new { id = product.ProductId }, product);
         }
 
         // DELETE: api/ProductGegevens/5
