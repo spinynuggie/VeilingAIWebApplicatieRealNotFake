@@ -1,15 +1,15 @@
 "use client";
 
-import RequireAuth from "@/components/RequireAuth";
+import RequireAuth from "@/components/(oud)/RequireAuth";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getVeilingen } from "@/services/veilingService";
 import type { Veiling } from "@/types/veiling";
-import VeilingDisplay from "../../../components/VeilingDisplay";
-import Navbar from "@/components/NavBar";
-import SearchBar from "@/components/SearchBar"
+import VeilingDisplay from "../../../components/(oud)/VeilingDisplay";
+import Navbar from "@/components/(oud)/NavBar";
+import SearchBar from "@/components/(oud)/SearchBar"
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
-import Profile from "@/components/Profile";
+import Profile from "@/components/(oud)/Profile";
 
 
 export default function Landing() {

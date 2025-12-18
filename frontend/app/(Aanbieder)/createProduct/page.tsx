@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import AppNavbar from "@/components/AppNavbar";
+import AppNavbar from "@/components/(oud)/AppNavbar";
 import ProductForm, { ProductData } from "@/app/(Aanbieder)/createProduct/ProductForm/index";
-import ProductCard from "@/components/ProductCard/index";
-import RequireAuth from "@/components/RequireAuth";
+import ProductCard from "@/components/(oud)/ProductCard/index";
+import RequireAuth from "@/components/(oud)/RequireAuth";
 
 export default function Page() {
   // HIER IS DE SINGLE SOURCE OF TRUTH

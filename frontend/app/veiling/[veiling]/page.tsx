@@ -5,16 +5,16 @@ import { usePathname } from "next/navigation";
 import { HubConnection } from "@microsoft/signalr";
 import { Veiling } from "@/types/veiling";
 import { getVeilingen } from "@/services/veilingService";
-import Navbar from "@/components/NavBar";
-import SearchBar from "@/components/SearchBar";
+import Navbar from "@/components/(oud)/NavBar";
+import SearchBar from "@/components/(oud)/SearchBar";
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
-import ProductDisplay from "@/components/ProductDisplay";
+import ProductDisplay from "@/components/(oud)/ProductDisplay";
 import { getProducts } from "@/services/productService";
-import Profile from "@/components/Profile";
+import Profile from "@/components/(oud)/Profile";
 import { Box } from "@mui/material";
-import RequireAuth from "@/components/RequireAuth";
-import ProductCard from "@/components/ProductCard/index";
-import { VeilingKlok } from "@/components/VeilingKlok";
+import RequireAuth from "@/components/(oud)/RequireAuth";
+import ProductCard from "@/components/(oud)/ProductCard/index";
+import { VeilingKlok } from "@/components/(oud)/VeilingKlok";
 import {
   BidEvent,
   PriceTickEvent,

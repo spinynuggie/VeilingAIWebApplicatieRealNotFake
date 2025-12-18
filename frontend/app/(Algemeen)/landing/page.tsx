@@ -2,38 +2,29 @@
 
 import Image from "next/image";
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
-import dynamic from "next/dynamic";
-import styles from "./landing.module.css";
-
-// Dynamically import AppNavbar with SSR disabled
-const AppNavbar = dynamic(
-  () => import("@/components/AppNavbar"),
-  { ssr: false, loading: () => <div style={{ height: '64px' }} /> }
-);
-
+import { NavBar } from "@/components/NavBar"
+import { Background } from "@/components/Background"
 export default function Landing() {
   return (
-    <div className={styles.landingContainer}>
-      <AppNavbar />
-
-      <main className={styles.heroSection}>
-        <div className={styles.logo}>
+    <Background> 
+      <NavBar mode="visitor"/>
+      <main >
+        <div>
           <Image 
             src={royalLogo} 
             alt="Royal FloraHolland Logo" 
-            priority 
-            className={styles.logoImg} 
+            priority  
           />
         </div>
 
-        <h1 className={styles.heroTitle}>
+        <h1 >
           De grootste<br />
           internationale<br />
           sierteeltmarktplaats
         </h1>
 
-        <button className={styles.ctaButton}>Meer informatie</button>
+        <button>Meer informatie</button>
       </main>
-    </div>
+    </Background>
   );
 }

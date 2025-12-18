@@ -1,4 +1,4 @@
-import ProductSearchBar from "@/components/ProductSearchBar";
+import ProductSearchBar from "@/components/(oud)/ProductSearchBar";
 import { Product } from "@/types/product";
 import styles from "../veilingAanmaken.module.css"; // Je kunt dezelfde CSS hergebruiken!
 

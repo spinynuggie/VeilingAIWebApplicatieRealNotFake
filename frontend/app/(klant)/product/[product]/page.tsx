@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import Navbar from "@/components/NavBar";
-import SearchBar from "@/components/SearchBar";
+import Navbar from "@/components/(oud)/NavBar";
+import SearchBar from "@/components/(oud)/SearchBar";
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
 import { getProducts } from "@/services/productService";
-import Profile  from "@/components/Profile";
+import Profile  from "@/components/(oud)/Profile";
 import { Box } from "@mui/material"
-import RequireAuth from "@/components/RequireAuth";
-import ProductCard from "@/components/ProductCard/index";
+import RequireAuth from "@/components/(oud)/RequireAuth";
+import ProductCard from "@/components/(oud)/ProductCard/index";
 // Make sure to import the type to ensure type safety
 import { Product } from '@/types/product';
 

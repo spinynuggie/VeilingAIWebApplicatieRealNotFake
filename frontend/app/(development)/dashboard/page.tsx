@@ -1,12 +1,12 @@
 "use client";
 
-import RequireAuth from "@/components/RequireAuth";
-import { useAuth } from "@/components/AuthProvider";
+import RequireAuth from "@/components/(oud)/RequireAuth";
+import { useAuth } from "@/components/(oud)/AuthProvider";
 import { useEffect, useState } from "react";
 import { getVeilingen } from "@/services/veilingService";
 import type { Veiling } from "@/types/veiling";
-import UserInfoCard from "@/components/UserInfoCard";
-import VeilingListSimple from "@/components/VeilingListSimple";
+import UserInfoCard from "@/components/(oud)/UserInfoCard";
+import VeilingListSimple from "@/components/(oud)/VeilingListSimple";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();

@@ -1,86 +1,51 @@
-"use client";
+import { Button } from "@/components/Button";
+import { AppBar, Toolbar, Box, Stack, Typography } from "@mui/material";
 
-import React from "react";
-
-type NavbarProps = {
-  left?: React.ReactNode;
-  center?: React.ReactNode;
-  right?: React.ReactNode;
-  style?: React.CSSProperties;
-};
-
-export default function Navbar({ left, center, right, style }: NavbarProps) {
-  return (
-    <>
-      <nav className="navbar" style={style}>
-        <div className="navbar-left">{left}</div>
-        <div className="navbar-center">{center}</div>
-        <div className="navbar-right">{right}</div>
-
-      </nav>
-
-      <style jsx>{`
-        .navbar {
-          display: flex;
-          width: 100%;
-          justify-content: space-between;
-          align-items: center;
-          padding: 1rem 2rem;
-          background: #fff;
-          border-bottom: 2px solid #d5d5d5;
-        }
-
-        .navbar-left,
-        .navbar-center,
-        .navbar-right {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .navbar-center {
-          flex: 1;
-          justify-content: center;
-        }
-
-        .navbar-right {
-          gap: 2rem;
-        }
-
-        .navbar-left-link,
-        .navbar-link {
-          color: #2d5f3f;
-          text-decoration: none;
-          font-size: 0.95rem;
-          transition: color 0.3s ease, text-decoration 0.3s ease;
-        }
-
-        .navbar-left-link:hover,
-        .navbar-link:hover {
-          color: #234a32;
-          text-decoration: underline;
-        }
-
-        .icon {
-          width: 24px;
-          height: 24px;
-        }
-
-        @media (max-width: 768px) {
-          .navbar-right {
-            gap: 1rem;
-          }
-
-          .navbar {
-            flex-direction: column;
-            gap: 0.5rem;
-          }
-
-          .navbar-center {
-            justify-content: center;
-          }
-        }
-      `}</style>
-    </>
-  );
+type NavMode = 'visitor' | 'customer' | 'seller' | 'auctioneer';
+interface NavBarProps {
+  mode: NavMode; 
 }
+
+export function NavBar({mode}: NavBarProps) {
+  const renderActions = () => {
+    switch (mode) {
+      case 'visitor':
+          return (
+            <>
+              <Button variant="outlined" color="primary">Login</Button>
+              <Button variant="outlined" color="primary">Registreren</Button>
+            </>
+      );
+      case 'customer':
+        return(
+          <Button>customer</Button>
+        );
+      case 'seller':
+        return(
+          <Button>seller</Button>
+        )
+      case 'auctioneer':
+        return(
+          <Button>auctioneer</Button>
+        )
+      default:
+        return null;
+    }
+  };
+  return (
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static" color="secondary" sx={{ boxShadow: 'none' }}>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
+            FLORA
+          </Typography>
+
+          <Stack direction="row" spacing={2}>
+            {renderActions()}
+          </Stack>
+        </Toolbar>
+      </AppBar>
+    </Box>
+  )
+}
+

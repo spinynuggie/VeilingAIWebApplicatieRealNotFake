@@ -1,9 +1,9 @@
 "use client";
 
-import RequireAuth from "@/components/RequireAuth";
+import RequireAuth from "@/components/(oud)/RequireAuth";
 import { useEffect, useState } from "react";
 import { getGebruiker } from "@/services/gebruikerService";
-import UserInfoCard from "@/components/UserInfoCard";
+import UserInfoCard from "@/components/(oud)/UserInfoCard";
 import type { User } from "@/types/user";
 
 export default function AdminPage() {

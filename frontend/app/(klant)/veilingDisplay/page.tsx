@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import VeilingDisplay from "../../../components/VeilingDisplay";
+import VeilingDisplay from "../../../components/(oud)/VeilingDisplay";
 import { getVeilingen } from "../../../services/veilingService";
-import Navbar from "@/components/NavBar";
-import SearchBar from "@/components/SearchBar"
+import Navbar from "@/components/(oud)/NavBar";
+import SearchBar from "@/components/(oud)/SearchBar"
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
-import RequireAuth from "@/components/RequireAuth";
-import Profile from "@/components/Profile";
+import RequireAuth from "@/components/(oud)/RequireAuth";
+import Profile from "@/components/(oud)/Profile";
 
 export default function VeilingList() {
   const [veilingen, setVeilingen] = useState<any[]>([]);

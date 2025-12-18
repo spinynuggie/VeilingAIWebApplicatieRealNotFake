@@ -19,8 +19,8 @@ import {
   DialogActions,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import RequireAuth from "@/components/RequireAuth";
-import { useAuth } from "@/components/AuthProvider";
+import RequireAuth from "@/components/(oud)/RequireAuth";
+import { useAuth } from "@/components/(oud)/AuthProvider";
 import * as gebruikerService from "@/services/gebruikerService";
 import * as verkoperService from "@/services/verkoperService";
 
