@@ -2,7 +2,7 @@
 "use client";
 
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { AuthProvider } from "@/components/(oud)/AuthProvider";
+import { AuthProvider } from "@/components/AuthProvider";
 import { appTheme } from "@/styles/theme"; // Imported from your new file
 import "./globals.css";
 import "@fontsource/roboto/300.css";

@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, FormEvent, KeyboardEvent } from "react";
 import { InteractiveButton } from "./interactiveButton";
 import { styles } from "./styles";
-import { useAuth } from "@/components/(oud)/AuthProvider";
+import { useAuth } from "@/components/AuthProvider";
 import { createProduct } from "@/services/productService";
 import { Alert, Snackbar, CircularProgress } from "@mui/material";
 import SpecificatiesMenu from "./specificatiesMenu";

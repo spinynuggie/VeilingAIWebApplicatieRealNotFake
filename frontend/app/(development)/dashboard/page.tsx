@@ -1,7 +1,7 @@
 "use client";
 
 import RequireAuth from "@/components/(oud)/RequireAuth";
-import { useAuth } from "@/components/(oud)/AuthProvider";
+import { useAuth } from "@/components/AuthProvider";
 import { useEffect, useState } from "react";
 import { getVeilingen } from "@/services/veilingService";
 import type { Veiling } from "@/types/veiling";

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import VeilingDisplay from "../../../components/(oud)/VeilingDisplay";
 import { getVeilingen } from "../../../services/veilingService";
-import { NavBar } from "@/components/NavBar";
+import { NavBar } from "@/features/(NavBar)/NavBar";
 import RequireAuth from "@/components/(oud)/RequireAuth";
 
 export default function VeilingList() {

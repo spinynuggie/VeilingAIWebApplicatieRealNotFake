@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import Navbar from "@/components/(oud)/NavBar";
+import Navbar from "@/features/(NavBar)/AppNavBar";
 import SearchBar from "@/components/(oud)/SearchBar";
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
 import { getProducts } from "@/services/productService";

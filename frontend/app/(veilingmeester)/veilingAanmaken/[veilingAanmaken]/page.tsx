@@ -1,6 +1,6 @@
 "use client";
 
-import AppNavbar from "@/components/(oud)/AppNavbar"; // Assuming you want the navbar here too
+import AppNavbar from "@/features/(NavBar)/AppNavBar";
 import { useVeilingAanmaken } from "../hooks/useVeilingAanmaken";
 import styles from "../veilingAanmaken.module.css";
 import { AvailableColumn } from "../Components/availableColumn";

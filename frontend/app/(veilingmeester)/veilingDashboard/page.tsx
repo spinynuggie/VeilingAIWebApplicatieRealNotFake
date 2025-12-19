@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { getVeilingen } from "@/services/veilingService";
 import type { Veiling } from "@/types/veiling";
 import VeilingDisplay from "../../../components/(oud)/VeilingDisplay";
-import Navbar from "@/components/(oud)/NavBar";
+import Navbar from "@/features/(NavBar)/AppNavBar";
 import SearchBar from "@/components/(oud)/SearchBar"
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
 import Profile from "@/components/(oud)/Profile";
