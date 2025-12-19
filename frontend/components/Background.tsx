@@ -1,7 +1,8 @@
+"use client"; // <--- Add this at the very top
+
 import { Box } from '@mui/material';
 import { ReactNode } from 'react';
 
-// This interface tells TypeScript that 'children' is a valid prop
 interface BackgroundProps {
   children: ReactNode;
 }
@@ -14,8 +15,8 @@ export function Background({ children }: BackgroundProps) {
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        // This pulls from the theme we set up earlier
-        background: (theme) => theme.gradients.main,
+        // This function is now safe because the component is 'use client'
+        background: (theme) => theme.gradients?.main || 'white', 
         color: 'text.primary',
         overflowX: 'hidden',
       }}

@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { SearchResult, globalSearch } from "@/services/searchService";
 
-export function useSearch() {
-  const [options, setOptions] = useState<SearchResult[]>([]);
+export function useSearch<T>(searchFn: (query: string, signal: AbortSignal) => Promise<T[]>) {
+  const [options, setOptions] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -20,11 +19,7 @@ export function useSearch() {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        // You can update your globalSearch to accept the signal
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_LINK}/api/Search?query=${encodeURIComponent(inputValue)}`, {
-          signal: controller.signal,
-        });
-        const data = await res.json();
+        const data = await searchFn(inputValue, controller.signal);
         setOptions(data);
       } catch (error: any) {
         if (error.name !== "AbortError") console.error("Search failed", error);
@@ -34,7 +29,7 @@ export function useSearch() {
     }, 200);
 
     return () => clearTimeout(timer);
-  }, [inputValue]);
+  }, [inputValue, searchFn]); // searchFn is nu een dependency
 
   return { options, loading, inputValue, setInputValue };
 }

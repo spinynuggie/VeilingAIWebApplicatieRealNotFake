@@ -48,12 +48,7 @@ export default function VeilingDetailPage() {
   if (!currentProduct) {
     return (
        <RequireAuth>
-          <Navbar
-            style={{ backgroundColor: "#C8FFD6"}}
-            left={<img src={royalLogo.src} alt="Logo Royal Flora Holland" width={100}/>}
-            center={<SearchBar/>}
-            right={<Profile/>}
-          />
+          <Navbar/>
           <div style={{textAlign: "center", marginTop: "50px"}}>
               <h1>Product niet gevonden</h1>
               <p>Er is geen product met productId: {id}</p>
@@ -65,12 +60,7 @@ export default function VeilingDetailPage() {
   return (
     <RequireAuth>
       <div style={{background: "white", minHeight: "100vh" }}>
-        <Navbar
-          style={{ backgroundColor: "#C8FFD6"}}
-          left={<img src={royalLogo.src} alt="Logo Royal Flora Holland" width={100}/>}
-          center={<SearchBar/>}
-          right={<Profile/>}
-        />
+        <Navbar        />
 
         <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1, justifyContent: 'center', paddingY: 4 }}>
             {/* THE FIX: Use currentProduct variable, NOT array index allProducts[id] */}

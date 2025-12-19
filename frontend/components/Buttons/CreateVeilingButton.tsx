@@ -1,7 +1,7 @@
 "use client";
 
 import { useVeilingAanmaken } from "@/hooks/useVeilingAanmaken";
-import { Button, CircularProgress, Icon, IconButton, } from "@mui/material";
+import { IconButton, } from "@mui/material";
 import { Add as AddIcon} from "@mui/icons-material";
 
 export function CreateVeilingButton() {
