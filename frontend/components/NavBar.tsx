@@ -1,5 +1,8 @@
 import { Button } from "@/components/Button";
-import { AppBar, Toolbar, Box, Stack, Typography } from "@mui/material";
+import { AppBar, Toolbar, Box, Stack, Typography, IconButton, } from "@mui/material";
+import { Person, Person as PersonIcon } from "@mui/icons-material";
+import { FloraLogo } from "./FloraLogo";
+import Link from "next/link";
 
 type NavMode = 'visitor' | 'customer' | 'seller' | 'auctioneer';
 interface NavBarProps {
@@ -12,13 +15,15 @@ export function NavBar({mode}: NavBarProps) {
       case 'visitor':
           return (
             <>
-              <Button variant="outlined" color="primary">Login</Button>
-              <Button variant="outlined" color="primary">Registreren</Button>
+              <Button variant="outlined" color="primary" component={Link} href="/login">Login</Button>
+              <Button variant="outlined" color="primary" component={Link} href="/register">Registreren</Button>
             </>
       );
       case 'customer':
         return(
-          <Button>customer</Button>
+          <IconButton size="medium" color="primary" component={Link} href="klantProfile">
+            <PersonIcon/>
+          </IconButton>
         );
       case 'seller':
         return(
@@ -36,10 +41,9 @@ export function NavBar({mode}: NavBarProps) {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" color="secondary" sx={{ boxShadow: 'none' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
-            FLORA
-          </Typography>
-
+          <Box component={Link} href="/landing" sx={{ display: 'flex', alignItems: 'center' }}>
+            <FloraLogo mode='small'/>
+          </Box>
           <Stack direction="row" spacing={2}>
             {renderActions()}
           </Stack>
