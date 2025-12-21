@@ -5,6 +5,8 @@ import ProductForm, { ProductData } from "@/app/(Aanbieder)/createProduct/Produc
 import ProductCard from "@/components/(oud)/ProductCard/index";
 import RequireAuth from "@/components/(oud)/RequireAuth";
 import AppNavbar from "@/features/(NavBar)/AppNavBar";
+import { Box as BoxMui } from "@mui/material"
+import { Background } from "@/components/Background";
 
 export default function Page() {
   // HIER IS DE SINGLE SOURCE OF TRUTH
@@ -19,11 +21,11 @@ export default function Page() {
   });
 
   return (
-    <RequireAuth roles={["ADMIN", "VERKOPER"]}>
-      <main style={{ minHeight: "100vh", backgroundColor: "#ffffff" }}>
+    <Background>
+      <RequireAuth roles={["ADMIN", "VERKOPER"]}>
         <AppNavbar />
 
-        <div
+        <BoxMui
           style={{
             display: "flex",
             justifyContent: "center",
@@ -36,16 +38,16 @@ export default function Page() {
           }}
         >
           {/* LINKER KANT: Het Formulier */}
-          <div style={{ flex: "1", minWidth: "500px" }}>
+          <BoxMui >
             <ProductForm formData={formData} setFormData={setFormData} />
-          </div>
+          </BoxMui>
 
           {/* RECHTER KANT: De Kaart */}
-          <div style={{ flex: "0 0 auto" }}>
+          <BoxMui style={{ flex: "0 0 auto" }}>
             <ProductCard mode="create" product={formData} />
-          </div>
-        </div>
-      </main>
+          </BoxMui>
+        </BoxMui>
     </RequireAuth>
+    </Background>
   );
 }

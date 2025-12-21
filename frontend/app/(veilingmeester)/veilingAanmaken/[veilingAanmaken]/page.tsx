@@ -2,7 +2,6 @@
 
 import AppNavbar from "@/features/(NavBar)/AppNavBar";
 import { useVeilingAanmaken } from "../hooks/useVeilingAanmaken";
-import styles from "../veilingAanmaken.module.css";
 import { AvailableColumn } from "../Components/availableColumn";
 import DetailColumn from "../Components/detailColumn";
 import AuctionColumn from "../Components/auctionColumn";
@@ -26,7 +25,7 @@ const VeilingAanmakenPage = () => {
 
   return (
     <RequireAuth roles={["ADMIN", "VERKOPER"]}>
-    <main className={styles.pageContainer}>
+    <main >
       {error && (
         <Snackbar
           open={true}
@@ -45,7 +44,7 @@ const VeilingAanmakenPage = () => {
       )}
       <AppNavbar />
 
-      <div className={styles.mainWrapper}>
+      <div>  
 
         {/* KOLOM 1: Nu schoon en leesbaar */}
         <AvailableColumn

@@ -4,7 +4,6 @@ import React from "react";
 import ProductCard from "@/components/(oud)/ProductCard/index";
 import { Product } from "@/types/product";
 // We importeren de CSS module uit de bovenliggende map
-import styles from "../veilingAanmaken.module.css";
 
 interface DetailColumnProps {
   product: Product | null;
@@ -13,7 +12,7 @@ interface DetailColumnProps {
 
 export default function DetailColumn({ product, onAdd }: DetailColumnProps) {
   return (
-    <div className={styles.middleColumn}>
+    <div >
       {product ? (
         <ProductCard
           mode="auction"
@@ -29,7 +28,7 @@ export default function DetailColumn({ product, onAdd }: DetailColumnProps) {
           }}
         />
       ) : (
-        <div className={styles.placeholder}>
+        <div >
           Selecteer een product links
         </div>
       )}

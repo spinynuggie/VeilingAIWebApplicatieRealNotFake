@@ -3,7 +3,6 @@
 import React from "react";
 import ProductSearchBar from "@/components/(oud)/ProductSearchBar";
 import { Product } from "@/types/product";
-import styles from "../veilingAanmaken.module.css";
 
 interface AuctionColumnProps {
   products: Product[];
@@ -13,8 +12,8 @@ interface AuctionColumnProps {
 
 export default function AuctionColumn({ products, onSearch, onRemove }: AuctionColumnProps) {
   return (
-    <div className={styles.column}>
-      <h3 className={styles.header}>Producten in veiling</h3>
+    <div >
+      <h3 >Producten in veiling</h3>
 
       {/* Zoekbalk specifiek voor deze kolom */}
       <ProductSearchBar onSearch={onSearch} />
@@ -27,10 +26,10 @@ export default function AuctionColumn({ products, onSearch, onRemove }: AuctionC
         )}
 
         {products.map((prod) => (
-          <div key={prod.productId} className={styles.cardItem} style={{ cursor: 'default' }}>
+          <div key={prod.productId} style={{ cursor: 'default' }}>
             {/* Verwijder knop (Rood kruisje) */}
             <button
-              className={styles.actionButton}
+             
               style={{ backgroundColor: "#d9534f", marginRight: "10px" }}
               onClick={() => onRemove(prod)}
             >
@@ -53,10 +52,10 @@ export default function AuctionColumn({ products, onSearch, onRemove }: AuctionC
       </div>
 
       {/* Footer knoppen */}
-      <div className={styles.footerButtons}>
-        <button className={styles.footerBtn}>Start</button>
-        <button className={styles.footerBtn}>Eind</button>
-        <button className={`${styles.footerBtn} ${styles.createBtn}`}>
+      <div >
+        <button >Start</button>
+        <button>Eind</button>
+        <button>
           Aanmaken
         </button>
       </div>

@@ -5,7 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { useEffect, useState } from "react";
 import { getVeilingen } from "@/services/veilingService";
 import type { Veiling } from "@/types/veiling";
-import UserInfoCard from "@/components/(oud)/UserInfoCard";
+import UserInfoCard from "@/features/UserInfoCard";
 import VeilingListSimple from "@/components/(oud)/VeilingListSimple";
 
 export default function DashboardPage() {

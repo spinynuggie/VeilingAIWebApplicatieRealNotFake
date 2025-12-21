@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 // @ts-ignore
-import './page.css';
 import { TextField, InputAdornment, IconButton, Button, Alert } from '@mui/material';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';

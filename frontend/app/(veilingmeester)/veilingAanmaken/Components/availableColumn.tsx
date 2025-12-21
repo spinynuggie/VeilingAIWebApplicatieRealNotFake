@@ -1,6 +1,5 @@
-import ProductSearchBar from "@/components/(oud)/ProductSearchBar";
+import SearchBar from "@/components/SearchBar";
 import { Product } from "@/types/product";
-import styles from "../veilingAanmaken.module.css"; // Je kunt dezelfde CSS hergebruiken!
 
 interface Props {
   loading: boolean;
@@ -12,9 +11,9 @@ interface Props {
 
 export function AvailableColumn({ loading, products, selectedId, onSearch, onSelect }: Props) {
   return (
-    <div className={styles.column}>
-      <h3 className={styles.header}>Zoek naar producten</h3>
-      <ProductSearchBar onSearch={onSearch} />
+    <div >
+      <h3 >Zoek naar producten</h3>
+      <SearchBar mode="callback" onSearch={onSearch} />
 
       {loading ? (
         <p style={{ textAlign: 'center', marginTop: '20px' }}>Laden...</p>
@@ -23,7 +22,6 @@ export function AvailableColumn({ loading, products, selectedId, onSearch, onSel
           {products.map((prod) => (
             <div
               key={prod.productId}
-              className={styles.cardItem}
               style={{
                 borderColor: selectedId === prod.productId ? "#000" : "transparent"
               }}
@@ -34,7 +32,6 @@ export function AvailableColumn({ loading, products, selectedId, onSearch, onSel
               </div>
 
               <button
-                className={styles.actionButton}
                 style={{ backgroundColor: "#90B498" }}
                 onClick={(e) => {
                   e.stopPropagation();

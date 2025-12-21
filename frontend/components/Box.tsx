@@ -7,10 +7,11 @@ interface MyBoxProps extends BoxProps {
 export function Box({ children, ...props }: MyBoxProps) {
   return (
     <BoxMui
+      {...props}
       sx={{
-        display: "inline-flex", // Allows boxes to sit next to each other
-        alignItems: "flex-start",
-        ...props.sx, // Allows you to override styles from the outside
+        display: "flex", // Veranderd van inline-flex naar flex
+        justifyContent: "center",
+        ...props.sx, 
       }}
     >
       <BoxMui
@@ -20,7 +21,9 @@ export function Box({ children, ...props }: MyBoxProps) {
           border: "2px solid",
           borderColor: "custom.color2",
           borderRadius: 2,
-          width: 'fit-content' // Ensures the box only takes the space it needs
+          minWidth: '400px', // Geef het een basisbreedte voor formulieren
+          width: 'fit-content',
+          boxShadow: 3 // Optioneel: geeft wat diepte
         }}
       >
         {children}

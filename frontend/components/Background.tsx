@@ -1,4 +1,4 @@
-"use client"; // <--- Add this at the very top
+"use client";
 
 import { Box } from '@mui/material';
 import { ReactNode } from 'react';
@@ -11,14 +11,14 @@ export function Background({ children }: BackgroundProps) {
   return (
     <Box
       sx={{
+        // Gebruik minHeight in plaats van height om afsnijden van content te voorkomen
         minHeight: '100vh',
         width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        // This function is now safe because the component is 'use client'
+        display: 'block', // 'block' in plaats van 'flex' voorkomt ongewenste verticale centering
         background: (theme) => theme.gradients?.main || 'white', 
         color: 'text.primary',
-        overflowX: 'hidden',
+        margin: 0,
+        padding: 0,
       }}
     >
       {children}
