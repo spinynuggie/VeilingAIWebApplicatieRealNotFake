@@ -5,8 +5,10 @@ import { useVeilingAanmaken } from "../hooks/useVeilingAanmaken";
 import { AvailableColumn } from "../Components/availableColumn";
 import DetailColumn from "../Components/detailColumn";
 import AuctionColumn from "../Components/auctionColumn";
-import { Alert, Snackbar } from "@mui/material";
+import { Alert, Snackbar, Box as BoxMui, Grid } from "@mui/material";
 import RequireAuth from "@/components/(oud)/RequireAuth";
+import { Background } from "@/components/Background";
+import { Box } from "@/components/Box";
 
 const VeilingAanmakenPage = () => {
   const {
@@ -25,7 +27,7 @@ const VeilingAanmakenPage = () => {
 
   return (
     <RequireAuth roles={["ADMIN", "VERKOPER"]}>
-    <main >
+      <Background>
       {error && (
         <Snackbar
           open={true}
@@ -44,9 +46,10 @@ const VeilingAanmakenPage = () => {
       )}
       <AppNavbar />
 
-      <div>  
 
+      <Grid container spacing={2} sx={{ p: 2, width: '100vw', display: 'flex', justifyContent: 'center' }}>
         {/* KOLOM 1: Nu schoon en leesbaar */}
+        <Box>
         <AvailableColumn
             loading={loading}
             products={filteredAvailable}
@@ -54,22 +57,26 @@ const VeilingAanmakenPage = () => {
             onSearch={handleSearchAvailable}
             onSelect={setSelectedProduct}
         />
+        </Box>
 
         {/* KOLOM 2 */}
+        <BoxMui>
         <DetailColumn
             product={selectedProduct}
             onAdd={handleAddToAuction}
         />
-
+        </BoxMui>
+        
         {/* KOLOM 3 */}
+        <Box>
         <AuctionColumn
             products={filteredAuction}
             onSearch={handleSearchAuction}
             onRemove={handleRemoveFromAuction}
         />
-
-      </div>
-    </main>
+        </Box>
+      </Grid>
+      </Background>
     </RequireAuth>
   );
 };

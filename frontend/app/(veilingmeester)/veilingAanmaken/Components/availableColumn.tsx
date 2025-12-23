@@ -1,5 +1,5 @@
-import SearchBar from "@/components/SearchBar";
 import { Product } from "@/types/product";
+import ProductSearchBar from "@/components/(oud)/ProductSearchBar"
 
 interface Props {
   loading: boolean;
@@ -13,7 +13,7 @@ export function AvailableColumn({ loading, products, selectedId, onSearch, onSel
   return (
     <div >
       <h3 >Zoek naar producten</h3>
-      <SearchBar mode="callback" onSearch={onSearch} />
+      <ProductSearchBar onSearch={onSearch} />
 
       {loading ? (
         <p style={{ textAlign: 'center', marginTop: '20px' }}>Laden...</p>

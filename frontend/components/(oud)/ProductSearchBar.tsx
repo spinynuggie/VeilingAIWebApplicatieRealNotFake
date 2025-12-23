@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import { Box, TextField, InputAdornment} from "@mui/material"
+import { Search as SearchIcon } from "@mui/icons-material";
 
 interface SearchBarProps {
   onSearch: (term: string) => void;
@@ -8,22 +9,37 @@ interface SearchBarProps {
 
 export default function SearchBar({ onSearch }: SearchBarProps) {
   return (
-    <div style={{ marginBottom: "20px" }}>
-      <input
-        type="text"
-        placeholder="Zoeken..."
-        onChange={(e) => onSearch(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "12px",
-          borderRadius: "8px",
-          border: "1px solid #90B498",
-          backgroundColor: "#F0FDF4", // Heel licht groen
-          fontSize: "14px",
-          outline: "none",
-          color: "#333"
-        }}
-      />
-    </div>
+    <Box sx={{ mb: 2.5 }}> {/* 20px -> 2.5 in MUI spacing (2.5 * 8px) */}
+    <TextField
+      fullWidth
+      placeholder="Zoeken..."
+      variant="outlined"
+      onChange={(e) => onSearch(e.target.value)}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <SearchIcon sx={{ color: 'custom.color2' }} />
+          </InputAdornment>
+        ),
+      }}
+      sx={{
+        // This targets the background of the input field
+        '& .MuiOutlinedInput-root': {
+          backgroundColor: 'custom.color6', // Using your Ultra Light Mint
+          borderRadius: '8px',
+          '& fieldset': {
+            borderColor: 'primary.main', // Using your Color2
+          },
+          '&:hover fieldset': {
+            borderColor: 'custom.color1', // Deep Forest Green on hover
+          },
+        },
+        '& .MuiInputBase-input': {
+          fontSize: '14px',
+          color: 'text.primary', // Your Color9 (Near Black)
+        }
+      }}
+    />
+  </Box>
   );
 }
