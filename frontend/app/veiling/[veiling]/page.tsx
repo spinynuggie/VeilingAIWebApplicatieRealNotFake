@@ -13,7 +13,7 @@ import { getProducts } from "@/services/productService";
 import Profile from "@/components/(oud)/Profile";
 import { Box } from "@mui/material";
 import RequireAuth from "@/components/(oud)/RequireAuth";
-import ProductCard from "@/components/(oud)/ProductCard/index";
+import ProductCard from "@/features/ProductCard";
 import { VeilingKlok } from "@/components/(oud)/VeilingKlok";
 import {
   BidEvent,

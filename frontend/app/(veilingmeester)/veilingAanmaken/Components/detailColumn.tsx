@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import ProductCard from "@/components/(oud)/ProductCard/index";
+import ProductCard from "@/features/ProductCard";
 import { Product } from "@/types/product";
 // We importeren de CSS module uit de bovenliggende map
 
