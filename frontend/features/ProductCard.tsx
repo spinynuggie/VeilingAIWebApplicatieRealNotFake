@@ -122,14 +122,14 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
             {mode === 'display' ? (
               <Stack direction="row" spacing={1}>
                 {/* Start Price */}
-                <Paper variant="outlined" sx={{ flex: 1, p: 1, textAlign: 'center', bgcolor: '#f9f9f9' }}>
+                <Paper variant="outlined" sx={{ flex: 1, p: 1, textAlign: 'center', bgcolor: 'custom.color6' }}>
                   <Typography variant="caption" display="block" color="text.secondary">startprijs</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                     {product.startPrijs ? `€${Number(product.startPrijs).toFixed(2)}` : 'price not assigned'}
                   </Typography>
                 </Paper>
                 {/* End Price */}
-                <Paper variant="outlined" sx={{ flex: 1, p: 1, textAlign: 'center', bgcolor: '#f9f9f9' }}>
+                <Paper variant="outlined" sx={{ flex: 1, p: 1, textAlign: 'center', bgcolor: 'custom.color6' }}>
                   <Typography variant="caption" display="block" color="text.secondary">eindprijs</Typography>
                   <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                     {product.eindPrijs ? `€${Number(product.eindPrijs).toFixed(2)}` : 'price not assigned'}
@@ -137,7 +137,7 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
                 </Paper>
               </Stack>
             ) : (
-              <Paper variant="outlined" sx={{ p: 1, textAlign: 'center', bgcolor: 'primary.light', color: 'primary.contrastText' }}>
+              <Paper variant="outlined" sx={{ p: 1, textAlign: 'center', bgcolor: 'primary.main', color: 'custom.color7' }}>
                 <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                   Min prijs: € {typeof displayPrice === 'number' ? displayPrice.toFixed(2) : displayPrice || "0.00"}
                 </Typography>

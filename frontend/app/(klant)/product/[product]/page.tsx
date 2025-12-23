@@ -8,6 +8,8 @@ import RequireAuth from "@/components/(oud)/RequireAuth";
 import ProductCard from "@/features/ProductCard";
 // Make sure to import the type to ensure type safety
 import { Product } from '@/types/product';
+import { Background } from "@/components/Background";
+import { Box as BoxMui } from "@mui/material";
 
 export default function VeilingDetailPage() {
   // Use the correct type for state
@@ -43,23 +45,30 @@ export default function VeilingDetailPage() {
   // 4. Product Not Found State
   if (!currentProduct) {
     return (
+      <Background>
        <RequireAuth>
           <Navbar/>
-          <div style={{textAlign: "center", marginTop: "50px"}}>
               <h1>Product niet gevonden</h1>
               <p>Er is geen product met productId: {id}</p>
-          </div>
        </RequireAuth>
+       </Background>
     );
   }
 
   return (
     <RequireAuth>
-      <div style={{background: "white", minHeight: "100vh" }}>
+      <Background>
         <Navbar        />
-
+        <BoxMui 
+        style={{
+          gap: "60px",
+          padding: "60px 40px"
+        }}
+        >
         <ProductCard mode="display" product={currentProduct}/>
-      </div>
+        </BoxMui>
+      </Background>
     </RequireAuth>
+    
   );
 }
