@@ -23,6 +23,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import * as authService from '@/services/authService';
 import AuthSplitLayout from '@/components/AuthSplitLayout';
+import { BackHand } from '@mui/icons-material';
+import { Background } from '@/components/Background';
 
 // simpele manier om valid email te checken
 const validateEmail = (email: string): boolean => {
@@ -105,6 +107,7 @@ function LoginForm() {
 
     return (
         <AuthSplitLayout cardProps={{ component: 'form', onSubmit: handleSubmit }}>
+
             <Stack spacing={1} alignItems="center">
                 <img src="/loginAssets/royalLogo.svg" alt="Royal Flora Holland Logo" width={180} />
                 <Typography variant="h5" fontWeight={700} textAlign="center">
@@ -188,6 +191,7 @@ function LoginForm() {
             <Button type="submit" variant="contained" size="large" fullWidth disabled={loading}>
                 {loading ? 'Bezig...' : 'Inloggen'}
             </Button>
+        
         </AuthSplitLayout>
     );
 }
