@@ -92,6 +92,12 @@ app.UseCors("AllowFrontend");
 // double-submit CSRF check for state-changing requests
 app.Use(async (context, next) =>
 {
+    if (context.Request.Path.StartsWithSegments("/hubs"))
+    {
+        await next();
+        return;
+    }
+
     if (HttpMethods.IsPost(context.Request.Method) ||
         HttpMethods.IsPut(context.Request.Method) ||
         HttpMethods.IsDelete(context.Request.Method) ||
