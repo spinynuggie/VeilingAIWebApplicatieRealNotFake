@@ -92,6 +92,11 @@ export default function VeilingDetailPage() {
 
   const handleLiveBid = async (price: number, quantity: number) => {
     if (!veiling) return;
+    const activeProduct = filteredProducts[0];
+    if (!activeProduct) {
+      setLiveStatus("Geen actief product gevonden.");
+      return;
+    }
     if (!connection) {
       setLiveStatus("Geen live verbinding, probeer te refreshen.");
       return;
@@ -99,7 +104,7 @@ export default function VeilingDetailPage() {
 
     setLiveStatus("Bod versturen...");
     try {
-      await sendBid(connection, String(veiling.veilingId), price, quantity);
+      await sendBid(connection, String(veiling.veilingId), activeProduct.productId, price, quantity);
       setLiveStatus("Bod verstuurd");
     } catch (err) {
       console.error("Bod mislukt:", err);
@@ -113,6 +118,9 @@ export default function VeilingDetailPage() {
   const filteredProducts = allProducts.filter((p) => {
     return String(p.veilingId) === String(veiling.veilingId);
   });
+
+  const activeProduct = filteredProducts[0];
+  const activeBidClosed = Boolean(lastBid && activeProduct && lastBid.productId === activeProduct.productId);
 
   return (
     <RequireAuth>
@@ -141,7 +149,19 @@ export default function VeilingDetailPage() {
             )}
           </Box>
 
-          <VeilingKlok startPrice={12} endPrice={5} duration={10} onBid={handleLiveBid} />
+          {activeProduct ? (
+            <VeilingKlok
+              startPrice={Number(activeProduct.startPrijs ?? 0)}
+              endPrice={Number(activeProduct.eindPrijs ?? 0)}
+              duration={10}
+              productName={activeProduct.productNaam}
+              isClosed={activeBidClosed}
+              closingPrice={lastBid?.amount}
+              onBid={handleLiveBid}
+            />
+          ) : (
+            <p>Geen actief product om op te bieden.</p>
+          )}
           <ProductDisplay product={filteredProducts.slice(1)} />
         </Box>
 

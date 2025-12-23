@@ -6,10 +6,12 @@ import {
 
 export type BidEvent = {
   veilingId: string;
+  productId: number;
   amount: number;
   quantity: number;
   bidder: string;
   timestamp: string;
+  remainingQuantity?: number;
 };
 
 export type PriceTickEvent = {
@@ -68,6 +70,7 @@ export async function stopAuctionConnection(
 export function sendBid(
   connection: HubConnection | null,
   veilingId: string,
+  productId: number,
   amount: number,
   quantity: number
 ): Promise<void> {
@@ -75,5 +78,5 @@ export function sendBid(
     return Promise.reject(new Error("Geen actieve live verbinding."));
   }
 
-  return connection.invoke("PlaceBid", veilingId, amount, quantity);
+  return connection.invoke("PlaceBid", veilingId, productId, amount, quantity);
 }
