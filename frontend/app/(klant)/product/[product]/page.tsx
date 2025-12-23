@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "@/features/(NavBar)/AppNavBar";
 import { getProducts } from "@/services/productService";
-import { Box } from "@mui/material"
 import RequireAuth from "@/components/(oud)/RequireAuth";
 import ProductCard from "@/features/ProductCard";
 // Make sure to import the type to ensure type safety

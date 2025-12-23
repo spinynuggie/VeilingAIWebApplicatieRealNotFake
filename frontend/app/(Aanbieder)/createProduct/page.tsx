@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import ProductForm, { ProductData } from "@/app/(Aanbieder)/createProduct/ProductForm/index";
-import ProductCard from "@/components/(oud)/ProductCard/index";
+import ProductCard from "@/features/ProductCard";
 import RequireAuth from "@/components/(oud)/RequireAuth";
 import AppNavbar from "@/features/(NavBar)/AppNavBar";
 import { Box as BoxMui } from "@mui/material"
