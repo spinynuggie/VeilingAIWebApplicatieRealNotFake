@@ -106,7 +106,7 @@ export function useVeilingAanmaken() {
             productId: productToRemove.productId,
             veilingId: 0,
             startPrijs: 0,
-            eindPrijs: 0
+            eindPrijs: productToRemove.eindPrijs
         });
 
         const resetProduct = { ...productToRemove, veilingId: 0 };
