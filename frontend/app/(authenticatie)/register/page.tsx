@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import NextLink from 'next/link';
 // @ts-ignore
-import { TextField, InputAdornment, IconButton, Button, Alert } from '@mui/material';
+import { Alert, Button, IconButton, InputAdornment, Link, Stack, TextField, Typography } from '@mui/material';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
@@ -10,6 +11,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import * as authService from '@/services/authService';
+import AuthSplitLayout from '@/components/AuthSplitLayout';
 
 // Simpele manier om valid email te checken
 const validateEmail = (email: string): boolean => {
@@ -115,55 +117,106 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-left">
-                <img src="/loginAssets/FloraHollandGebouw.png" alt="Royal Flora Holland" className="login-image" />
-            </div>
-            <div className="login-right">
-                <form className="login-form" onSubmit={handleSubmit}>
-                    <img src="/loginAssets/royalLogo.svg" alt="Royal Flora Holland Logo" className="logo" />
-                    <div className="inloggen-text">Registreren</div>
-                    <div className="register-section">
-                        <span>Al een gebruiker?</span>
-                        <a href="/login" className="register-btn">Inloggen</a>
-                    </div>
+        <AuthSplitLayout cardProps={{ component: 'form', onSubmit: handleSubmit }}>
+            <Stack spacing={1} alignItems="center">
+                <img src="/loginAssets/royalLogo.svg" alt="Royal Flora Holland Logo" width={180} />
+                <Typography variant="h5" fontWeight={700} textAlign="center">
+                    Registreren
+                </Typography>
+            </Stack>
 
-                    <div className="input-field">
-                        <TextField label="E-mail adres" name="emailadres" variant="outlined" fullWidth value={form.emailadres} onChange={handleChange}
-                            error={!!emailError}
-                            helperText={emailError}
-                            InputProps={{ startAdornment: (<InputAdornment position="start"><MailOutlineIcon /></InputAdornment>) }}
-                        />
-                    </div>
+            <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+                <Typography variant="body2" color="text.secondary">
+                    Al een gebruiker?
+                </Typography>
+                <Link
+                    component={NextLink}
+                    href="/login"
+                    underline="hover"
+                    color="primary"
+                    variant="body2"
+                    fontWeight={600}
+                >
+                    Inloggen
+                </Link>
+            </Stack>
 
-                    <div className="input-field">
-                        <TextField label="Wachtwoord" name="wachtwoord" type={showPassword ? 'text' : 'password'} variant="outlined" fullWidth value={form.wachtwoord} onChange={handleChange}
-                            error={!!passwordError}
-                            helperText={passwordError}
-                            InputProps={{
-                                startAdornment: (<InputAdornment position="start"><LockOutlinedIcon /></InputAdornment>),
-                                endAdornment: (<InputAdornment position="end"><IconButton onClick={() => setShowPassword(!showPassword)}>{showPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment>),
-                            }} />
-                    </div>
+            <Stack spacing={2}>
+                <TextField
+                    label="E-mail adres"
+                    name="emailadres"
+                    variant="outlined"
+                    fullWidth
+                    value={form.emailadres}
+                    onChange={handleChange}
+                    error={!!emailError}
+                    helperText={emailError}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <MailOutlineIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+                <TextField
+                    label="Wachtwoord"
+                    name="wachtwoord"
+                    type={showPassword ? 'text' : 'password'}
+                    variant="outlined"
+                    fullWidth
+                    value={form.wachtwoord}
+                    onChange={handleChange}
+                    error={!!passwordError}
+                    helperText={passwordError}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <LockOutlinedIcon />
+                            </InputAdornment>
+                        ),
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+                <TextField
+                    label="Herhaal wachtwoord"
+                    name="repeatWachtwoord"
+                    type={showPassword ? 'text' : 'password'}
+                    variant="outlined"
+                    fullWidth
+                    value={form.repeatWachtwoord}
+                    onChange={handleChange}
+                    error={!!repeatPasswordError}
+                    helperText={repeatPasswordError}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <LockOutlinedIcon />
+                            </InputAdornment>
+                        ),
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+            </Stack>
 
-                    <div className="input-field">
-                        <TextField label="Herhaal wachtwoord" name="repeatWachtwoord" type={showPassword ? 'text' : 'password'} variant="outlined" fullWidth value={form.repeatWachtwoord} onChange={handleChange}
-                            error={!!repeatPasswordError} // 💡 FIX: Gebruik de nieuwe error state
-                            helperText={repeatPasswordError} // 💡 FIX: Gebruik de nieuwe error state
-                            InputProps={{
-                                startAdornment: (<InputAdornment position="start"><LockOutlinedIcon /></InputAdornment>),
-                                endAdornment: (<InputAdornment position="end"><IconButton onClick={() => setShowPassword(!showPassword)}>{showPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment>),
-                            }} />
-                    </div>
+            {error && <Alert severity="error">{error}</Alert>}
+            {success && <Alert severity="success">{success}</Alert>}
 
-                    {error && <Alert severity="error">{error}</Alert>}
-                    {success && <Alert severity="success">{success}</Alert>}
-
-                    <Button type="submit" variant="contained" className="login-btn" disabled={loading}>
-                        {loading ? 'Bezig...' : 'Account aanmaken'}
-                    </Button>
-                </form>
-            </div>
-        </div>
+            <Button type="submit" variant="contained" size="large" fullWidth disabled={loading}>
+                {loading ? 'Bezig...' : 'Account aanmaken'}
+            </Button>
+        </AuthSplitLayout>
     );
 }

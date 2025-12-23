@@ -5,25 +5,28 @@ interface MyBoxProps extends BoxProps {
 }
 
 export function Box({ children, ...props }: MyBoxProps) {
+  const { sx, ...rest } = props;
+
   return (
     <BoxMui
-      {...props}
       sx={{
-        display: "flex", // Veranderd van inline-flex naar flex
+        display: "flex",
         justifyContent: "center",
-        ...props.sx, 
       }}
     >
       <BoxMui
+        {...rest}
         sx={{
-          p: 4,
-          bgcolor: "custom.color6",
-          border: "2px solid",
-          borderColor: "custom.color2",
-          borderRadius: 2,
-          minWidth: '400px', // Geef het een basisbreedte voor formulieren
-          width: 'fit-content',
-          boxShadow: 3 // Optioneel: geeft wat diepte
+          bgcolor: "background.paper",
+          borderRadius: 3,
+          boxShadow: 3,
+          p: { xs: 3, md: 4 },
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          minWidth: { xs: 0, sm: 360 },
+          width: { xs: "100%", sm: "fit-content" },
+          ...sx,
         }}
       >
         {children}
