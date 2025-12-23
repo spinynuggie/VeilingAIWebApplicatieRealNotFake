@@ -101,7 +101,7 @@ export function NavBar({ mode, onLogout }: NavBarProps) {
             <FloraLogo mode='small'/>
           </Link>
 
-          <SearchBar mode="redirect"/>
+          <SearchBar mode="redirect" sx={{ width: '20vw'}}/>
 
           <Stack direction="row" spacing={2} alignItems="center">
             {renderActions()}

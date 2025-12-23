@@ -1,11 +1,15 @@
 import React, { useState, ChangeEvent, FormEvent, KeyboardEvent } from "react";
+import { useSearch } from "@/hooks/useSearch";  
+import { SearchResult } from "@/types/search";    
 import { useAuth } from "@/components/AuthProvider";
 import { createProduct } from "@/services/productService";
 import { Alert, Snackbar, CircularProgress } from "@mui/material";
 import { Box } from "@/components/Box";
 import { TextField } from "@/components/TextField";
 import { Button } from "@/components/Buttons/Button";
+import SearchBar from "@/components/SearchBar"
 import { Stack, Grid, Typography, InputAdornment, Box as BoxMui } from "@mui/material";
+import { searchSpecificaties } from "@/services/searchService";
 
 // --- TYPES ---
 export interface ProductData {
@@ -28,6 +32,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const { user } = useAuth();
+  const searchControl = useSearch<SearchResult>(searchSpecificaties);
 
   // --- HANDLERS ---
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -217,6 +222,9 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
           value={formData.description}
           onChange={handleChange}
         />
+        <SearchBar mode="callback" searchControl={searchControl} >
+
+        </SearchBar>
 
         <BoxMui sx={{ mt: 'auto', textAlign: 'center' }}>
           <Button 

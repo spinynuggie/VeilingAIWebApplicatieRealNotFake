@@ -17,9 +17,10 @@ interface SearchBarProps {
     inputValue: string;
     setInputValue: (val: string) => void;
   };
+  sx?: any;
 }
 
-export default function SearchBar({ mode, onSearch, searchControl }: SearchBarProps) {
+export default function SearchBar({ mode, onSearch, searchControl, sx }: SearchBarProps) {
   const router = useRouter();
 
   // Initialiseer een interne search voor als er geen searchControl wordt meegegeven (bijv. in de NavBar)
@@ -42,7 +43,8 @@ export default function SearchBar({ mode, onSearch, searchControl }: SearchBarPr
 
   return (
     <Autocomplete
-      sx={{ width: "30vw" }}
+      sx={{ ...sx }}
+      fullWidth
       freeSolo
       options={options || []}
       loading={loading}
