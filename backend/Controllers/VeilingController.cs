@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using backend.Data;
 using backend.Models;
 using backend.Dtos;
+using backend.Services;
 
 namespace backend.Controllers
 {
@@ -15,10 +16,14 @@ namespace backend.Controllers
     public class VeilingController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly AuctionStateStore _stateStore;
+        private readonly AuctionRealtimeService _realtime;
 
-        public VeilingController(AppDbContext context)
+        public VeilingController(AppDbContext context, AuctionStateStore stateStore, AuctionRealtimeService realtime)
         {
             _context = context;
+            _stateStore = stateStore;
+            _realtime = realtime;
         }
 
         // GET: api/Veiling (Blijft ongewijzigd, retourneert het domeinmodel)
@@ -61,6 +66,10 @@ namespace backend.Controllers
             veiling.Starttijd = veilingDto.Starttijd;
             veiling.Eindtijd   = veilingDto.Eindtijd;
             veiling.VeilingMeesterId = veilingDto.VeilingMeesterId;
+            if (veilingDto.ActiefProductId.HasValue)
+            {
+                veiling.ActiefProductId = veilingDto.ActiefProductId > 0 ? veilingDto.ActiefProductId : null;
+            }
 
             _context.Entry(veiling).State = EntityState.Modified;
 
@@ -80,6 +89,8 @@ namespace backend.Controllers
                 }
             }
 
+            await PublishAuctionStateAsync(veiling.VeilingId);
+
             return NoContent();
         }
 
@@ -96,12 +107,15 @@ namespace backend.Controllers
                 Locatie = veilingDto.Locatie,
                 Starttijd = veilingDto.Starttijd,
                 Eindtijd   = veilingDto.Eindtijd,
-                VeilingMeesterId = veilingDto.VeilingMeesterId
+                VeilingMeesterId = veilingDto.VeilingMeesterId,
+                ActiefProductId = veilingDto.ActiefProductId > 0 ? veilingDto.ActiefProductId : null
             };
             
             // 2. Voeg het domeinmodel toe en sla op
             _context.Veiling.Add(veiling);
             await _context.SaveChangesAsync();
+
+            await PublishAuctionStateAsync(veiling.VeilingId);
 
             // 3. Retourneer het aangemaakte Veiling domeinmodel
             return CreatedAtAction("GetVeiling", new { id = veiling.VeilingId }, veiling);
@@ -126,6 +140,18 @@ namespace backend.Controllers
         private bool VeilingExists(int id)
         {
             return _context.Veiling.Any(e => e.VeilingId == id);
+        }
+
+        private async Task PublishAuctionStateAsync(int veilingId)
+        {
+            var state = await _stateStore.GetOrRefreshAsync(_context, veilingId, true);
+            if (state == null)
+            {
+                return;
+            }
+
+            var payload = AuctionStateDto.FromState(state, DateTimeOffset.UtcNow);
+            await _realtime.PublishStateAsync(payload);
         }
     }
 }

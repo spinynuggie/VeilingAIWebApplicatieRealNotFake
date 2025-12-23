@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -25,6 +26,8 @@ namespace backend.Models
         public DateTimeOffset Starttijd { get; set; }
         
         public DateTimeOffset Eindtijd { get; set; }
+
+        public int? ActiefProductId { get; set; }
 
         public int VeilingMeesterId { get; set; }
         

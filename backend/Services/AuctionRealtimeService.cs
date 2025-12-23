@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using backend.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -29,14 +30,18 @@ namespace backend.Services
             });
         }
 
-        public Task PublishTickAsync(string veilingId, decimal price, DateTimeOffset timestamp)
+        public Task PublishTickAsync(AuctionStateDto state, CancellationToken cancellationToken = default)
         {
-            return _hubContext.Clients.Group(veilingId).SendAsync(AuctionHub.PriceTickMethod, new
-            {
-                veilingId,
-                price,
-                timestamp
-            });
+            return _hubContext.Clients
+                .Group(state.VeilingId.ToString())
+                .SendAsync(AuctionHub.PriceTickMethod, state, cancellationToken);
+        }
+
+        public Task PublishStateAsync(AuctionStateDto state, CancellationToken cancellationToken = default)
+        {
+            return _hubContext.Clients
+                .Group(state.VeilingId.ToString())
+                .SendAsync(AuctionHub.StateSyncMethod, state, cancellationToken);
         }
     }
 }

@@ -39,6 +39,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddSingleton<AuctionRealtimeService>();
+builder.Services.AddSingleton<AuctionStateStore>();
+builder.Services.AddSingleton<AuctionPresenceStore>();
+builder.Services.AddHostedService<AuctionTickerHostedService>();
 builder.Services.AddSignalR();
 builder.Services.AddResponseCompression(options =>
 {

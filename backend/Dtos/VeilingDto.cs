@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace backend.Dtos
@@ -26,5 +27,7 @@ namespace backend.Dtos
 
         [Required(ErrorMessage = "VeilingMeesterId is verplicht.")]
         public int VeilingMeesterId { get; set; }
+
+        public int? ActiefProductId { get; set; }
     }
 }

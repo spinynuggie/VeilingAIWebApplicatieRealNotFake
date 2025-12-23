@@ -134,7 +134,8 @@ namespace backend.Controllers
                 
                 // Interne velden worden ingesteld door de backend, NIET de client DTO
                 GebruikerId = koperId, 
-                IsBetaald = false // Standaard onbetaald
+                IsBetaald = false, // Standaard onbetaald
+                CreatedAt = DateTimeOffset.UtcNow
             };
 
             _context.Aankoop.Add(aankoop);
@@ -167,4 +168,3 @@ namespace backend.Controllers
         }
     }
 }
-

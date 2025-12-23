@@ -44,3 +44,14 @@
 - Single VPS instance (no SignalR backplane needed).
 - Cache is in-memory; if the server restarts, state is recalculated from DB + time.
 - CSRF bypass for `/hubs/*` stays in place.
+
+## Additional User Story (English)
+When a buyer wants to place a bid on a flower lot, they must be able to open a screen (popup or existing page) that shows **historical prices** for that product/flower type. The screen must show:
+- The **average price** across all historical deliveries, and
+- The **last 10 prices** for:
+  1) the **current supplier** (aanvoerder) and
+  2) **all suppliers** combined.
+
+Performance requirement:
+- This data must be fetched via **raw SQL queries** (not Entity Framework), because it needs to be real-time and efficient.
+- Add **indexes** where needed to prevent future performance issues.

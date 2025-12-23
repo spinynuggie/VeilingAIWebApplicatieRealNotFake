@@ -12,13 +12,22 @@ export type BidEvent = {
   bidder: string;
   timestamp: string;
   remainingQuantity?: number;
+  status?: string;
 };
 
-export type PriceTickEvent = {
-  veilingId: string;
-  price: number;
-  timestamp: string;
+export type AuctionStateEvent = {
+  veilingId: number;
+  activeProductId: number | null;
+  currentPrice: number;
+  lastBidPrice?: number | null;
+  remainingQuantity: number;
+  status: string;
+  serverTime: string;
+  starttijd: string;
+  eindtijd: string;
 };
+
+export type PriceTickEvent = AuctionStateEvent;
 
 const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
 
@@ -29,6 +38,7 @@ if (!apiBase) {
 type AuctionHandlers = {
   onBid?: (bid: BidEvent) => void;
   onTick?: (tick: PriceTickEvent) => void;
+  onState?: (state: AuctionStateEvent) => void;
 };
 
 export async function startAuctionConnection(
@@ -48,6 +58,9 @@ export async function startAuctionConnection(
   }
   if (handlers.onTick) {
     connection.on("PriceTick", handlers.onTick);
+  }
+  if (handlers.onState) {
+    connection.on("AuctionState", handlers.onState);
   }
 
   await connection.start();
@@ -79,4 +92,15 @@ export function sendBid(
   }
 
   return connection.invoke("PlaceBid", veilingId, productId, amount, quantity);
+}
+
+export async function fetchCurrentState(
+  connection: HubConnection | null,
+  veilingId: string
+): Promise<AuctionStateEvent> {
+  if (!connection) {
+    return Promise.reject(new Error("Geen actieve live verbinding."));
+  }
+
+  return connection.invoke("GetCurrentState", veilingId);
 }
