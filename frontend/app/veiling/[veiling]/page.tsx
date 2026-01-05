@@ -5,16 +5,16 @@ import { usePathname } from "next/navigation";
 import { HubConnection } from "@microsoft/signalr";
 import { Veiling } from "@/types/veiling";
 import { getVeilingen } from "@/services/veilingService";
-import Navbar from "@/components/NavBar";
-import SearchBar from "@/components/SearchBar";
+import Navbar from "@/features/(NavBar)/AppNavBar";
+import SearchBar from "@/features/(NavBar)/AppNavBar";
 import royalLogo from "@/public/loginAssets/royalLogo.svg";
-import ProductDisplay from "@/components/ProductDisplay";
+import ProductDisplay from "@/components/(oud)/ProductDisplay";
 import { getProducts } from "@/services/productService";
-import Profile from "@/components/Profile";
+import Profile from "@/components/(oud)/Profile";
 import { Box } from "@mui/material";
-import RequireAuth from "@/components/RequireAuth";
-import ProductCard from "@/components/ProductCard/index";
-import { VeilingKlok } from "@/components/VeilingKlok";
+import RequireAuth from "@/components/(oud)/RequireAuth";
+import ProductCard from "@/features/ProductCard";
+import { VeilingKlok } from "@/components/(oud)/VeilingKlok";
 import {
   BidEvent,
   PriceTickEvent,
@@ -92,6 +92,11 @@ export default function VeilingDetailPage() {
 
   const handleLiveBid = async (price: number, quantity: number) => {
     if (!veiling) return;
+    const activeProduct = filteredProducts[0];
+    if (!activeProduct) {
+      setLiveStatus("Geen actief product gevonden.");
+      return;
+    }
     if (!connection) {
       setLiveStatus("Geen live verbinding, probeer te refreshen.");
       return;
@@ -99,7 +104,7 @@ export default function VeilingDetailPage() {
 
     setLiveStatus("Bod versturen...");
     try {
-      await sendBid(connection, String(veiling.veilingId), price, quantity);
+      await sendBid(connection, String(veiling.veilingId), activeProduct.productId, price, quantity);
       setLiveStatus("Bod verstuurd");
     } catch (err) {
       console.error("Bod mislukt:", err);
@@ -113,6 +118,9 @@ export default function VeilingDetailPage() {
   const filteredProducts = allProducts.filter((p) => {
     return String(p.veilingId) === String(veiling.veilingId);
   });
+
+  const activeProduct = filteredProducts[0];
+  const activeBidClosed = Boolean(lastBid && activeProduct && lastBid.productId === activeProduct.productId);
 
   return (
     <RequireAuth>
@@ -141,7 +149,19 @@ export default function VeilingDetailPage() {
             )}
           </Box>
 
-          <VeilingKlok startPrice={12} endPrice={5} duration={10} onBid={handleLiveBid} />
+          {activeProduct ? (
+            <VeilingKlok
+              startPrice={Number(activeProduct.startPrijs ?? 0)}
+              endPrice={Number(activeProduct.eindPrijs ?? 0)}
+              duration={10}
+              productName={activeProduct.productNaam}
+              isClosed={activeBidClosed}
+              closingPrice={lastBid?.amount}
+              onBid={handleLiveBid}
+            />
+          ) : (
+            <p>Geen actief product om op te bieden.</p>
+          )}
           <ProductDisplay product={filteredProducts.slice(1)} />
         </Box>
 

@@ -1,9 +1,9 @@
 "use client";
 
-import RequireAuth from "@/components/RequireAuth";
+import RequireAuth from "@/components/(oud)/RequireAuth";
 import { useEffect, useState } from "react";
 import { getVeilingen } from "@/services/veilingService";
-import VeilingListSimple from "@/components/VeilingListSimple";
+import VeilingListSimple from "@/components/(oud)/VeilingListSimple";
 import type { Veiling } from "@/types/veiling";
 
 export default function WatchlistPage() {

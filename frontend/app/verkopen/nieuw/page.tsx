@@ -1,6 +1,6 @@
 "use client";
 
-import RequireAuth from "@/components/RequireAuth";
+import RequireAuth from "@/components/(oud)/RequireAuth";
 
 export default function NieuweVerkoopPage() {
   return (

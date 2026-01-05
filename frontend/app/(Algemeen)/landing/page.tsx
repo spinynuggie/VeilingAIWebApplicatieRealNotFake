@@ -1,39 +1,24 @@
 "use client";
 
-import Image from "next/image";
-import royalLogo from "@/public/loginAssets/royalLogo.svg";
-import dynamic from "next/dynamic";
-import styles from "./landing.module.css";
-
-// Dynamically import AppNavbar with SSR disabled
-const AppNavbar = dynamic(
-  () => import("@/components/AppNavbar"),
-  { ssr: false, loading: () => <div style={{ height: '64px' }} /> }
-);
-
+import  AppNavBar  from "@/features/(NavBar)/AppNavBar"
+import { FloraLogo } from "@/components/FloraLogo";
+import { Background } from "@/components/Background"
 export default function Landing() {
-  return (
-    <div className={styles.landingContainer}>
-      <AppNavbar />
+return (
+  <Background> 
+    <AppNavBar/>
+    {/* min-h-screen accounts for the full height minus the NavBar if it's fixed */}
+    <main className="flex flex-col items-center justify-center min-h-[calc(100vh)] text-center">
+      <div>
+        <FloraLogo mode="large"/>
+      </div>
 
-      <main className={styles.heroSection}>
-        <div className={styles.logo}>
-          <Image 
-            src={royalLogo} 
-            alt="Royal FloraHolland Logo" 
-            priority 
-            className={styles.logoImg} 
-          />
-        </div>
-
-        <h1 className={styles.heroTitle}>
-          De grootste<br />
-          internationale<br />
-          sierteeltmarktplaats
-        </h1>
-
-        <button className={styles.ctaButton}>Meer informatie</button>
-      </main>
-    </div>
-  );
+      <h1 className="mt-8 text-8xl font-bold leading-tight">
+        De grootste<br />
+        internationale<br />
+        sierteeltmarktplaats
+      </h1>
+    </main>
+  </Background>
+);
 }

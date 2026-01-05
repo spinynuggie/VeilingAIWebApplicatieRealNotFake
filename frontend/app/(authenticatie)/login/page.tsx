@@ -1,9 +1,20 @@
 'use client';
 
 import React, { Suspense, useState } from 'react';
+import NextLink from 'next/link';
 // @ts-ignore:
-import './page.css';
-import { TextField, InputAdornment, IconButton, Checkbox, Button, Alert } from '@mui/material';
+import {
+    Alert,
+    Button,
+    Checkbox,
+    FormControlLabel,
+    IconButton,
+    InputAdornment,
+    Link,
+    Stack,
+    TextField,
+    Typography,
+} from '@mui/material';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
@@ -11,6 +22,9 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import * as authService from '@/services/authService';
+import AuthSplitLayout from '@/components/AuthSplitLayout';
+import { BackHand } from '@mui/icons-material';
+import { Background } from '@/components/Background';
 
 // simpele manier om valid email te checken
 const validateEmail = (email: string): boolean => {
@@ -92,87 +106,93 @@ function LoginForm() {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-left">
-                <img src="/loginAssets/FloraHollandGebouw.png" alt="Royal Flora Holland" className="login-image" />
-            </div>
-            <div className="login-right">
-                <form className="login-form" onSubmit={handleSubmit}>
-                    <img src="/loginAssets/royalLogo.svg" alt="Royal Flora Holland Logo" className="logo" />
-                    <div className="inloggen-text">Inloggen</div>
+        <AuthSplitLayout cardProps={{ component: 'form', onSubmit: handleSubmit }}>
 
-                    <div className="register-section">
-                        <span>Nieuwe gebruiker?</span>
-                        <a href="/register" className="register-btn">Account aanmaken</a>
-                    </div>
+            <Stack spacing={1} alignItems="center">
+                <img src="/loginAssets/royalLogo.svg" alt="Royal Flora Holland Logo" width={180} />
+                <Typography variant="h5" fontWeight={700} textAlign="center">
+                    Inloggen
+                </Typography>
+            </Stack>
 
-                    <div className="input-field">
-                        <TextField
-                            label="E-mail adres"
-                            variant="outlined"
-                            fullWidth
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            // --- FRONTEND ERROR PROPS ---
-                            error={!!emailError}
-                            helperText={emailError}
-                            // ----------------------------
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <MailOutlineIcon />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </div>
+            <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+                <Typography variant="body2" color="text.secondary">
+                    Nieuwe gebruiker?
+                </Typography>
+                <Link
+                    component={NextLink}
+                    href="/register"
+                    underline="hover"
+                    color="primary"
+                    variant="body2"
+                    fontWeight={600}
+                >
+                    Account aanmaken
+                </Link>
+            </Stack>
 
-                    <div className="input-field">
-                        <TextField
-                            label="Wachtwoord"
-                            type={showPassword ? 'text' : 'password'}
-                            variant="outlined"
-                            fullWidth
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            // --- FRONTEND ERROR PROPS ---
-                            error={!!passwordError}
-                            helperText={passwordError}
-                            // ----------------------------
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <LockOutlinedIcon />
-                                    </InputAdornment>
-                                ),
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton onClick={() => setShowPassword(!showPassword)}>
-                                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </div>
+            <Stack spacing={2}>
+                <TextField
+                    label="E-mail adres"
+                    variant="outlined"
+                    fullWidth
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    // --- FRONTEND ERROR PROPS ---
+                    error={!!emailError}
+                    helperText={emailError}
+                    // ----------------------------
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <MailOutlineIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+                <TextField
+                    label="Wachtwoord"
+                    type={showPassword ? 'text' : 'password'}
+                    variant="outlined"
+                    fullWidth
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    // --- FRONTEND ERROR PROPS ---
+                    error={!!passwordError}
+                    helperText={passwordError}
+                    // ----------------------------
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <LockOutlinedIcon />
+                            </InputAdornment>
+                        ),
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+            </Stack>
 
-                    <div className="remember-section">
-                        <label className="remember-label">
-                            <Checkbox />
-                            Herinner mij
-                        </label>
-                        <a href="#" className="forgot-link">Wachtwoord vergeten?</a>
-                    </div>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <FormControlLabel control={<Checkbox />} label="Herinner mij" />
+                <Link href="#" underline="hover" variant="body2">
+                    Wachtwoord vergeten?
+                </Link>
+            </Stack>
 
-                    {error && <Alert severity="error">{error}</Alert>}
-                    {success && <Alert severity="success">{success}</Alert>}
+            {error && <Alert severity="error">{error}</Alert>}
+            {success && <Alert severity="success">{success}</Alert>}
 
-                    <Button type="submit" variant="contained" className="login-btn" disabled={loading}>
-                        {loading ? 'Bezig...' : 'Inloggen'}
-                    </Button>
-                </form>
-            </div>
-        </div>
+            <Button type="submit" variant="contained" size="large" fullWidth disabled={loading}>
+                {loading ? 'Bezig...' : 'Inloggen'}
+            </Button>
+        
+        </AuthSplitLayout>
     );
 }
 

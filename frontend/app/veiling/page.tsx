@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getProducts } from "../../services/productService";
 import { Product } from "@/types/product";
-import RequireAuth from "@/components/RequireAuth";
+import RequireAuth from "@/components/(oud)/RequireAuth";
 
 export default function ProductList() {
   // We hoeven niet alle producten op te slaan, alleen degene die we willen tonen

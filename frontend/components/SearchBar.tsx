@@ -1,141 +1,92 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { TextField, Autocomplete, CircularProgress, InputAdornment } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import React from "react";
+import { TextField, Autocomplete, CircularProgress } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { SearchResult } from "@/types/search";
+import { useSearch } from "@/hooks/useSearch";
+import { globalSearch } from "@/services/searchService";
 
-interface SearchResult {
-  id: number;
-  naam: string;
-  type: "Product" | "Veiling";
-  image?: string;
+interface SearchBarProps {
+  mode: "redirect" | "callback";
+  onSearch?: (term: string) => void;
+  // Optioneel gemaakt om crashes in NavBar te voorkomen
+  searchControl?: {
+    options: SearchResult[];
+    loading: boolean;
+    inputValue: string;
+    setInputValue: (val: string) => void;
+  };
+  sx?: any;
 }
 
-const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
-
-export default function SearchBar() {
+export default function SearchBar({ mode, onSearch, searchControl, sx }: SearchBarProps) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [options, setOptions] = useState<SearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [inputValue, setInputValue] = useState("");
 
-  // Ref to keep track of the current request so we can cancel it
-  const abortControllerRef = useRef<AbortController | null>(null);
+  // Initialiseer een interne search voor als er geen searchControl wordt meegegeven (bijv. in de NavBar)
+  const internalSearch = useSearch<SearchResult>(globalSearch);
+  
+  // Gebruik de externe control indien aanwezig, anders de interne fallback
+  const { options, loading, setInputValue } = searchControl ?? internalSearch;
 
-  useEffect(() => {
-    // 1. If empty, clear and stop
-    if (inputValue.length === 0) {
-      setOptions([]);
-      setLoading(false);
-      return;
-    }
-
-    // 2. CANCEL previous request if it's still running
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    // 3. Create new controller for this specific keystroke
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    // 4. Short delay
-    const timer = setTimeout(async () => {
-      setLoading(true);
-
-      try {
-        const res = await fetch(`${apiBase}/api/Search?query=${encodeURIComponent(inputValue)}`, {
-          signal: controller.signal, // <--- This connects the abort controller
-        });
-
-        if (!res.ok) throw new Error("Error");
-
-        const data = await res.json();
-        setOptions(data);
-        setLoading(false);
-      } catch (error: any) {
-        // Only log error if it wasn't cancelled on purpose
-        if (error.name !== "AbortError") {
-          console.error("Search failed", error);
-          setLoading(false);
-        }
-      }
-    }, 150);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [inputValue]);
-
-  const handleSelect = (event: any, value: SearchResult | null) => {
+  const handleChange = (event: any, value: SearchResult | string | null) => {
     if (!value) return;
-    setInputValue(""); // Clear input
-    setOptions([]); // Clear dropdown
 
-    const path = value.type === "Product" ? `/product/${value.id}` : `/veiling/${value.id}`;
-    router.push(path);
+    if (mode === "redirect" && typeof value !== "string") {
+      const path = value.type === "Product" ? `/product/${value.id}` : `/veiling/${value.id}`;
+      router.push(path);
+    } else if (mode === "callback") {
+      const term = typeof value === "string" ? value : value.naam;
+      onSearch?.(term);
+    }
   };
 
   return (
     <Autocomplete
-      id="server-search"
-      sx={{ width: "40vw" }}
-      open={open}
-      onOpen={() => { if (inputValue.length > 0) setOpen(true); }}
-      onClose={() => setOpen(false)}
-
-      // Standard Server-Side setup
-      getOptionLabel={(option) => option.naam}
-      filterOptions={(x) => x} // Disable client filtering
-      options={options}
+      sx={{ ...sx }}
+      fullWidth
+      freeSolo
+      options={options || []}
       loading={loading}
-
-      // Typing handler
-      onInputChange={(event, newInputValue) => {
-        setInputValue(newInputValue);
-        setOpen(newInputValue.length > 0);
-      }}
-
-      onChange={handleSelect}
-
-      // Your existing styling...
-      renderOption={(props, option) => {
-        const { key, ...restProps } = props;
-        return (
-            <li key={key} {...restProps}>
-            <div style={{ display: "flex", alignItems: 'center', gap: '10px', width: '100%' }}>
-                {option.image && <img src={option.image} style={{width: 30, height: 30, borderRadius: 4}} />}
-                <div>
-                    <span style={{ fontWeight: "500", display: "block" }}>{option.naam}</span>
-                    <span style={{ fontSize: "12px", color: "#888" }}>{option.type}</span>
-                </div>
-            </div>
-            </li>
-        );
-      }}
+      getOptionLabel={(option) => (typeof option === "string" ? option : option.naam)}
+      filterOptions={(x) => x}
+      onInputChange={(_, newValue) => setInputValue(newValue)}
+      onChange={handleChange}
       renderInput={(params) => (
         <TextField
           {...params}
-          variant="outlined"
-          size="small"
+          variant="standard"
           placeholder="Zoeken..."
           InputProps={{
             ...params.InputProps,
-            startAdornment: (
-                <InputAdornment position="start"><SearchIcon sx={{ color: '#aaa' }} /></InputAdornment>
-            ),
             endAdornment: (
-              <React.Fragment>
+              <>
                 {loading ? <CircularProgress color="inherit" size={20} /> : null}
                 {params.InputProps.endAdornment}
-              </React.Fragment>
+              </>
             ),
           }}
-          sx={{ backgroundColor: "#f5f5f5", borderRadius: "50px", "& fieldset": { borderRadius: "50px" } }}
         />
       )}
+      renderOption={(props, option) => {
+        const { key, ...restProps } = props;
+        return (
+          <li key={key} {...restProps}>
+            <div style={{ display: "flex", alignItems: "center", width: "100%", gap: "12px" }}>
+              {option.image ? (
+                <img src={option.image} alt="" style={{ width: 32, height: 32, borderRadius: 4, objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: 32, height: 32, borderRadius: 4, backgroundColor: '#eee' }} />
+              )}
+              <span style={{ fontWeight: 500, fontSize: '14px' }}>{option.naam}</span>
+              <div style={{ flexGrow: 1 }} />
+              <span style={{ fontSize: "11px", color: "#999", textTransform: "uppercase" }}>
+                {option.type}
+              </span>
+            </div>
+          </li>
+        );
+      }}
     />
   );
 }

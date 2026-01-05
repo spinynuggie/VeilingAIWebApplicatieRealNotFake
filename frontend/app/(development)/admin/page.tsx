@@ -1,10 +1,13 @@
 "use client";
 
-import RequireAuth from "@/components/RequireAuth";
+import RequireAuth from "@/components/(oud)/RequireAuth";
 import { useEffect, useState } from "react";
 import { getGebruiker } from "@/services/gebruikerService";
-import UserInfoCard from "@/components/UserInfoCard";
+import UserInfoCard from "@/features/UserInfoCard";
 import type { User } from "@/types/user";
+import AppNavBar from "@/features/(NavBar)/AppNavBar";
+import { Background } from "@/components/Background";
+import { Container, Typography, Grid} from "@mui/material"
 
 export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -18,16 +21,31 @@ export default function AdminPage() {
 
   return (
     <RequireAuth roles={["ADMIN"]}>
-      <div style={{ padding: "20px", display: "grid", gap: 16 }}>
-        <h1 style={{ margin: 0 }}>Admin</h1>
+      <Background>
+      <AppNavBar/>
+      <Container maxWidth="lg" sx={{ mt: 4, pb: 8 }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+          Admin Dashboard
+        </Typography>
+
         {error ? (
-          <div style={{ color: "red" }}>{error}</div>
+          <Typography color="error">{error}</Typography>
         ) : users.length === 0 ? (
-          <div>Geen gebruikers gevonden.</div>
+          <Typography>Geen gebruikers gevonden.</Typography>
         ) : (
-          users.map((u) => <UserInfoCard key={u.gebruikerId} user={u} title={`Gebruiker #${u.gebruikerId}`} />)
+          <Grid container spacing={3}>
+            {users.map((u) => (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={u.gebruikerId}>
+                <UserInfoCard 
+                  user={u} 
+                  title={`Gebruiker #${u.gebruikerId}`} 
+                />
+              </Grid>
+            ))}
+          </Grid>
         )}
-      </div>
+      </Container>
+      </Background>
     </RequireAuth>
   );
 }

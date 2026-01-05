@@ -1,10 +1,15 @@
 import React, { useState, ChangeEvent, FormEvent, KeyboardEvent } from "react";
-import { InteractiveButton } from "./interactiveButton";
-import { styles } from "./styles";
+import { useSearch } from "@/hooks/useSearch";  
+import { SearchResult } from "@/types/search";    
 import { useAuth } from "@/components/AuthProvider";
 import { createProduct } from "@/services/productService";
 import { Alert, Snackbar, CircularProgress } from "@mui/material";
-import SpecificatiesMenu from "./specificatiesMenu";
+import { Box } from "@/components/Box";
+import { TextField } from "@/components/TextField";
+import { Button } from "@/components/Buttons/Button";
+import SearchBar from "@/components/SearchBar"
+import { Stack, Grid, Typography, InputAdornment, Box as BoxMui } from "@mui/material";
+import { searchSpecificaties } from "@/services/searchService";
 
 // --- TYPES ---
 export interface ProductData {
@@ -27,6 +32,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const { user } = useAuth();
+  const searchControl = useSearch<SearchResult>(searchSpecificaties);
 
   // --- HANDLERS ---
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -151,99 +157,89 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
   );
 
   return (
-    <form style={styles.card} onSubmit={handleSubmit}>
-      {error && showAlert(error, "error")}
-      {success && showAlert(success, "success")}
-      <input
-        type="text"
-        name="name"
-        placeholder="Naam Product..."
-        value={formData.name}
-        onChange={handleChange}
-        style={styles.titleInput}
-      />
+ <Box component="form" onSubmit={handleSubmit} >
+  <Typography variant="h5" gutterBottom>Product Aanmaken</Typography>
+  
+  <Grid container spacing={4}>
+    {/* LINKER KOLOM */}
+    <Grid size={{ xs: 12, md: 6 }}>
+      <Stack spacing={3}>
+        <TextField
+          label="Naam Product"
+          fullWidth
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+        />
 
-      <div style={styles.mainContent}>
-        {/* LEFT COLUMN */}
-        <div style={styles.columnLeft}>
-          <label style={styles.label}>Afbeelding URL*</label>
-          <input
-            type="text"
-            name="image"
-            placeholder="https://..."
-            value={formData.image}
-            onChange={handleChange}
-            style={{...styles.titleInput, marginBottom: "15px", fontSize: "14px"}}
+        <TextField
+          label="Afbeelding URL"
+          fullWidth
+          name="image"
+          value={formData.image}
+          onChange={handleChange}
+          placeholder="https://..."
+        />
+
+        {/* Preview Box */}
+        <BoxMui sx={{ height: 200, border: '1px dashed grey', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {formData.image ? <img src={formData.image} style={{ maxHeight: '100%' }} /> : "Preview"}
+        </BoxMui>
+
+        <Stack direction="row" spacing={2} alignItems="center">
+           <TextField
+            label="Aantal"
+            type="number"
+            value={formData.quantity}
+            onChange={handleQuantityInput}
+            onKeyDown={preventInvalidIntegerInput}
           />
-          <div style={styles.imagePreviewBox}>
-            {formData.image ? (
-              <img
-                src={formData.image}
-                alt="Preview"
-                style={styles.previewImage}
-                onError={(e) => (e.currentTarget.style.display = 'none')}
-              />
-            ) : ( <span>Preview...</span> )}
-          </div>
+          {/* Hier kun je je +/- knoppen eventueel behouden of MUI IconButton gebruiken */}
+        </Stack>
 
-          <label style={styles.label}>Aantal Product*</label>
-          <div style={styles.quantityWrapper}>
-            <InteractiveButton type="button" onClick={() => handleQuantityButton(-1)} baseStyle={styles.btnSmall}>-</InteractiveButton>
-            <input
-              type="number"
-              value={formData.quantity}
-              onChange={handleQuantityInput}
-              onKeyDown={preventInvalidIntegerInput}
-              style={styles.quantityInput}
-            />
-            <InteractiveButton type="button" onClick={() => handleQuantityButton(1)} baseStyle={styles.btnSmall}>+</InteractiveButton>
-          </div>
+        <TextField
+          label="Minimum Prijs"
+          value={formData.price}
+          onChange={handlePriceChange}
+          slotProps={{
+            input: {
+              startAdornment: <InputAdornment position="start">€</InputAdornment>,
+            },
+          }}
+        />
+      </Stack>
+    </Grid>
 
-          <label style={styles.label}>Minimum Prijs*</label>
-          <div style={styles.priceWrapper}>
-            <span style={styles.currencySymbol}>€</span>
-            <input
-              type="text"
-              inputMode="decimal"
-              name="price"
-              value={formData.price}
-              onChange={handlePriceChange}
-              onKeyDown={preventInvalidPriceInput}
-              style={styles.priceInput}
-            />
-          </div>
-        </div>
+    {/* RECHTER KOLOM */}
+    <Grid size={{ xs: 12, md: 6 }}>
+      <Stack spacing={3} sx={{ height: '100%' }}>
+        <TextField
+          label="Beschrijving"
+          multiline
+          rows={6}
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+        />
+        <SearchBar mode="callback" searchControl={searchControl} >
 
-        {/* RIGHT COLUMN */}
-        <div style={styles.columnRight}>
-          <label style={styles.label}>Beschrijving</label>
-          <textarea
-            name="description"
-            placeholder="Beschrijving..."
-            value={formData.description}
-            onChange={handleChange}
-            style={styles.textarea}
-          />
+        </SearchBar>
 
-          {/* ✅ The Dropdown Menu */}
-          <div>
-            <SpecificatiesMenu 
-              onChange={handleSpecificationsChange}
-              selectedIdsProp={formData.specificationIds} 
-            />
-          </div>
-
-          <div style={{ marginTop: "auto", display: "flex", justifyContent: "center", paddingTop: "30px" }}>
-            <InteractiveButton 
-              type="submit" 
-              baseStyle={styles.submitBtn}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Product Aanmaken'}
-            </InteractiveButton>
-          </div>
-        </div>
-      </div>
-    </form>
+        <BoxMui sx={{ mt: 'auto', textAlign: 'center' }}>
+          <Button 
+            type="submit" 
+            variant="contained" 
+            size="large"
+            disabled={isSubmitting}
+            startIcon={isSubmitting && <CircularProgress size={20} />}
+          >
+            Product Aanmaken
+          </Button>
+        </BoxMui>
+      </Stack>
+    </Grid>
+  </Grid>
+</Box>
   );
 }

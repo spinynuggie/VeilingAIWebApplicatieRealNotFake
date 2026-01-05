@@ -6,6 +6,8 @@ interface AuctionClockProps {
   endPrice: number;
   duration: number;
   productName?: string;
+  isClosed?: boolean;
+  closingPrice?: number;
   onBid?: (price: number, quantity: number) => void;
 }
 
@@ -14,6 +16,8 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
   endPrice,
   duration,
   productName,
+  isClosed = false,
+  closingPrice,
   onBid,
 }) => {
   const [timeRemaining, setTimeRemaining] = useState<number>(duration);
@@ -42,6 +46,13 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
 
     return () => clearInterval(interval);
   }, [isActive, timeRemaining, auctionEnded]);
+
+  useEffect(() => {
+    if (!isClosed) return;
+    setIsActive(false);
+    setAuctionEnded(true);
+    setFinalPrice(closingPrice ?? currentPrice);
+  }, [isClosed, closingPrice, currentPrice]);
 
   useEffect(() => {
     const priceDrop = ((duration - timeRemaining) / duration) * (startPrice - endPrice);

@@ -2,16 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import Navbar from "@/components/NavBar";
-import SearchBar from "@/components/SearchBar";
-import royalLogo from "@/public/loginAssets/royalLogo.svg";
+import Navbar from "@/features/(NavBar)/AppNavBar";
 import { getProducts } from "@/services/productService";
-import Profile  from "@/components/Profile";
-import { Box } from "@mui/material"
-import RequireAuth from "@/components/RequireAuth";
-import ProductCard from "@/components/ProductCard/index";
+import RequireAuth from "@/components/(oud)/RequireAuth";
+import ProductCard from "@/features/ProductCard";
 // Make sure to import the type to ensure type safety
 import { Product } from '@/types/product';
+import { Background } from "@/components/Background";
+import { Box as BoxMui } from "@mui/material";
 
 export default function VeilingDetailPage() {
   // Use the correct type for state
@@ -47,36 +45,30 @@ export default function VeilingDetailPage() {
   // 4. Product Not Found State
   if (!currentProduct) {
     return (
+      <Background>
        <RequireAuth>
-          <Navbar
-            style={{ backgroundColor: "#C8FFD6"}}
-            left={<img src={royalLogo.src} alt="Logo Royal Flora Holland" width={100}/>}
-            center={<SearchBar/>}
-            right={<Profile/>}
-          />
-          <div style={{textAlign: "center", marginTop: "50px"}}>
+          <Navbar/>
               <h1>Product niet gevonden</h1>
               <p>Er is geen product met productId: {id}</p>
-          </div>
        </RequireAuth>
+       </Background>
     );
   }
 
   return (
     <RequireAuth>
-      <div style={{background: "white", minHeight: "100vh" }}>
-        <Navbar
-          style={{ backgroundColor: "#C8FFD6"}}
-          left={<img src={royalLogo.src} alt="Logo Royal Flora Holland" width={100}/>}
-          center={<SearchBar/>}
-          right={<Profile/>}
-        />
-
-        <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1, justifyContent: 'center', paddingY: 4 }}>
-            {/* THE FIX: Use currentProduct variable, NOT array index allProducts[id] */}
-            <ProductCard mode="display" product={currentProduct} />
-        </Box>
-      </div>
+      <Background>
+        <Navbar        />
+        <BoxMui 
+        style={{
+          gap: "60px",
+          padding: "60px 40px"
+        }}
+        >
+        <ProductCard mode="display" product={currentProduct}/>
+        </BoxMui>
+      </Background>
     </RequireAuth>
+    
   );
 }

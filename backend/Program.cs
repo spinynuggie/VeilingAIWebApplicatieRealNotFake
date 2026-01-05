@@ -92,6 +92,16 @@ app.UseCors("AllowFrontend");
 // double-submit CSRF check for state-changing requests
 app.Use(async (context, next) =>
 {
+    var referer = context.Request.Headers.Referer.ToString();
+    if (context.Request.Path.StartsWithSegments("/hubs") ||
+        context.Request.Path.StartsWithSegments("/swagger") ||
+        (!string.IsNullOrWhiteSpace(referer) &&
+         referer.Contains("/swagger", StringComparison.OrdinalIgnoreCase)))
+    {
+        await next();
+        return;
+    }
+
     if (HttpMethods.IsPost(context.Request.Method) ||
         HttpMethods.IsPut(context.Request.Method) ||
         HttpMethods.IsDelete(context.Request.Method) ||

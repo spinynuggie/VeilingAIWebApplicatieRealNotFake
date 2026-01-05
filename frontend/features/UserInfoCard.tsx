@@ -1,6 +1,7 @@
 "use client";
 
 import type { User } from "@/types/user";
+import { Box } from "@/components/Box";
 
 type Props = {
   user: User;
@@ -9,7 +10,7 @@ type Props = {
 
 export default function UserInfoCard({ user, title = "Gebruiker" }: Props) {
   return (
-    <div style={{ border: "1px solid #e0e0e0", borderRadius: 8, padding: 16, background: "#fafafa" }}>
+    <Box>
       <h2 style={{ marginTop: 0 }}>{title}</h2>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
         <InfoRow label="Naam" value={user.naam ?? "-"} />
@@ -20,7 +21,7 @@ export default function UserInfoCard({ user, title = "Gebruiker" }: Props) {
         <InfoRow label="Postcode" value={user.postcode ?? "-"} />
         <InfoRow label="Woonplaats" value={user.woonplaats ?? "-"} />
       </div>
-    </div>
+    </Box>
   );
 }
 

@@ -3,7 +3,7 @@
 import React, { Suspense, useEffect, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import type { Role } from "@/types/user";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "../AuthProvider";
 
 type RequireAuthProps = {
   roles?: Role[];
