@@ -28,7 +28,5 @@ namespace backend.Models
 
         public int VeilingMeesterId { get; set; }
         
-        public string Locatie { get; set; } = string.Empty;
-        
     }
 }

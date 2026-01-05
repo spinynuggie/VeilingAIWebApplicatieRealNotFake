@@ -32,4 +32,4 @@ namespace backend.Data
             return new AppDbContext(optionsBuilder.Options);
         }
     }
-}
+}   

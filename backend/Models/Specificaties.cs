@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace backend.Models
 {
     [Table("specificaties")]
-    public class Specificatie
+    public class Specificaties
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

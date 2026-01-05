@@ -23,7 +23,7 @@ public class SpecificatiesController : ControllerBase
     public async Task<ActionResult<SpecificatiesCreateDto>> CreateSpecificatie(
         [FromBody] SpecificatiesCreateDto specificatieCreateDto)
     {
-        var specificatie = new Specificatie
+        var specificatie = new Specificaties
         {
             Naam = specificatieCreateDto.naam,
             Beschrijving = specificatieCreateDto.beschrijving

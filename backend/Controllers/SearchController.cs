@@ -18,6 +18,28 @@ namespace backend.Controllers
         {
             _context = context;
         }
+        
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<SpecificatiesResponseDto>>> SearchSpecificaties([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return Ok(new List<SpecificatiesResponseDto>());
+            }
+
+            // We halen de data op en projecteren deze direct naar de DTO met .Select()
+            var results = await _context.Specificaties
+                .Where(s => s.Naam.Contains(query) || s.Beschrijving.Contains(query))
+                .Select(s => new SpecificatiesResponseDto
+                {
+                    SpecificatieId = s.SpecificatieId,
+                    Naam = s.Naam,
+                    Beschrijving = s.Beschrijving
+                })
+                .ToListAsync();
+
+            return Ok(results);
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SearchResultDto>>> Search([FromQuery] string query)

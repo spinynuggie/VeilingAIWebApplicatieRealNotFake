@@ -57,7 +57,6 @@ namespace backend.Controllers
             veiling.Naam = veilingDto.Naam;
             veiling.Beschrijving = veilingDto.Beschrijving;
             veiling.Image = veilingDto.Image;
-            veiling.Locatie = veilingDto.Locatie;
             veiling.Starttijd = veilingDto.Starttijd;
             veiling.Eindtijd   = veilingDto.Eindtijd;
             veiling.VeilingMeesterId = veilingDto.VeilingMeesterId;
@@ -93,7 +92,6 @@ namespace backend.Controllers
                 Naam = veilingDto.Naam,
                 Beschrijving = veilingDto.Beschrijving,
                 Image = veilingDto.Image,
-                Locatie = veilingDto.Locatie,
                 Starttijd = veilingDto.Starttijd,
                 Eindtijd   = veilingDto.Eindtijd,
                 VeilingMeesterId = veilingDto.VeilingMeesterId
