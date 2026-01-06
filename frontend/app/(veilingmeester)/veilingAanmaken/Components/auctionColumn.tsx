@@ -1,6 +1,15 @@
 "use client";
 
-import React from "react";
+import React from 'react';
+import { 
+  Box, 
+  Typography, 
+  Paper, 
+  IconButton, 
+  Stack, 
+  Divider 
+} from '@mui/material';
+import { Close as CloseIcon} from "@mui/icons-material"
 import ProductSearchBar from "@/components/(oud)/ProductSearchBar";
 import { Product } from "@/types/product";
 
@@ -12,53 +21,73 @@ interface AuctionColumnProps {
 
 export default function AuctionColumn({ products, onSearch, onRemove }: AuctionColumnProps) {
   return (
-    <div >
-      <h3 >Producten in veiling</h3>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* TITEL */}
+      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: 'custom.color1' }}>
+        Producten in veiling
+      </Typography>
 
-      {/* Zoekbalk specifiek voor deze kolom */}
+      {/* ZOEKBALK */}
       <ProductSearchBar onSearch={onSearch} />
 
-      <div style={{ flexGrow: 1, marginTop: '10px' }}>
-        {products.length === 0 && (
-          <p style={{ textAlign: 'center', color: '#666', fontSize: '14px', marginTop: '20px' }}>
+      <Box sx={{ flexGrow: 1, mt: 2, overflowY: 'auto' }}>
+        {products.length === 0 ? (
+          <Typography 
+            variant="body2" 
+            sx={{ textAlign: 'center', color: 'text.secondary', mt: 4 }}
+          >
             Geen producten gevonden.
-          </p>
+          </Typography>
+        ) : (
+          <Stack spacing={1.5}>
+            {products.map((prod) => (
+              <Paper
+                key={prod.productId}
+                variant="outlined"
+                sx={{
+                  p: 1.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderColor: 'custom.color5',
+                  bgcolor: 'background.paper',
+                  '&:hover': { borderColor: 'primary.main' }
+                }}
+              >
+                {/* VERWIJDER KNOP */}
+                <IconButton
+                  size="small"
+                  onClick={() => onRemove(prod)}
+                  sx={{
+                    bgcolor: 'error.main',
+                    color: 'white',
+                    mr: 2,
+                    '&:hover': { bgcolor: 'error.dark' },
+                    borderRadius: 1 // Maakt het een subtiel vierkantje met afgeronde hoeken
+                  }}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+
+                {/* PRODUCT INFO */}
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+                    {prod.productNaam}
+                  </Typography>
+                  
+                  <Stack direction="row" justifyContent="space-between" sx={{ mt: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Start: {prod.startPrijs !== 0 ? `€${prod.startPrijs.toFixed(2)}` : 'N.v.t.'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Eind: {prod.eindPrijs !== 0 ? `€${prod.eindPrijs.toFixed(2)}` : 'N.v.t.'}
+                    </Typography>
+                  </Stack>
+                </Box>
+              </Paper>
+            ))}
+          </Stack>
         )}
-
-        {products.map((prod) => (
-          <div key={prod.productId} style={{ cursor: 'default' }}>
-            {/* Verwijder knop (Rood kruisje) */}
-            <button
-             
-              style={{ backgroundColor: "#d9534f", marginRight: "10px" }}
-              onClick={() => onRemove(prod)}
-            >
-              ✕
-            </button>
-
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 'bold' }}>{prod.productNaam}</div>
-              <div style={{ fontSize: '13px', display: 'flex', justifyContent: 'space-between', gap: '10px', marginTop: '5px' }}>
-                <div>
-                  Startprijs: {prod.startPrijs !== 0 ? `€${prod.startPrijs.toFixed(2)}` : 'price not assigned'}
-                </div>
-                <div>
-                  Eindprijs: {prod.eindPrijs !== 0 ? `€${prod.eindPrijs.toFixed(2)}` : 'price not assigned'}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Footer knoppen */}
-      <div >
-        <button >Start</button>
-        <button>Eind</button>
-        <button>
-          Aanmaken
-        </button>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
