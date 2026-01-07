@@ -6,15 +6,10 @@ export interface Product {
   hoeveelheid: number;
   startPrijs: number;
   eindPrijs: number;
-  huidigePrijs: number;
+  huidigeprijs: number;
   veilingId: number;
   verkoperId: number;
-  // Optioneel: specficaties, als je die lokaal gebruikt in de frontend
   specificaties?: string[];
-}
-
-export interface ProductDisplayProps {
-  product: Product[];
 }
 
 export interface CreateProductInput {
@@ -23,8 +18,9 @@ export interface CreateProductInput {
   fotos: string;
   hoeveelheid: number;
   startPrijs: number;
-  eindPrijs: number;
-  verkoperId: number;     
+  eindprijs: number;      // Match met Backend DTO
+  verkoperId: number;
+  specificatieIds: number[]; // De cruciale koppeling
 }
 
 export interface UpdateProductAuctionInput {

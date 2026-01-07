@@ -1,8 +1,10 @@
 "use client";
 
+
 import { Paper, Typography, Box as BoxMui } from "@mui/material";
 import { Button } from "@/components/Buttons/Button";
 import { TextField } from "@/components/TextField";
+import UniversalSelector from "@/features/UniversalSelect";
 
 interface CreateFormProps {
   auctionData: any;
@@ -49,15 +51,14 @@ export default function CreateForm({ auctionData, setAuctionData, onNext }: Crea
           />
         </BoxMui>
 
-        <TextField
-          fullWidth
-          label="Locatie ID"
-          type="number"
-          margin="normal"
-          value={auctionData.locationId || ""}
-          onChange={(e: any) => setAuctionData({ ...auctionData, locationId: e.target.value })}
-          InputLabelProps={{ shrink: true }}
-        />
+<Typography variant="subtitle2">Veiling Locatie</Typography>
+  <UniversalSelector 
+    mode="location" 
+    onSelect={(ids) => {
+      // Omdat locatie enkelvoudig is, pakken we de eerste ID
+      setAuctionData({ ...auctionData, locationId: ids[0]?.toString() || "" });
+    }}
+  />
 
         <TextField
           fullWidth
