@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+// Force client-side only (disable SSR) for this dynamic auction page
+export const dynamic = "force-dynamic";
+
+import { useEffect, useState, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { HubConnection } from "@microsoft/signalr";
 import { Veiling } from "@/types/veiling";
@@ -49,6 +52,11 @@ export default function VeilingDetailPage() {
   const [liveStatus, setLiveStatus] = useState<string>("");
   const [countdown, setCountdown] = useState<number | null>(null);
   const [remainingQty, setRemainingQty] = useState<number | null>(null);
+
+  // Sequential Auction State
+  const [activeProductId, setActiveProductId] = useState<number | null>(null);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [pauseMessage, setPauseMessage] = useState<string>("");
 
   const pathname = usePathname();
   const id = parseInt(pathname.split("/").pop() || "0");
@@ -100,10 +108,6 @@ export default function VeilingDetailPage() {
       const start = new Date(veiling.starttijd).getTime();
       const remaining = Math.max(0, Math.floor((start - Date.now()) / 1000));
       setCountdown(remaining);
-      if (remaining <= 0) {
-        // Auction just started, trigger re-render
-        setVeiling({ ...veiling });
-      }
     };
 
     updateCountdown();
@@ -126,7 +130,14 @@ export default function VeilingDetailPage() {
           setRemainingQty(bid.remainingQuantity);
         }
       },
-      onTick: (tick: PriceTickEvent) => setLivePrice(tick.price),
+      onTick: (tick: PriceTickEvent) => {
+        setLivePrice(tick.price);
+        // Fallback: if we receive ticks for a product but missed the start event
+        if (!activeProductId) {
+          console.log("Tick received but no activeProductId. Syncing to:", tick.productId);
+          setActiveProductId(tick.productId);
+        }
+      },
     })
       .then((conn) => {
         if (disposed) {
@@ -134,6 +145,29 @@ export default function VeilingDetailPage() {
           return;
         }
         activeConnection = conn;
+
+        // Listen to new Sequential events
+        conn.on("ProductStart", (data: any) => {
+          console.log("ProductStart", data);
+          setActiveProductId(data.productId);
+          setLivePrice(data.startPrice);
+          setRemainingQty(data.qty);
+          setIsPaused(false);
+          setPauseMessage("");
+          setLastBid(null); // Reset bids for new product
+        });
+
+        conn.on("AuctionPaused", (data: any) => {
+          console.log("AuctionPaused", data);
+          setIsPaused(true);
+          setPauseMessage(data.message || "Pauze...");
+        });
+
+        conn.on("AuctionEnded", () => {
+          console.log("AuctionEnded");
+          // Optionally handle end logic here
+        });
+
         setConnection(conn);
         setLiveStatus("Live verbonden");
       })
@@ -147,14 +181,30 @@ export default function VeilingDetailPage() {
       setConnection(null);
       stopAuctionConnection(activeConnection);
     };
-  }, [veiling?.veilingId, auctionStatus]);
+  }, [veiling?.veilingId, auctionStatus]); // Removed activeProductId from deps to avoid reconnect cycles
 
-  const filteredProducts = allProducts.filter((p) => {
-    return veiling ? String(p.veilingId) === String(veiling.veilingId) : false;
-  });
+  const filteredProducts = useMemo(() => {
+    return allProducts.filter((p) => {
+      return veiling ? String(p.veilingId) === String(veiling.veilingId) : false;
+    });
+  }, [allProducts, veiling]);
 
-  const activeProduct = filteredProducts[0];
+  // Determine active product object
+  const activeProduct = useMemo(() => {
+    return activeProductId
+      ? (filteredProducts.find(p => p.productId === activeProductId) || allProducts.find(p => p.productId === activeProductId))
+      : (filteredProducts.length > 0 && !connection ? filteredProducts[0] : null);
+  }, [activeProductId, filteredProducts, allProducts, connection]);
 
+  // Debugging logs
+  useEffect(() => {
+    if (activeProductId && !activeProduct && allProducts.length > 0) {
+      console.warn("Mismatch! activeProductId:", activeProductId, "Available IDs:", allProducts.map(p => p.productId));
+      console.log("All Products:", allProducts);
+    }
+  }, [activeProductId, activeProduct, allProducts]);
+
+  // Sync initial remaining qty if not set
   useEffect(() => {
     if (activeProduct && remainingQty === null) {
       setRemainingQty(activeProduct.hoeveelheid);
@@ -171,11 +221,11 @@ export default function VeilingDetailPage() {
   const handleLiveBid = async (price: number, quantity: number) => {
     if (!veiling || auctionStatus !== "active") return;
     if (!activeProduct) {
-      setLiveStatus("Geen actief product gevonden.");
+      setLiveStatus("Geen actief product.");
       return;
     }
     if (!connection) {
-      setLiveStatus("Geen live verbinding, probeer te refreshen.");
+      setLiveStatus("Geen live verbinding.");
       return;
     }
 
@@ -197,31 +247,18 @@ export default function VeilingDetailPage() {
       <div style={{ background: "white", minHeight: "100vh" }}>
         <Navbar />
 
-        {/* Auction Info Header */}
-        <Box sx={{ textAlign: "center", py: 3, backgroundColor: "#f5f5f5" }}>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-            {veiling.naam}
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-            {veiling.beschrijving}
-          </Typography>
-
-          {/* Time Display */}
-          <Box sx={{ display: "flex", justifyContent: "center", gap: 4, flexWrap: "wrap" }}>
+        {/* Auction Info Header - Minimal */}
+        <Paper elevation={1} sx={{ padding: 2, backgroundColor: "#f8f9fa", borderRadius: 0, borderBottom: "1px solid #e0e0e0" }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "1400px", mx: "auto", px: 2 }}>
             <Box>
-              <Typography variant="caption" color="text.secondary">Start</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {formatDateTime(veiling.starttijd)}
-              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>{veiling.naam}</Typography>
+              <Typography variant="caption" color="text.secondary">{formatDateTime(veiling.starttijd)} - {formatDateTime(veiling.eindtijd)}</Typography>
             </Box>
             <Box>
-              <Typography variant="caption" color="text.secondary">Einde</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {formatDateTime(veiling.eindtijd)}
-              </Typography>
+              {/* Potentially add status badge here */}
             </Box>
           </Box>
-        </Box>
+        </Paper>
 
         {/* Main Content */}
         <Box
@@ -231,44 +268,59 @@ export default function VeilingDetailPage() {
             gap: 4,
             justifyContent: "center",
             alignItems: "flex-start",
-            paddingY: 6,
+            paddingY: 4,
             px: 4,
             maxWidth: "1400px",
             mx: "auto",
             flexWrap: "wrap"
           }}
         >
-          {/* Left Side: Product Image/Details */}
+          {/* Left: Product Details */}
           <Box sx={{ flex: "1 1 400px", maxWidth: "500px" }}>
-            {filteredProducts.length > 0 ? (
-              <ProductCard mode="display" product={filteredProducts[0]} />
+            {activeProduct ? (
+              <ProductCard mode="display" product={activeProduct} />
             ) : (
-              <Typography variant="body1">Geen producten gevonden voor deze veiling.</Typography>
+              <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fafafa', borderRadius: 4, border: '1px dashed #ccc' }}>
+                <Typography variant="h6" color="text.secondary">
+                  {filteredProducts.length === 0 && !connection
+                    ? "Veiling is afgelopen."
+                    : (connection ? "Wachten op volgend product..." : "Producten laden...")}
+                </Typography>
+              </Box>
             )}
           </Box>
 
-          {/* Center: VeilingKlok */}
-          {activeProduct && (
-            <Box sx={{ flex: "0 0 auto" }}>
+          {/* Center: Clock */}
+          <Box sx={{ flex: "0 0 auto" }}>
+            {activeProduct ? (
               <VeilingKlok
+                key={activeProduct.productId} /* Reset clock on product change */
                 startPrice={Number(activeProduct.startPrijs ?? 0)}
                 endPrice={Number(activeProduct.eindPrijs ?? 0)}
                 duration={Math.max(1, (new Date(veiling.eindtijd).getTime() - new Date(veiling.starttijd).getTime()) / 1000)}
                 productName={activeProduct.productNaam}
-                isClosed={activeBidClosed}
+                isClosed={activeBidClosed || isPaused}
                 closingPrice={lastBid?.amount}
                 onBid={handleLiveBid}
                 livePrice={livePrice}
                 status={auctionStatus}
-                countdownText={countdown !== null ? formatCountdown(countdown) : undefined}
+                countdownText={isPaused ? pauseMessage : (countdown !== null ? formatCountdown(countdown) : undefined)}
                 remainingQuantity={remainingQty ?? activeProduct.hoeveelheid}
               />
-            </Box>
-          )}
+            ) : (
+              /* Placeholder Clock or Empty */
+              <Box sx={{ width: 380, height: 400, bgcolor: '#f0f0f0', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography>{isPaused ? pauseMessage : "..."}</Typography>
+              </Box>
+            )}
+          </Box>
 
-          {/* Right Side: Other products */}
+          {/* Right: Upcoming Products (Queue) */}
           <Box sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
-            <ProductDisplay product={filteredProducts.slice(1)} />
+            <Typography variant="h6" sx={{ mb: 2 }}>Volgende producten</Typography>
+            <ProductDisplay
+              product={filteredProducts.filter(p => p.productId !== activeProductId)}
+            />
           </Box>
         </Box>
 
@@ -278,7 +330,8 @@ export default function VeilingDetailPage() {
             <Typography variant="body2" color="text.secondary">
               Live status: {liveStatus || "Onbekend"}
             </Typography>
-            {livePrice !== null && (
+            {isPaused && <Typography variant="h6" color="primary">{pauseMessage}</Typography>}
+            {!isPaused && livePrice !== null && (
               <Typography variant="body1" sx={{ fontWeight: 600 }}>
                 Live prijs: € {livePrice.toFixed(2)}
               </Typography>
@@ -294,4 +347,3 @@ export default function VeilingDetailPage() {
     </RequireAuth>
   );
 }
-

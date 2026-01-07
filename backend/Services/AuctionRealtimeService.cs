@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using backend.Data;
@@ -12,7 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace backend.Services
 {
     /// <summary>
-    /// In-memory auction engine for high-performance, real-time price ticks and concurrency-safe bidding.
+    /// In-memory auction engine for high-performance, real-time price ticks and multiple sequential products.
     /// </summary>
     public sealed class AuctionRealtimeService
     {
@@ -20,18 +22,34 @@ namespace backend.Services
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ConcurrentDictionary<string, AuctionState> _auctions = new();
 
-        public class AuctionState
+        public class ProductState
         {
-            public int VeilingId;
             public int ProductId;
+            public string ProductNaam;
             public decimal StartPrice;
             public decimal EndPrice;
             public decimal CurrentPrice;
+            public int OriginalQty;
             public int RemainingQty;
-            public DateTimeOffset StartTime;
-            public DateTimeOffset EndTime;
+            public DateTimeOffset StartTime; // Effectively when this product became active
+            public double DurationSeconds;    // Derived from Veiling duration
+        }
+
+        public class AuctionState
+        {
+            public int VeilingId;
+            public List<ProductState> Products = new();
+            public int CurrentIndex = 0;
+            public bool IsPaused = false;
+            
+            // Global auction constraints
+            public DateTimeOffset GlobalStartTime;
+            public DateTimeOffset GlobalEndTime;
+            
             public CancellationTokenSource Cts = new();
             public object Lock = new();
+
+            public ProductState ActiveProduct => (CurrentIndex >= 0 && CurrentIndex < Products.Count) ? Products[CurrentIndex] : null;
         }
 
         public AuctionRealtimeService(IHubContext<AuctionHub> hubContext, IServiceScopeFactory scopeFactory)
@@ -52,83 +70,168 @@ namespace backend.Services
             if (!int.TryParse(veilingId, out var id)) return null;
 
             var veiling = await db.Veiling.FirstOrDefaultAsync(v => v.VeilingId == id);
-            var product = await db.ProductGegevens.FirstOrDefaultAsync(p => p.VeilingId == id);
-            if (veiling == null || product == null) return null;
+            // Load ALL products for this auction
+            var products = await db.ProductGegevens
+                .Where(p => p.VeilingId == id)
+                .OrderBy(p => p.ProductId) // Sequential order
+                .ToListAsync();
+
+            if (veiling == null || !products.Any()) return null;
+
+            var totalDuration = (veiling.Eindtijd - veiling.Starttijd).TotalSeconds;
+            if (totalDuration <= 0) totalDuration = 3600; // Fallback 1h
 
             var state = new AuctionState
             {
                 VeilingId = id,
-                ProductId = product.ProductId,
-                StartPrice = product.StartPrijs,
-                EndPrice = product.EindPrijs,
-                CurrentPrice = product.StartPrijs,
-                RemainingQty = product.Hoeveelheid,
-                StartTime = veiling.Starttijd,
-                EndTime = veiling.Eindtijd
+                GlobalStartTime = veiling.Starttijd,
+                GlobalEndTime = veiling.Eindtijd
             };
 
-            // Calculate current price based on absolute time
-            var now = DateTimeOffset.UtcNow;
-            if (now >= state.StartTime && now < state.EndTime)
+            foreach (var p in products)
             {
-                var duration = (state.EndTime - state.StartTime).TotalSeconds;
-                var elapsed = (now - state.StartTime).TotalSeconds;
-                var progress = Math.Clamp(elapsed / duration, 0, 1);
-                state.CurrentPrice = state.StartPrice - (decimal)(progress * (double)(state.StartPrice - state.EndPrice));
-            }
-            else if (now >= state.EndTime)
-            {
-                state.CurrentPrice = state.EndPrice;
+                state.Products.Add(new ProductState
+                {
+                    ProductId = p.ProductId,
+                    ProductNaam = p.ProductNaam,
+                    StartPrice = p.StartPrijs,
+                    EndPrice = p.EindPrijs,
+                    CurrentPrice = p.StartPrijs,
+                    OriginalQty = p.Hoeveelheid,
+                    RemainingQty = p.Hoeveelheid,
+                    // StartTime will be set when it becomes active
+                    StartTime = DateTimeOffset.MaxValue, 
+                    DurationSeconds = totalDuration // Use Veiling duration as the "slope" duration for each item
+                });
             }
 
+            // Attempt to add. If race condition beats us, use existing.
             if (_auctions.TryAdd(veilingId, state))
             {
-                _ = RunTickLoopAsync(veilingId, state);
+                _ = RunAuctionLoopAsync(veilingId, state);
             }
             return _auctions[veilingId];
         }
 
-        private async Task RunTickLoopAsync(string veilingId, AuctionState state)
+        private async Task RunAuctionLoopAsync(string veilingId, AuctionState state)
         {
-            // Wait until start time
+            // 1. Wait for Global Start Time
             var now = DateTimeOffset.UtcNow;
-            if (state.StartTime > now)
+            if (state.GlobalStartTime > now)
             {
-                try { await Task.Delay(state.StartTime - now, state.Cts.Token); }
+                try { await Task.Delay(state.GlobalStartTime - now, state.Cts.Token); }
                 catch (TaskCanceledException) { return; }
             }
 
-            var duration = (state.EndTime - state.StartTime).TotalSeconds;
-            while (DateTimeOffset.UtcNow < state.EndTime && !state.Cts.IsCancellationRequested && state.RemainingQty > 0)
+            // 2. Loop through products
+            while (state.CurrentIndex < state.Products.Count && !state.Cts.IsCancellationRequested)
             {
-                var elapsed = (DateTimeOffset.UtcNow - state.StartTime).TotalSeconds;
-                var progress = Math.Clamp(elapsed / duration, 0, 1);
-                var price = state.StartPrice - (decimal)(progress * (double)(state.StartPrice - state.EndPrice));
+                var product = state.ActiveProduct;
+                if (product == null) break;
 
-                lock (state.Lock) { state.CurrentPrice = price; }
-
-                await _hubContext.Clients.Group(veilingId).SendAsync(AuctionHub.PriceTickMethod, new
+                // INIT PRODUCT
+                product.StartTime = DateTimeOffset.UtcNow;
+                
+                // Notify clients: Product Switching / Starting
+                await _hubContext.Clients.Group(veilingId).SendAsync("ProductStart", new
                 {
                     veilingId,
-                    price,
+                    productId = product.ProductId,
+                    productNaam = product.ProductNaam,
+                    startPrice = product.StartPrice,
+                    qty = product.RemainingQty,
                     timestamp = DateTimeOffset.UtcNow
                 });
 
-                try { await Task.Delay(100, state.Cts.Token); }
-                catch (TaskCanceledException) { break; }
+                // RUN PRODUCT TICK LOOP
+                bool productSoldOut = false;
+
+                while (!state.Cts.IsCancellationRequested)
+                {
+                    // Calculate Price
+                    var elapsed = (DateTimeOffset.UtcNow - product.StartTime).TotalSeconds;
+                    var progress = Math.Clamp(elapsed / product.DurationSeconds, 0, 1);
+                    
+                    decimal newPrice = product.StartPrice - (decimal)(progress * (double)(product.StartPrice - product.EndPrice));
+
+                    lock (state.Lock)
+                    {
+                        if (product.RemainingQty <= 0)
+                        {
+                            productSoldOut = true;
+                            break; // Sold out!
+                        }
+                        
+                        product.CurrentPrice = newPrice;
+                        
+                        // If we hit the end of the duration/price curve
+                        if (progress >= 1.0)
+                        {
+                            break; // Timeup for this product
+                        }
+                    }
+
+                    // Send Tick
+                    await _hubContext.Clients.Group(veilingId).SendAsync("PriceTick", new
+                    {
+                        veilingId,
+                        productId = product.ProductId, // Include ID so client knows
+                        price = newPrice,
+                        timestamp = DateTimeOffset.UtcNow
+                    });
+
+                    try { await Task.Delay(100, state.Cts.Token); }
+                    catch (TaskCanceledException) { return; }
+                }
+
+                if (state.Cts.IsCancellationRequested) return;
+
+                // PRODUCT ENDED (Sold out or Time up)
+                
+                // 3. PAUSE PHASE (5 Seconds)
+                state.IsPaused = true;
+                await _hubContext.Clients.Group(veilingId).SendAsync("AuctionPaused", new
+                {
+                    veilingId,
+                    message = productSoldOut ? "UITVERKOCHT!" : "Tijd is om!",
+                    durationMs = 5000
+                });
+
+                try { await Task.Delay(5000, state.Cts.Token); }
+                catch (TaskCanceledException) { return; }
+                
+                state.IsPaused = false;
+
+                // Move to next
+                lock (state.Lock)
+                {
+                    state.CurrentIndex++;
+                }
             }
+
+            // AUCTION FINISHED
+            await _hubContext.Clients.Group(veilingId).SendAsync("AuctionEnded", new { veilingId });
+            _auctions.TryRemove(veilingId, out _);
         }
 
         public async Task<(bool success, string error)> ProcessBidAsync(string veilingId, int productId, decimal amount, int qty, int koperId, string bidder)
         {
             var state = GetState(veilingId);
-            if (state == null) return (false, "Veiling niet geladen.");
+            if (state == null) return (false, "Veiling niet actief.");
+            
+            if (state.IsPaused) return (false, "Veiling is gepauzeerd.");
 
+            ProductState product;
             lock (state.Lock)
             {
-                if (state.RemainingQty < qty) return (false, "Onvoldoende voorraad.");
-                if (amount < state.EndPrice || amount > state.StartPrice) return (false, "Bod buiten limiet.");
-                state.RemainingQty -= qty;
+                product = state.ActiveProduct;
+                if (product == null) return (false, "Geen actief product.");
+                if (product.ProductId != productId) return (false, "Dit product is niet meer actief.");
+                
+                if (product.RemainingQty < qty) return (false, "Onvoldoende voorraad.");
+                if (amount < product.EndPrice || amount > product.StartPrice) return (false, "Bod buiten limiet.");
+                
+                product.RemainingQty -= qty;
             }
 
             // Persist async
@@ -136,58 +239,37 @@ namespace backend.Services
             {
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                var product = await db.ProductGegevens.FindAsync(productId);
-                if (product != null)
+                var dbProduct = await db.ProductGegevens.FindAsync(productId);
+                if (dbProduct != null)
                 {
-                    product.Hoeveelheid = state.RemainingQty;
-                    product.Huidigeprijs = amount;
+                    dbProduct.Hoeveelheid = product.RemainingQty;
+                    dbProduct.Huidigeprijs = product.CurrentPrice; 
+                    
                     db.Aankoop.Add(new Aankoop
                     {
                         ProductId = productId,
                         GebruikerId = koperId,
-                        Prijs = amount,
+                        Prijs = product.CurrentPrice, 
                         AanKoopHoeveelheid = qty,
-                        IsBetaald = false
+                        IsBetaald = false,
+                        Datum = DateTime.UtcNow
                     });
                     await db.SaveChangesAsync();
                 }
             });
 
-            await _hubContext.Clients.Group(veilingId).SendAsync(AuctionHub.BidPlacedMethod, new
+            await _hubContext.Clients.Group(veilingId).SendAsync("BidPlaced", new
             {
                 veilingId,
                 productId,
-                amount,
+                amount = product.CurrentPrice, // Broadcast actual price dealt
                 quantity = qty,
                 bidder,
-                remainingQuantity = state.RemainingQty,
+                remainingQuantity = product.RemainingQty,
                 timestamp = DateTimeOffset.UtcNow
             });
 
-            if (state.RemainingQty <= 0) state.Cts.Cancel();
             return (true, "");
-        }
-
-        public Task PublishBidAsync(string veilingId, decimal amount, int quantity, string bidder, DateTimeOffset timestamp)
-        {
-            return _hubContext.Clients.Group(veilingId).SendAsync(AuctionHub.BidPlacedMethod, new
-            {
-                veilingId,
-                amount,
-                quantity,
-                bidder,
-                timestamp
-            });
-        }
-
-        public Task PublishTickAsync(string veilingId, decimal price, DateTimeOffset timestamp)
-        {
-            return _hubContext.Clients.Group(veilingId).SendAsync(AuctionHub.PriceTickMethod, new
-            {
-                veilingId,
-                price,
-                timestamp
-            });
         }
     }
 }

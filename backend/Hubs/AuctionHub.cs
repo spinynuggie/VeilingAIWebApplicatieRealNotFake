@@ -31,12 +31,36 @@ namespace backend.Hubs
             var state = await _realtime.EnsureLoadedAsync(veilingId);
             if (state != null)
             {
-                await Clients.Caller.SendAsync(PriceTickMethod, new
+                var product = state.ActiveProduct;
+                if (state.IsPaused)
                 {
-                    veilingId,
-                    price = state.CurrentPrice,
-                    timestamp = DateTimeOffset.UtcNow
-                });
+                     await Clients.Caller.SendAsync("AuctionPaused", new 
+                     { 
+                        veilingId, 
+                        message = "Even geduld...", 
+                        durationMs = 5000 
+                     });
+                }
+                else if (product != null)
+                {
+                    await Clients.Caller.SendAsync("ProductStart", new
+                    {
+                        veilingId,
+                        productId = product.ProductId,
+                        productNaam = product.ProductNaam,
+                        startPrice = product.StartPrice,
+                        qty = product.RemainingQty,
+                        timestamp = DateTimeOffset.UtcNow
+                    });
+
+                    await Clients.Caller.SendAsync(PriceTickMethod, new
+                    {
+                        veilingId,
+                        productId = product.ProductId,
+                        price = product.CurrentPrice,
+                        timestamp = DateTimeOffset.UtcNow
+                    });
+                }
             }
         }
 

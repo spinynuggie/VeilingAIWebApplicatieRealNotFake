@@ -109,10 +109,16 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
                 <TextField
                     label="Aantal"
                     type="number"
+                    autoFocus
                     value={quantity}
                     onChange={(e) => {
                         const val = Math.max(1, parseInt(e.target.value || '1', 10));
                         setQuantity((remainingQuantity !== undefined ? Math.min(val, remainingQuantity) : val).toString());
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            handleBid();
+                        }
                     }}
                     disabled={isEnded || isPending}
                     fullWidth

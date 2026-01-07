@@ -86,6 +86,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseResponseCompression();
+app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowFrontend");
 
@@ -180,7 +181,8 @@ using (var scope = app.Services.CreateScope())
                 EindPrijs = 5.0m,
                 Huidigeprijs = 12.50m,
                 VerkoperId = 1,
-                LocatieId = 1 // Aalsmeer
+                LocatieId = 1, // Aalsmeer
+                VeilingId = 1
             },
             new backend.Models.ProductGegevens 
             { 
@@ -192,7 +194,8 @@ using (var scope = app.Services.CreateScope())
                 EindPrijs = 7.50m,
                 Huidigeprijs = 15.00m,
                 VerkoperId = 1,
-                LocatieId = 2 // Naaldwijk
+                LocatieId = 2, // Naaldwijk
+                VeilingId = 1
             }
         });
         context.SaveChanges();
