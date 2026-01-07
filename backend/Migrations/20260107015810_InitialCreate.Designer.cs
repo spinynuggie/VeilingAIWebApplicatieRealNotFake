@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251223135326_NewMigration")]
-    partial class NewMigration
+    [Migration("20260107015810_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -195,7 +195,7 @@ namespace backend.Migrations
                     b.ToTable("refresh_tokens");
                 });
 
-            modelBuilder.Entity("backend.Models.Specificatie", b =>
+            modelBuilder.Entity("backend.Models.Specificaties", b =>
                 {
                     b.Property<int>("SpecificatieId")
                         .ValueGeneratedOnAdd()
@@ -232,10 +232,6 @@ namespace backend.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Image")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Locatie")
                         .IsRequired()
                         .HasColumnType("text");
 

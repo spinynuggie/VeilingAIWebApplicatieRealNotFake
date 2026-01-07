@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace backend.Migrations
 {
     /// <inheritdoc />
-    public partial class NewMigration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -113,8 +113,7 @@ namespace backend.Migrations
                     Image = table.Column<string>(type: "text", nullable: false),
                     Starttijd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Eindtijd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    VeilingMeesterId = table.Column<int>(type: "integer", nullable: false),
-                    Locatie = table.Column<string>(type: "text", nullable: false)
+                    VeilingMeesterId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

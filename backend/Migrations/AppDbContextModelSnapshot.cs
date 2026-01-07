@@ -192,7 +192,7 @@ namespace backend.Migrations
                     b.ToTable("refresh_tokens");
                 });
 
-            modelBuilder.Entity("backend.Models.Specificatie", b =>
+            modelBuilder.Entity("backend.Models.Specificaties", b =>
                 {
                     b.Property<int>("SpecificatieId")
                         .ValueGeneratedOnAdd()
@@ -229,10 +229,6 @@ namespace backend.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Image")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Locatie")
                         .IsRequired()
                         .HasColumnType("text");
 
