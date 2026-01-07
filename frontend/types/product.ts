@@ -9,6 +9,7 @@ export interface Product {
   huidigeprijs: number;
   veilingId: number;
   verkoperId: number;
+  locatieId: number;
   specificaties?: string[];
 }
 
@@ -18,9 +19,10 @@ export interface CreateProductInput {
   fotos: string;
   hoeveelheid: number;
   startPrijs: number;
-  eindprijs: number;      // Match met Backend DTO
+  eindPrijs: number;
   verkoperId: number;
-  specificatieIds: number[]; // De cruciale koppeling
+  locatieId: number;
+  specificatieIds: number[];
 }
 
 export interface UpdateProductAuctionInput {

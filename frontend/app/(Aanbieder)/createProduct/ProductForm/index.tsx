@@ -1,12 +1,12 @@
-import React, { useState, ChangeEvent, FormEvent, KeyboardEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent, KeyboardEvent } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { createProduct } from "@/services/productService";
-import { Alert, Snackbar, CircularProgress } from "@mui/material";
+import { Alert, Snackbar, CircularProgress, TextField } from "@mui/material";
 import { Box } from "@/components/Box";
-import { TextField } from "@/components/TextField";
 import { Button } from "@/components/Buttons/Button";
 import { Stack, Grid, Typography, InputAdornment, Box as BoxMui } from "@mui/material";
 import UniversalSelector from "@/features/UniversalSelect";
+import { getLocaties } from "@/services/locatieService";
 
 // --- TYPES ---
 export interface ProductData {
@@ -16,7 +16,8 @@ export interface ProductData {
   price: string;
   specifications: string[]; // For visual preview (ProductCard)
   specificationIds: number[]; // For Backend Logic
-  image: string; 
+  image: string;
+  locationId: number | "";
 }
 
 interface ProductFormProps {
@@ -29,6 +30,17 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const { user } = useAuth();
+
+  const [locations, setLocations] = useState<{ locatieId: number; locatieNaam: string }[]>([]);
+
+  useEffect(() => {
+    getLocaties().then((data: any[]) => {
+      setLocations(data);
+      if (data.length > 0 && (formData.locationId === "" || formData.locationId === undefined)) {
+        setFormData(prev => ({ ...prev, locationId: data[0].locatieId }));
+      }
+    }).catch(console.error);
+  }, []);
 
   // --- HANDLERS ---
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -87,6 +99,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
     if (!formData.price) { setError("Prijs is verplicht"); return false; }
     if (isNaN(Number(formData.price)) || Number(formData.price) <= 0) { setError("Voer een geldig bedrag in"); return false; }
     if (!formData.image) { setError("Afbeelding URL is verplicht"); return false; }
+    if (formData.locationId === "") { setError("Locatie is verplicht"); return false; }
     return true;
   };
 
@@ -94,9 +107,9 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    
+
     if (!validateForm()) return;
-    
+
     if (!user) {
       setError("Je moet ingelogd zijn om een product aan te maken");
       return;
@@ -104,22 +117,23 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
 
     try {
       setIsSubmitting(true);
-      
+
       // ✅ Prepare Payload matching your Backend DTO
       const productData = {
         productNaam: formData.name,
         productBeschrijving: formData.description || "Geen beschrijving",
         fotos: formData.image,
         hoeveelheid: Number(formData.quantity),
-        startPrijs: 0, 
+        startPrijs: 0,
         eindPrijs: parseFloat(formData.price), // Assuming this is logic for auctions
         specificatieIds: formData.specificationIds, // ✅ SENDING IDs TO BACKEND
         verkoperId: user.gebruikerId,
+        locatieId: Number(formData.locationId),
       };
 
       await createProduct(productData);
       setSuccess("Product succesvol aangemaakt!");
-      
+
       // Clear the form
       setFormData({
         name: "",
@@ -129,8 +143,9 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
         specifications: [],
         specificationIds: [],
         image: "",
+        locationId: locations.length > 0 ? locations[0].locatieId : "",
       });
-      
+
     } catch (err: any) {
       console.error("Error creating product:", err);
       setError(err.message || "Er is een fout opgetreden");
@@ -153,91 +168,114 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
   );
 
   return (
- <Box component="form" onSubmit={handleSubmit} >
-  <Typography variant="h5" gutterBottom>Product Aanmaken</Typography>
-  
-  <Grid container spacing={4}>
-    {/* LINKER KOLOM */}
-    <Grid size={{ xs: 12, md: 6 }}>
-      <Stack spacing={3}>
-        <TextField
-          label="Naam Product"
-          fullWidth
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
+    <Box component="form" onSubmit={handleSubmit} >
+      <Typography variant="h5" gutterBottom>Product Aanmaken</Typography>
 
-        <TextField
-          label="Afbeelding URL"
-          fullWidth
-          name="image"
-          value={formData.image}
-          onChange={handleChange}
-          placeholder="https://..."
-        />
+      <Grid container spacing={4}>
+        {/* LINKER KOLOM */}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Stack spacing={3}>
+            <TextField
+              label="Naam Product"
+              fullWidth
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
 
-        {/* Preview Box */}
-        <BoxMui sx={{ height: 200, border: '1px dashed grey', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {formData.image ? <img src={formData.image} style={{ maxHeight: '100%' }} /> : "Preview"}
-        </BoxMui>
+            <TextField
+              label="Afbeelding URL"
+              fullWidth
+              name="image"
+              value={formData.image}
+              onChange={handleChange}
+              placeholder="https://..."
+            />
 
-        <Stack direction="row" spacing={2} alignItems="center">
-           <TextField
-            label="Aantal"
-            type="number"
-            value={formData.quantity}
-            onChange={handleQuantityInput}
-            onKeyDown={preventInvalidIntegerInput}
-          />
-          {/* Hier kun je je +/- knoppen eventueel behouden of MUI IconButton gebruiken */}
-        </Stack>
+            {/* Preview Box */}
+            <BoxMui sx={{ height: 200, border: '1px dashed grey', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {formData.image ? <img src={formData.image} style={{ maxHeight: '100%' }} /> : "Preview"}
+            </BoxMui>
 
-        <TextField
-          label="Minimum Prijs"
-          value={formData.price}
-          onChange={handlePriceChange}
-          slotProps={{
-            input: {
-              startAdornment: <InputAdornment position="start">€</InputAdornment>,
-            },
-          }}
-        />
-      </Stack>
-    </Grid>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <TextField
+                label="Aantal"
+                type="number"
+                value={formData.quantity}
+                onChange={handleQuantityInput}
+                onKeyDown={preventInvalidIntegerInput}
+              />
+              {/* Hier kun je je +/- knoppen eventueel behouden of MUI IconButton gebruiken */}
+            </Stack>
 
-    {/* RECHTER KOLOM */}
-    <Grid size={{ xs: 12, md: 6 }}>
-      <Stack spacing={3} sx={{ height: '100%' }}>
-        <TextField
-          label="Beschrijving"
-          multiline
-          rows={6}
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-        />
-        <Typography variant="subtitle2">Product Specificaties</Typography>
-          <UniversalSelector 
-            mode="specification" 
-            onSelect={(ids, names) => handleSpecificationsChange(ids, names)}
-            valueIds={formData.specificationIds}
-          />
-        <BoxMui sx={{ mt: 'auto', textAlign: 'center' }}>
-          <Button 
-            type="submit" 
-            variant="contained" 
-            size="large"
-            disabled={isSubmitting}
-            startIcon={isSubmitting && <CircularProgress size={20} />}
-          >
-            Product Aanmaken
-          </Button>
-        </BoxMui>
-      </Stack>
-    </Grid>
-  </Grid>
-</Box>
+            <TextField
+              label="Minimum Prijs"
+              value={formData.price}
+              onChange={handlePriceChange}
+              slotProps={{
+                input: {
+                  startAdornment: <InputAdornment position="start">€</InputAdornment>,
+                },
+              }}
+            />
+
+            <TextField
+              select
+              label="Locatie"
+              name="locationId"
+              value={formData.locationId}
+              onChange={handleChange}
+              required
+              InputLabelProps={{ shrink: true }}
+              slotProps={{
+                select: {
+                  native: true,
+                },
+              }}
+            >
+              {locations.map((loc) => (
+                <option key={loc.locatieId} value={loc.locatieId}>
+                  {loc.locatieNaam}
+                </option>
+              ))}
+            </TextField>
+          </Stack>
+        </Grid>
+
+        {/* RECHTER KOLOM */}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Stack spacing={3} sx={{ height: '100%' }}>
+            <TextField
+              label="Beschrijving"
+              multiline
+              rows={6}
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+            />
+            <Typography variant="subtitle2">Product Specificaties</Typography>
+            <UniversalSelector
+              mode="specification"
+              onSelect={(ids, names) => handleSpecificationsChange(ids, names)}
+              valueIds={formData.specificationIds}
+            />
+            <BoxMui sx={{ mt: 'auto', textAlign: 'center' }}>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={isSubmitting}
+                startIcon={isSubmitting && <CircularProgress size={20} />}
+              >
+                Product Aanmaken
+              </Button>
+            </BoxMui>
+          </Stack>
+        </Grid>
+      </Grid>
+      {error && showAlert(error, "error")}
+      {success && showAlert(success, "success")}
+    </Box>
   );
 }

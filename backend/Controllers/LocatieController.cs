@@ -1,41 +1,39 @@
+using backend.Data;
 using backend.Models;
-using backend.DTOs;
+using backend.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
 [ApiController]
-[Route("api/[controller]")] // Dit resulteert in /api/Locatie
+[Route("api/[controller]")]
 public class LocatieController : ControllerBase
 {
-    // Voorbeeld lijst voor demo doeleinden (normaal gebruik je een DBContext)
-    private static readonly List<Locatie> _locaties = new();
+    private readonly AppDbContext _context;
+
+    public LocatieController(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Locatie>>> GetLocaties()
+    {
+        return await _context.Locaties.ToListAsync();
+    }
 
     [HttpPost]
-    public IActionResult CreateLocatie([FromBody] LocatieCreateDto dto)
+    public async Task<IActionResult> CreateLocatie([FromBody] backend.Models.Locatie dto)
     {
         if (dto == null)
         {
             return BadRequest("Data is ongeldig");
         }
 
-        // Mapping van DTO naar Model
-        var nieuweLocatie = new Locatie
-        {
-            LocatieId = _locaties.Count + 1, // Simpele ID generatie
-            LocatieNaam = dto.LocatieNaam,
-            Foto = dto.Foto
-        };
+        _context.Locaties.Add(dto);
+        await _context.SaveChangesAsync();
 
-        _locaties.Add(nieuweLocatie);
-
-        // Retourneer 201 Created met het nieuwe object, inclusief ID
-        return CreatedAtAction(nameof(GetLocaties), new { id = nieuweLocatie.LocatieId }, nieuweLocatie);
-    }
-
-    [HttpGet]
-    public IActionResult GetLocaties()
-    {
-        return Ok(_locaties);
+        return CreatedAtAction(nameof(GetLocaties), new { id = dto.LocatieId }, dto);
     }
 }

@@ -18,6 +18,7 @@ export default function Page() {
     specifications: [],    // For ProductCard (Strings)
     specificationIds: [],  // For Backend (Numbers)
     image: "",
+    locationId: "",
   });
 
   return (
@@ -47,7 +48,7 @@ export default function Page() {
             <ProductCard mode="create" product={formData} />
           </BoxMui>
         </BoxMui>
-    </RequireAuth>
+      </RequireAuth>
     </Background>
   );
 }

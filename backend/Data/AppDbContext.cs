@@ -19,5 +19,6 @@ namespace backend.Data
         public DbSet<backend.Models.Veiling> Veiling { get; set; } = default!;
         public DbSet<backend.Models.Specificaties> Specificaties { get; set; } = default!;
         public DbSet<backend.Models.ProductSpecificatie> ProductSpecificaties { get; set; } = default!;
+        public DbSet<backend.Models.Locatie> Locaties { get; set; } = default!;
     }
 }

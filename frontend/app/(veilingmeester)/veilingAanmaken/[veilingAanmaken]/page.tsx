@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import AppNavbar from "@/features/(NavBar)/AppNavBar";
 import { useVeilingAanmaken } from "../hooks/useVeilingAanmaken";
 import { AvailableColumn } from "../Components/availableColumn";
@@ -15,10 +15,12 @@ import CreateForm from "../Components/createForm";
 
 const VeilingAanmakenPage = () => {
   const searchParams = useSearchParams();
-  
+  const params = useParams();
+  const veilingId = params?.veilingAanmaken ? parseInt(params.veilingAanmaken as string) : null;
+
   // Lees de stap uit de URL (?step=1), anders begin op stap 0
   const [step, setStep] = useState(0);
-  
+
   const [auctionData, setAuctionData] = useState({
     title: "",
     startTime: "",
@@ -31,8 +33,8 @@ const VeilingAanmakenPage = () => {
   const {
     loading, filteredAvailable, filteredAuction, selectedProduct, setSelectedProduct,
     error, setError, handleCreateVeiling, handleAddToAuction, handleRemoveFromAuction,
-    handleSearchAvailable, handleSearchAuction,
-  } = useVeilingAanmaken();
+    handleSearchAvailable, handleSearchAuction, locations
+  } = useVeilingAanmaken(veilingId);
 
   // Effect om de stap te zetten als de URL parameter verandert
   useEffect(() => {
@@ -62,10 +64,11 @@ const VeilingAanmakenPage = () => {
         <AppNavbar />
 
         {step === 0 && (
-          <CreateForm 
-            auctionData={auctionData} 
-            setAuctionData={setAuctionData} 
-            onNext={processToProducts} 
+          <CreateForm
+            auctionData={auctionData}
+            setAuctionData={setAuctionData}
+            onNext={processToProducts}
+            locations={locations}
           />
         )}
 
@@ -79,30 +82,30 @@ const VeilingAanmakenPage = () => {
                 Selecteer producten aan de linkerkant om ze aan deze veiling toe te voegen.
               </Typography>
             </BoxMui>
-            
+
             <Grid container spacing={2} sx={{ p: 2, width: '100vw', display: 'flex', justifyContent: 'center' }}>
-                <Box>
-                    <AvailableColumn 
-                      loading={loading} 
-                      products={filteredAvailable} 
-                      selectedId={selectedProduct?.productId} 
-                      onSearch={handleSearchAvailable} 
-                      onSelect={setSelectedProduct} 
-                    />
-                </Box>
-                <BoxMui>
-                    <DetailColumn 
-                      product={selectedProduct} 
-                      onAdd={handleAddToAuction} 
-                    />
-                </BoxMui>
-                <Box>
-                    <AuctionColumn 
-                      products={filteredAuction} 
-                      onSearch={handleSearchAuction} 
-                      onRemove={handleRemoveFromAuction} 
-                    />
-                </Box>
+              <Box>
+                <AvailableColumn
+                  loading={loading}
+                  products={filteredAvailable}
+                  selectedId={selectedProduct?.productId}
+                  onSearch={handleSearchAvailable}
+                  onSelect={setSelectedProduct}
+                />
+              </Box>
+              <BoxMui>
+                <DetailColumn
+                  product={selectedProduct}
+                  onAdd={handleAddToAuction}
+                />
+              </BoxMui>
+              <Box>
+                <AuctionColumn
+                  products={filteredAuction}
+                  onSearch={handleSearchAuction}
+                  onRemove={handleRemoveFromAuction}
+                />
+              </Box>
             </Grid>
           </>
         )}

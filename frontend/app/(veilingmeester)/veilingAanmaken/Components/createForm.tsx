@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 
 import { Paper, Typography, Box as BoxMui } from "@mui/material";
@@ -10,16 +11,24 @@ interface CreateFormProps {
   auctionData: any;
   setAuctionData: (data: any) => void;
   onNext: () => void;
+  locations: { locatieId: number; locatieNaam: string }[];
 }
 
-export default function CreateForm({ auctionData, setAuctionData, onNext }: CreateFormProps) {
+export default function CreateForm({ auctionData, setAuctionData, onNext, locations }: CreateFormProps) {
+  // Ensure we have a default location if none is selected
+  React.useEffect(() => {
+    if (locations.length > 0 && !auctionData.locationId) {
+      setAuctionData({ ...auctionData, locationId: locations[0].locatieId });
+    }
+  }, [locations]);
+
   return (
     <BoxMui sx={{ display: 'flex', justifyContent: 'center', mt: 5, mb: 5 }}>
       <Paper sx={{ p: 4, width: '100%', maxWidth: 500, backgroundColor: 'primary', borderRadius: 2 }}>
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: 'primary' }}>
           Stap 1: Veiling Details
         </Typography>
-        
+
         <TextField
           fullWidth
           label="Veiling Naam"
@@ -51,14 +60,15 @@ export default function CreateForm({ auctionData, setAuctionData, onNext }: Crea
           />
         </BoxMui>
 
-<Typography variant="subtitle2">Veiling Locatie</Typography>
-  <UniversalSelector 
-    mode="location" 
-    onSelect={(ids) => {
-      // Omdat locatie enkelvoudig is, pakken we de eerste ID
-      setAuctionData({ ...auctionData, locationId: ids[0]?.toString() || "" });
-    }}
-  />
+        <Typography variant="subtitle2" sx={{ mt: 2 }}>Veiling Locatie</Typography>
+        <UniversalSelector
+          mode="location"
+          valueIds={auctionData.locationId ? [Number(auctionData.locationId)] : []}
+          onSelect={(ids) => {
+            // Omdat locatie enkelvoudig is, pakken we de eerste ID
+            setAuctionData({ ...auctionData, locationId: ids[0]?.toString() || "" });
+          }}
+        />
 
         <TextField
           fullWidth

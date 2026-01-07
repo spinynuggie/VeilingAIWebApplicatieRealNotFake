@@ -31,6 +31,8 @@ namespace backend.Models
         public int VeilingId { get; set; }
         
         public int VerkoperId { get; set; }
+        
+        public int LocatieId { get; set; }
 
         // Navigation property voor meer op meer relatie
         public ICollection<ProductSpecificatie> ProductSpecificaties { get; set; }

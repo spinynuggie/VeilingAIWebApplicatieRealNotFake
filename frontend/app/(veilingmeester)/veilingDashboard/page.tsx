@@ -23,19 +23,19 @@ export default function Landing() {
   return (
     <RequireAuth roles={["ADMIN", "VERKOPER"]}>
       <div style={{ backgroundColor: "white" }}>
-              <Navbar/>
-              {/* Rij voor huidige veilingen*/}
-              <div style={{ padding: "30px" }}>
-                <h2 style={{ marginBottom: "10px", marginTop:"0" }}>Produkten die geveld kunnen worden</h2>
-                <VeilingDisplay veilingen={veilingen} mode = "veilingAanmaken" />
-              </div>
+        <Navbar />
+        {/* Rij voor huidige veilingen*/}
+        <div style={{ padding: "30px" }}>
+          <h2 style={{ marginBottom: "10px", marginTop: "0" }}>Produkten die geveld kunnen worden</h2>
+          <VeilingDisplay veilingen={veilingen} mode="veilingAanmaken" />
+        </div>
 
-              {/* opkomende veilingen */}
-              <div style={{ padding: "30px" }}>
-                <h2 style={{ marginBottom: "20px", marginTop: "-10px"}}>Toekomstige veilingen - tijdelijk copie van huidige veilingen</h2>
-                <VeilingDisplay veilingen={veilingen} mode = "veilingAanmaken" />
-              </div>
-            </div>
+        {/* opkomende veilingen */}
+        <div style={{ padding: "30px" }}>
+          <h2 style={{ marginBottom: "20px", marginTop: "-10px" }}>Toekomstige veilingen - tijdelijk copie van huidige veilingen</h2>
+          <VeilingDisplay veilingen={veilingen} mode="veilingAanmaken" />
+        </div>
+      </div>
     </RequireAuth>
   );
 }

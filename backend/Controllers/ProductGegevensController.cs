@@ -98,7 +98,9 @@ namespace backend.Controllers
                 ProductBeschrijving = productDto.ProductBeschrijving,
                 Fotos = productDto.Fotos,
                 Hoeveelheid = productDto.Hoeveelheid,
-                EindPrijs = productDto.Eindprijs
+                EindPrijs = productDto.Eindprijs,
+                VerkoperId = productDto.VerkoperId,
+                LocatieId = productDto.LocatieId
                 // Don't map SpecificatieIds here, they don't exist on the Product table
             };
 

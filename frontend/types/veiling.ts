@@ -3,6 +3,9 @@ export interface Veiling {
   naam: string;
   beschrijving: string;
   image: string;
+  starttijd: string;
+  eindtijd: string;
+  locatieId: number;
 }
 
 export interface VeilingDisplayProps {

@@ -27,6 +27,7 @@ namespace backend.Models
         public DateTimeOffset Eindtijd { get; set; }
 
         public int VeilingMeesterId { get; set; }
-        
+
+        public int LocatieId { get; set; }
     }
 }
