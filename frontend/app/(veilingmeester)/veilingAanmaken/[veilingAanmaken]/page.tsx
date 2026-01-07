@@ -72,10 +72,10 @@ const VeilingAanmakenPage = () => {
         {step === 1 && (
           <>
             <BoxMui sx={{ textAlign: 'center', py: 2 }}>
-              <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold' }}>
+              <Typography variant="h5" sx={{ color: 'primary', fontWeight: 'bold' }}>
                 {auctionData.title ? `Items toevoegen aan: ${auctionData.title}` : "Producten beheren"}
               </Typography>
-              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+              <Typography variant="body2" sx={{ color: 'primary' }}>
                 Selecteer producten aan de linkerkant om ze aan deze veiling toe te voegen.
               </Typography>
             </BoxMui>

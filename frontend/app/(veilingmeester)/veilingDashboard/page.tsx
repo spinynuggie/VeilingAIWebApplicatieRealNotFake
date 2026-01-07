@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getVeilingen } from "@/services/veilingService";
 import type { Veiling } from "@/types/veiling";
-import VeilingDisplay from "../../../components/(oud)/VeilingDisplay";
+import VeilingDisplay from "../../../components/VeilingDisplay";
 import Navbar from "@/features/(NavBar)/AppNavBar";
 
 

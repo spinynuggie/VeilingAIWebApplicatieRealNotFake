@@ -13,8 +13,8 @@ interface CreateFormProps {
 export default function CreateForm({ auctionData, setAuctionData, onNext }: CreateFormProps) {
   return (
     <BoxMui sx={{ display: 'flex', justifyContent: 'center', mt: 5, mb: 5 }}>
-      <Paper sx={{ p: 4, width: '100%', maxWidth: 500, backgroundColor: 'rgba(255,255,255,0.9)', borderRadius: 2 }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: '#333' }}>
+      <Paper sx={{ p: 4, width: '100%', maxWidth: 500, backgroundColor: 'primary', borderRadius: 2 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: 'primary' }}>
           Stap 1: Veiling Details
         </Typography>
         

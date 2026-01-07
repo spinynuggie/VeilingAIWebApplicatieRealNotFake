@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import VeilingDisplay from "../../../components/(oud)/VeilingDisplay";
+import VeilingDisplay from "../../../components/VeilingDisplay";
 import { getVeilingen } from "../../../services/veilingService";
 import { NavBar } from "@/features/(NavBar)/NavBar";
 import RequireAuth from "@/components/(oud)/RequireAuth";
