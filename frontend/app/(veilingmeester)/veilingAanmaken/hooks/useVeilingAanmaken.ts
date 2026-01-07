@@ -3,42 +3,29 @@
 import { useEffect, useState } from "react";
 import { Product } from "@/types/product";
 import { getProducts, updateProductAuctionData } from "@/services/productService";
-import { usePathname } from "next/navigation";
+
+// Haal huidige gebruiker op
+const getCurrentUserId = () => 1;
 
 export function useVeilingAanmaken() {
-  const pathname = usePathname();
-  const id = parseInt(pathname.split('/').pop() || '0');
-  const CURRENT_VEILING_ID = id;
-
-  // --- LINKER KOLOM STATES ---
+  const [currentVeilingId, setCurrentVeilingId] = useState<number | null>(null);
   const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
   const [filteredAvailable, setFilteredAvailable] = useState<Product[]>([]);
-
-  // --- RECHTER KOLOM STATES ---
   const [auctionProducts, setAuctionProducts] = useState<Product[]>([]);
   const [filteredAuction, setFilteredAuction] = useState<Product[]>([]);
-  
-  // --- ERROR STATE ---
   const [error, setError] = useState<string | null>(null);
-
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 1. DATA OPHALEN
   useEffect(() => {
     async function fetchData() {
       try {
         const data = await getProducts();
-        const leftList = data.filter((p) => p.veilingId === 0);
-        const rightList = data.filter((p) => p.veilingId === CURRENT_VEILING_ID);
-
+        const leftList = data.filter((p) => p.veilingId === 0 || p.veilingId === null);
         setAvailableProducts(leftList);
         setFilteredAvailable(leftList);
-
-        setAuctionProducts(rightList);
-        setFilteredAuction(rightList);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error("Data fetch error:", err);
       } finally {
         setLoading(false);
       }
@@ -46,97 +33,92 @@ export function useVeilingAanmaken() {
     fetchData();
   }, []);
 
-  // 2a. ZOEKEN LINKS
-  const handleSearchAvailable = (term: string) => {
-    const lowerTerm = term.toLowerCase();
-    setFilteredAvailable(availableProducts.filter((p) =>
-      p.productNaam.toLowerCase().includes(lowerTerm)
-    ));
-  };
-
-  // 2b. ZOEKEN RECHTS
-  const handleSearchAuction = (term: string) => {
-    const lowerTerm = term.toLowerCase();
-    setFilteredAuction(auctionProducts.filter((p) =>
-      p.productNaam.toLowerCase().includes(lowerTerm)
-    ));
-  };
-
-  // 3. TOEVOEGEN (Links -> Rechts)
-  const handleAddToAuction = async (maxPrice: number) => {
-    if (!selectedProduct) return;
-    
-    // Validation: startprijs must be at least 1.00 higher than eindprijs
-    const eindPrijs = selectedProduct.eindPrijs || 0;
-    if (maxPrice < eindPrijs + 1.00) {
-      setError('Startprijs moet minimaal 1.00 hoger zijn dan eind prijs');
-      return;
-    }
-    
+  const handleCreateVeiling = async (formData: any) => {
     try {
-        await updateProductAuctionData({
-            productId: selectedProduct.productId,
-            veilingId: CURRENT_VEILING_ID,
-            startPrijs: maxPrice,
-            eindPrijs: selectedProduct.eindPrijs // Preserve the existing eindPrijs
-        });
+      setError(null);
 
-        const updatedProduct = { ...selectedProduct, veilingId: CURRENT_VEILING_ID, startPrijs: maxPrice };
+      // Payload bouwen conform Swagger
+      const payload = {
+        naam: String(formData.title || ""),
+        beschrijving: String(formData.description || ""),
+        image: String(formData.imageUrl || ""),
+        // Zorg dat datums niet leeg zijn voor ISO conversie
+        starttijd: formData.startTime ? new Date(formData.startTime).toISOString() : null,
+        eindtijd: formData.endTime ? new Date(formData.endTime).toISOString() : null,
+        veilingMeesterId: Number(getCurrentUserId()),
+        locatieId: Number(formData.locationId || 1)
+      };
 
-        // Update Links
-        const newAvailable = availableProducts.filter(p => p.productId !== selectedProduct.productId);
-        setAvailableProducts(newAvailable);
-        setFilteredAvailable(newAvailable);
+      console.log("Versturen naar API:", payload);
 
-        // Update Rechts
-        const newAuctionList = [...auctionProducts, updatedProduct];
-        setAuctionProducts(newAuctionList);
-        setFilteredAuction(newAuctionList);
+      const response = await fetch("http://localhost:5000/api/Veiling", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload),
+      });
 
-        setSelectedProduct(null);
-    } catch (e) {
-        console.error(e);
+      if (!response.ok) {
+        const errorData = await response.json();
+        
+        // DIT LOGT DE EXACTE FOUTEN (bijv. "The locatieId field is required")
+        console.error("BACKEND VALIDATIE FOUT:", errorData.errors);
+        
+        // Combineer de foutmeldingen voor de gebruiker
+        const messages = errorData.errors 
+          ? Object.entries(errorData.errors).map(([field, msg]) => `${field}: ${msg}`).join(", ")
+          : errorData.title || "Validatie fout";
+
+        throw new Error(messages);
+      }
+      
+      const newVeiling = await response.json();
+      // Afhankelijk van je backend: .veilingId of .id
+      const createdId = newVeiling.veilingId || newVeiling.id;
+      setCurrentVeilingId(createdId);
+      return createdId;
+
+    } catch (err: any) {
+      setError(err.message);
+      return null;
     }
   };
 
-  // 4. VERWIJDEREN (Rechts -> Links)
+  const handleAddToAuction = async (maxPrice: number) => {
+    if (!selectedProduct || !currentVeilingId) return;
+    try {
+      await updateProductAuctionData({
+        productId: selectedProduct.productId,
+        veilingId: currentVeilingId,
+        startPrijs: maxPrice,
+        eindPrijs: selectedProduct.eindPrijs
+      });
+      const updated = { ...selectedProduct, veilingId: currentVeilingId, startPrijs: maxPrice };
+      setAvailableProducts(p => p.filter(x => x.productId !== selectedProduct.productId));
+      setFilteredAvailable(p => p.filter(x => x.productId !== selectedProduct.productId));
+      setAuctionProducts(p => [...p, updated]);
+      setFilteredAuction(p => [...p, updated]);
+      setSelectedProduct(null);
+    } catch (e) { setError("Toevoegen mislukt"); }
+  };
+
   const handleRemoveFromAuction = async (productToRemove: Product) => {
     try {
-        await updateProductAuctionData({
-            productId: productToRemove.productId,
-            veilingId: 0,
-            startPrijs: 0,
-            eindPrijs: productToRemove.eindPrijs
-        });
-
-        const resetProduct = { ...productToRemove, veilingId: 0 };
-
-        // Update Rechts
-        const newAuctionList = auctionProducts.filter(p => p.productId !== productToRemove.productId);
-        setAuctionProducts(newAuctionList);
-        setFilteredAuction(newAuctionList);
-
-        // Update Links
-        const newAvailable = [...availableProducts, resetProduct];
-        setAvailableProducts(newAvailable);
-        setFilteredAvailable(newAvailable);
-
-    } catch (e) {
-        console.error(e);
-    }
+      await updateProductAuctionData({ productId: productToRemove.productId, veilingId: 0, startPrijs: 0, eindPrijs: productToRemove.eindPrijs });
+      const reset = { ...productToRemove, veilingId: 0 };
+      setAuctionProducts(p => p.filter(x => x.productId !== productToRemove.productId));
+      setFilteredAuction(p => p.filter(x => x.productId !== productToRemove.productId));
+      setAvailableProducts(p => [...p, reset]);
+      setFilteredAvailable(p => [...p, reset]);
+    } catch (e) { setError("Verwijderen mislukt"); }
   };
 
   return {
-    loading,
-    filteredAvailable,
-    filteredAuction,
-    selectedProduct,
-    setSelectedProduct,
-    error,
-    setError,
-    handleSearchAvailable,
-    handleSearchAuction,
-    handleAddToAuction,
-    handleRemoveFromAuction
+    loading, filteredAvailable, filteredAuction, selectedProduct, setSelectedProduct, error, setError,
+    handleCreateVeiling, handleAddToAuction, handleRemoveFromAuction,
+    handleSearchAvailable: (t: string) => setFilteredAvailable(availableProducts.filter(p => p.productNaam.toLowerCase().includes(t.toLowerCase()))),
+    handleSearchAuction: (t: string) => setFilteredAuction(auctionProducts.filter(p => p.productNaam.toLowerCase().includes(t.toLowerCase()))),
   };
 }
