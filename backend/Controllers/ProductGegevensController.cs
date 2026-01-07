@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using backend.Data;
 using backend.Models;
@@ -88,6 +89,7 @@ namespace backend.Controllers
         
         // POST: api/ProductGegevens
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754// POST: api/ProductGegevens
+        [Authorize(Roles = "VERKOPER,ADMIN")]
         [HttpPost]
         public async Task<ActionResult<ProductGegevens>> PostProductGegevens(ProductGegevensCreateUpdateDto productDto)
         {

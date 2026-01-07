@@ -8,6 +8,10 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using backend.Hubs;
+using backend.Middleware;
+using backend.Validation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,13 +36,18 @@ builder.Services.AddCors(options =>
 });
 
 // add controllers, dbcontext, swagger, authentication, authorization, password hasher
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ProductGegevensValidator>());
+
+builder.Services.AddHealthChecks();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddSingleton<AuctionRealtimeService>();
+builder.Services.AddScoped<PrijsHistorieService>();
 builder.Services.AddSignalR();
 builder.Services.AddResponseCompression(options =>
 {
@@ -82,6 +91,8 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+app.UseMiddleware<GlobalExceptionMiddleware>(); // Global Error Handling (Top Priority)
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -89,6 +100,8 @@ app.UseResponseCompression();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowFrontend");
+
+app.MapHealthChecks("/health"); // Health Check Endpoint
 
 // double-submit CSRF check for state-changing requests
 app.Use(async (context, next) =>

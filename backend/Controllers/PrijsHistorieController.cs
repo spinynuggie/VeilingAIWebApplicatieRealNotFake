@@ -22,7 +22,7 @@ namespace backend.Controllers
         /// <param name="productId">The ID of the product</param>
         /// <param name="verkoperId">The seller's user ID</param>
         /// <param name="productNaam">The product name (for grouping similar items)</param>
-        [Authorize(Roles = "VERKOPER,VEILINGMEESTER,ADMIN")]
+        [Authorize(Roles = "VERKOPER,VEILINGMEESTER,ADMIN,KLANT")]
         [HttpGet("{productId}")]
         public async Task<IActionResult> GetHistory(
             int productId,
@@ -32,8 +32,18 @@ namespace backend.Controllers
             if (string.IsNullOrEmpty(productNaam))
                 return BadRequest("productNaam is vereist.");
 
-            var result = await _service.GetHistorieAsync(productId, verkoperId, productNaam);
-            return Ok(result);
+            var userRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
+
+            try
+            {
+                var result = await _service.GetHistorieAsync(productId, verkoperId, productNaam, userRole);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Return the actual error message for debugging (in dev environment)
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
 }

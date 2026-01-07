@@ -3,12 +3,13 @@
 
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { AuthProvider } from "@/components/AuthProvider";
-import { appTheme } from "@/styles/theme"; // Imported from your new file
+import { appTheme } from "@/styles/theme";
 import "./globals.css";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
+import { Toaster } from 'react-hot-toast';
 
 export default function RootLayout({
   children,
@@ -21,6 +22,7 @@ export default function RootLayout({
         <ThemeProvider theme={appTheme}>
           <CssBaseline />
           <AuthProvider>
+            <Toaster position="top-right" />
             {children}
           </AuthProvider>
         </ThemeProvider>

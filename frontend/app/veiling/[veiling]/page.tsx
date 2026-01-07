@@ -294,18 +294,19 @@ export default function VeilingDetailPage() {
           <Box sx={{ flex: "0 0 auto" }}>
             {activeProduct ? (
               <VeilingKlok
-                key={activeProduct.productId} /* Reset clock on product change */
-                startPrice={Number(activeProduct.startPrijs ?? 0)}
-                endPrice={Number(activeProduct.eindPrijs ?? 0)}
-                duration={Math.max(1, (new Date(veiling.eindtijd).getTime() - new Date(veiling.starttijd).getTime()) / 1000)}
-                productName={activeProduct.productNaam}
-                isClosed={activeBidClosed || isPaused}
-                closingPrice={lastBid?.amount}
-                onBid={handleLiveBid}
+                startPrice={activeProduct ? activeProduct.startPrijs : veiling.producten?.[0]?.startPrijs || 10}
+                endPrice={activeProduct ? activeProduct.eindPrijs : veiling.producten?.[0]?.eindPrijs || 1}
+                duration={300} // arbitrary, driven by backend
+                productName={activeProduct?.productNaam}
+                productId={activeProduct?.productId}
+                verkoperId={activeProduct?.verkoperId}
+                remainingQuantity={remainingQty ?? activeProduct?.hoeveelheid}
                 livePrice={livePrice}
-                status={auctionStatus}
-                countdownText={isPaused ? pauseMessage : (countdown !== null ? formatCountdown(countdown) : undefined)}
-                remainingQuantity={remainingQty ?? activeProduct.hoeveelheid}
+                closingPrice={activeBidClosed ? lastBid?.amount : undefined}
+                status={isPaused ? "pending" : activeProduct ? "active" : "ended"}
+                countdownText={pauseMessage || "Wachten..."}
+                onBid={handleLiveBid}
+                isClosed={activeBidClosed}
               />
             ) : (
               /* Placeholder Clock or Empty */
