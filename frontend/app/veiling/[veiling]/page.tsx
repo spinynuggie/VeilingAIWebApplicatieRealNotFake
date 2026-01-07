@@ -14,7 +14,8 @@ import { getProducts } from "@/services/productService";
 import { Box, Typography, Paper } from "@mui/material";
 import RequireAuth from "@/components/(oud)/RequireAuth";
 import ProductCard from "@/features/ProductCard";
-import { VeilingKlok } from "@/components/VeilingKlok";
+import nextDynamic from "next/dynamic";
+const VeilingKlok = nextDynamic(() => import("@/components/VeilingKlok").then(mod => mod.VeilingKlok), { ssr: false });
 import {
   BidEvent,
   PriceTickEvent,
