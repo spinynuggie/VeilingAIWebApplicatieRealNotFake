@@ -11,7 +11,7 @@ import { getProducts } from "@/services/productService";
 import { Box, Typography, Paper } from "@mui/material";
 import RequireAuth from "@/components/(oud)/RequireAuth";
 import ProductCard from "@/features/ProductCard";
-import { VeilingKlok } from "@/components/(oud)/VeilingKlok";
+import { VeilingKlok } from "@/components/VeilingKlok";
 import {
   BidEvent,
   PriceTickEvent,
@@ -48,6 +48,7 @@ export default function VeilingDetailPage() {
   const [livePrice, setLivePrice] = useState<number | null>(null);
   const [liveStatus, setLiveStatus] = useState<string>("");
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [remainingQty, setRemainingQty] = useState<number | null>(null);
 
   const pathname = usePathname();
   const id = parseInt(pathname.split("/").pop() || "0");
@@ -119,7 +120,12 @@ export default function VeilingDetailPage() {
 
     setLiveStatus("Verbinden met live veiling...");
     startAuctionConnection(String(veiling.veilingId), {
-      onBid: (bid: BidEvent) => setLastBid(bid),
+      onBid: (bid: BidEvent) => {
+        setLastBid(bid);
+        if (bid.remainingQuantity !== undefined) {
+          setRemainingQty(bid.remainingQuantity);
+        }
+      },
       onTick: (tick: PriceTickEvent) => setLivePrice(tick.price),
     })
       .then((conn) => {
@@ -143,9 +149,27 @@ export default function VeilingDetailPage() {
     };
   }, [veiling?.veilingId, auctionStatus]);
 
+  const filteredProducts = allProducts.filter((p) => {
+    return veiling ? String(p.veilingId) === String(veiling.veilingId) : false;
+  });
+
+  const activeProduct = filteredProducts[0];
+
+  useEffect(() => {
+    if (activeProduct && remainingQty === null) {
+      setRemainingQty(activeProduct.hoeveelheid);
+    }
+  }, [activeProduct, remainingQty]);
+
+  const activeBidClosed = Boolean(
+    lastBid &&
+    activeProduct &&
+    lastBid.productId === activeProduct.productId &&
+    remainingQty === 0
+  );
+
   const handleLiveBid = async (price: number, quantity: number) => {
     if (!veiling || auctionStatus !== "active") return;
-    const activeProduct = filteredProducts[0];
     if (!activeProduct) {
       setLiveStatus("Geen actief product gevonden.");
       return;
@@ -167,13 +191,6 @@ export default function VeilingDetailPage() {
 
   if (error) return <p>Error: {error}</p>;
   if (!veiling) return <p>Loading... (looking for id: {id})</p>;
-
-  const filteredProducts = allProducts.filter((p) => {
-    return String(p.veilingId) === String(veiling.veilingId);
-  });
-
-  const activeProduct = filteredProducts[0];
-  const activeBidClosed = Boolean(lastBid && activeProduct && lastBid.productId === activeProduct.productId);
 
   return (
     <RequireAuth>
@@ -244,6 +261,7 @@ export default function VeilingDetailPage() {
                 livePrice={livePrice}
                 status={auctionStatus}
                 countdownText={countdown !== null ? formatCountdown(countdown) : undefined}
+                remainingQuantity={remainingQty ?? activeProduct.hoeveelheid}
               />
             </Box>
           )}

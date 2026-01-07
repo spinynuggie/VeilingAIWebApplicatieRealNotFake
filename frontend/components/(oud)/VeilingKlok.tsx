@@ -13,6 +13,7 @@ interface AuctionClockProps {
   livePrice?: number | null;
   status?: "pending" | "active" | "ended";
   countdownText?: string;
+  remainingQuantity?: number;
 }
 
 export const VeilingKlok: React.FC<AuctionClockProps> = ({
@@ -26,6 +27,7 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
   livePrice,
   status = "active",
   countdownText,
+  remainingQuantity,
 }) => {
   const [localTimeRemaining, setLocalTimeRemaining] = useState<number>(duration);
   const [quantity, setQuantity] = useState<string>('1');
@@ -93,7 +95,12 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^[1-9]\d*$/.test(value)) {
-      setQuantity(value);
+      const num = parseInt(value || '0', 10);
+      if (remainingQuantity !== undefined && num > remainingQuantity) {
+        setQuantity(remainingQuantity.toString());
+      } else {
+        setQuantity(value);
+      }
     }
   };
 
@@ -169,6 +176,11 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
             <Typography sx={{ fontSize: '20px', fontWeight: 700, color: '#1f2937', letterSpacing: '-0.02em' }}>
               {productName}
             </Typography>
+            {remainingQuantity !== undefined && (
+              <Typography sx={{ fontSize: '14px', color: '#6b7280', mt: 0.5 }}>
+                Nog {remainingQuantity} beschikbaar
+              </Typography>
+            )}
           </Box>
         )}
 
@@ -282,7 +294,7 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
             variant="contained"
             fullWidth
             onClick={handleBid}
-            disabled={status !== "active" || auctionEnded || parseInt(quantity || '0', 10) <= 0}
+            disabled={status !== "active" || auctionEnded || parseInt(quantity || '0', 10) <= 0 || (remainingQuantity !== undefined && parseInt(quantity || '0', 10) > remainingQuantity)}
             sx={{
               maxWidth: '220px',
               height: '56px',
