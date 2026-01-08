@@ -31,3 +31,7 @@ export interface UpdateProductAuctionInput {
   startPrijs: number;
   eindPrijs: number;
 }
+
+export interface ProductDisplayProps {
+  product: Product[];
+}

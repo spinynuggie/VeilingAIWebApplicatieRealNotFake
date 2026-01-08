@@ -6,7 +6,7 @@ import { Box } from "@/components/Box";
 import { Button } from "@/components/Buttons/Button";
 import { Stack, Grid, Typography, InputAdornment, Box as BoxMui } from "@mui/material";
 import UniversalSelector from "@/features/UniversalSelect";
-import { getLocaties } from "@/services/locatieService";
+import { getLocaties, Locatie } from "@/services/locatieService";
 
 // --- TYPES ---
 export interface ProductData {
@@ -31,13 +31,13 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
   const [success, setSuccess] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const [locations, setLocations] = useState<{ locatieId: number; locatieNaam: string }[]>([]);
+  const [locations, setLocations] = useState<Locatie[]>([]);
 
   useEffect(() => {
-    getLocaties().then((data: any[]) => {
+    getLocaties().then((data) => {
       setLocations(data);
       if (data.length > 0 && (formData.locationId === "" || formData.locationId === undefined)) {
-        setFormData(prev => ({ ...prev, locationId: data[0].locatieId }));
+        setFormData(prev => ({ ...prev, locationId: data[0].locatieId || "" }));
       }
     }).catch(console.error);
   }, []);
@@ -143,7 +143,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
         specifications: [],
         specificationIds: [],
         image: "",
-        locationId: locations.length > 0 ? locations[0].locatieId : "",
+        locationId: locations.length > 0 ? (locations[0].locatieId || "") : "",
       });
 
     } catch (err: any) {

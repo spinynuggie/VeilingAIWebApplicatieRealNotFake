@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Product } from "@/types/product";
 import { getProducts, updateProductAuctionData } from "@/services/productService";
-import { getLocaties } from "@/services/locatieService";
+import { getLocaties, Locatie } from "@/services/locatieService";
 import { getVeilingById } from "@/services/veilingService";
 
 // Haal huidige gebruiker op
@@ -18,7 +18,7 @@ export function useVeilingAanmaken(initialVeilingId?: number | null) {
   const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [locations, setLocations] = useState<{ locatieId: number; locatieNaam: string }[]>([]);
+  const [locations, setLocations] = useState<Locatie[]>([]);
   const [auctionLocationId, setAuctionLocationId] = useState<number | null>(null);
 
   useEffect(() => {

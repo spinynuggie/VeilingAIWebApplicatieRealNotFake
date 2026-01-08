@@ -1,3 +1,5 @@
+import { SearchResult } from "@/types/search";
+
 const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
 
 export async function globalSearch(query: string, signal: AbortSignal): Promise<SearchResult[]> {
@@ -9,7 +11,7 @@ export async function globalSearch(query: string, signal: AbortSignal): Promise<
 export async function searchSpecificaties(query: string, signal: AbortSignal): Promise<SearchResult[]> {
   const res = await fetch(`${apiBase}/api/Search/search?query=${encodeURIComponent(query)}`, { signal });
   const data = await res.json();
-  
+
   return data.map((s: any) => ({
     id: s.specificatieId,
     naam: s.naam,

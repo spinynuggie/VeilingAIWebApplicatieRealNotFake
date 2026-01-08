@@ -7,11 +7,13 @@ import { Button } from "@/components/Buttons/Button";
 import { TextField } from "@/components/TextField";
 import UniversalSelector from "@/features/UniversalSelect";
 
+import { Locatie } from "@/services/locatieService";
+
 interface CreateFormProps {
   auctionData: any;
   setAuctionData: (data: any) => void;
   onNext: () => void;
-  locations: { locatieId: number; locatieNaam: string }[];
+  locations: Locatie[];
 }
 
 export default function CreateForm({ auctionData, setAuctionData, onNext, locations }: CreateFormProps) {
