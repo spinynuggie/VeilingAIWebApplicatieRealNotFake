@@ -16,27 +16,23 @@ using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Env.Load();
-var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://localhost:3000";
-var frontendUrlAlt = Environment.GetEnvironmentVariable("FRONTEND_URL_ALT") ?? "http://127.0.0.1:3000";
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "dev-secret-change-me";
-var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "VeilingAI";
-var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "VeilingAIUsers";
-var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+// Split FRONTEND_URL by commas to support multiple domains (e.g. Vercel prod + previews)
+var frontendOrigins = (Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://localhost:3000")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
 // CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.SetIsOriginAllowed(origin => true) // Allow any origin for now!
+        policy.WithOrigins(frontendOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
     });
 });
 
-Console.WriteLine($"[DEBUG] Frontend URL: {frontendUrl}");
+Console.WriteLine($"[DEBUG] Frontend Origins: {string.Join(", ", frontendOrigins)}");
 Console.WriteLine($"[DEBUG] Environment: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}");
 
 // add controllers, dbcontext, swagger, authentication, authorization, password hasher
