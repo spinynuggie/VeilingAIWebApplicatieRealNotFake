@@ -283,9 +283,11 @@ export default function VeilingDetailPage() {
             ) : (
               <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fafafa', borderRadius: 4, border: '1px dashed #ccc' }}>
                 <Typography variant="h6" color="text.secondary">
-                  {filteredProducts.length === 0 && !connection
-                    ? "Veiling is afgelopen."
-                    : (connection ? "Wachten op volgend product..." : "Producten laden...")}
+                  {auctionStatus === "pending"
+                    ? "Deze veiling is nog niet gestart."
+                    : (filteredProducts.length === 0 && !connection
+                      ? "Veiling is afgelopen."
+                      : (connection ? "Wachten op volgend product..." : "Producten laden..."))}
                 </Typography>
               </Box>
             )}
@@ -311,8 +313,12 @@ export default function VeilingDetailPage() {
               />
             ) : (
               /* Placeholder Clock or Empty */
-              <Box sx={{ width: 380, height: 400, bgcolor: '#f0f0f0', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography>{isPaused ? pauseMessage : "..."}</Typography>
+              <Box sx={{ width: 380, height: 400, bgcolor: '#f0f0f0', borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', p: 3 }}>
+                <Typography color="text.secondary">
+                  {auctionStatus === "pending"
+                    ? `Veiling begint over ${countdown !== null ? formatCountdown(countdown) : "..."}`
+                    : (isPaused ? pauseMessage : "...")}
+                </Typography>
               </Box>
             )}
           </Box>
