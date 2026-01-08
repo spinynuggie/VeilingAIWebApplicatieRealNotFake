@@ -20,9 +20,24 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 
 // Support multiple domains + auto-trim trailing slashes (which often breaks CORS)
-var frontendOrigins = (Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "https://veiling-ai-web-applicatie-real-not.vercel.app,http://localhost:3000")
-    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-    .Select(o => o.TrimEnd('/')) 
+// 1. Get from Env (safely handle null/empty)
+var envUrl = Environment.GetEnvironmentVariable("FRONTEND_URL");
+var origins = new List<string>();
+
+if (!string.IsNullOrWhiteSpace(envUrl))
+{
+    origins.AddRange(envUrl.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+}
+
+// 2. ALWAYS add the known production Vercel URL (Hardcoded Safety Net)
+origins.Add("https://veiling-ai-web-applicatie-real-not.vercel.app");
+origins.Add("http://localhost:3000"); // Localhost fallback
+
+// 3. Normalize: Trim slashes & remove duplicates
+var frontendOrigins = origins
+    .Where(o => !string.IsNullOrWhiteSpace(o))
+    .Select(o => o.TrimEnd('/'))
+    .Distinct()
     .ToArray();
 
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "dev-secret-change-me";

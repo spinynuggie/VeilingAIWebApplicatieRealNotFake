@@ -2,8 +2,8 @@
 
 # Configuration - EDIT THESE
 DOCKER_USERNAME="rayantjedo"
-VERCEL_URL="your-app.vercel.app"
-TAG="v1" # Change this (e.g., v1, v2, migrationfix) to force a refresh!
+VERCEL_URL="veiling-ai-web-applicatie-real-not.vercel.app"
+TAG="v4-cors-force" # Force-include usage
 
 echo "🚀 Starting Magic Deployment (Tag: $TAG)..."
 
