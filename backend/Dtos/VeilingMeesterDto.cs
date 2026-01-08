@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace backend.Dtos
 {
     /// <summary>
@@ -8,8 +6,6 @@ namespace backend.Dtos
     /// </summary>
     public class VeilingMeesterDto
     {
-        [Required(ErrorMessage = "GebruikerId is verplicht.")]
-        [Range(1, int.MaxValue, ErrorMessage = "GebruikerId moet een geldige positieve integer zijn.")]
         public int GebruikerId { get; set; }
     }
 }

@@ -81,7 +81,22 @@ namespace backend.Controllers
             results.AddRange(products);
             results.AddRange(auctions);
 
-            return Ok(results);
+            // 5. Output validatie - controleer data kwaliteit
+            var validatedResults = results.Where(r => 
+                !string.IsNullOrWhiteSpace(r.Naam) &&  // Naam mag niet leeg zijn
+                r.Id > 0 &&                               // ID moet positief zijn
+                !string.IsNullOrWhiteSpace(r.Type))      // Type mag niet leeg zijn
+            .Select(r => new SearchResultDto              // Clean de output
+            {
+                Id = r.Id,
+                Naam = r.Naam?.Trim() ?? "",              // Trim whitespace
+                Type = r.Type?.Trim() ?? "Onbekend",      // Fallback voor type
+                Image = string.IsNullOrWhiteSpace(r.Image) ? null : r.Image.Trim() // Clean image URL
+            })
+            .Take(50) // Limit results voor performance
+            .ToList();
+
+            return Ok(validatedResults);
         }
     }
 }

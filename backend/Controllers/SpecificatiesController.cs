@@ -42,12 +42,18 @@ public class SpecificatiesController : ControllerBase
     {
         var specificaties = await _context.Specificaties.ToListAsync();
 
-        var response = specificaties.Select(s => new SpecificatiesResponseDto
-        {
-            SpecificatieId = s.SpecificatieId,
-            Naam = s.Naam,
-            Beschrijving = s.Beschrijving,
-        }).ToList();
+        // Output validatie - filter en clean de data
+        var response = specificaties
+            .Where(s => s.SpecificatieId > 0 && 
+                       !string.IsNullOrWhiteSpace(s.Naam))
+            .Select(s => new SpecificatiesResponseDto
+            {
+                SpecificatieId = s.SpecificatieId,
+                Naam = s.Naam?.Trim() ?? "",
+                Beschrijving = string.IsNullOrWhiteSpace(s.Beschrijving) ? "" : s.Beschrijving.Trim()
+            })
+            .Take(100) // Limit voor performance
+            .ToList();
 
         return Ok(response);
     }

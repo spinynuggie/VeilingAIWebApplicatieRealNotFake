@@ -27,13 +27,36 @@ namespace backend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductGegevens>>> GetProductGegevens()
         {
-            return await _context.ProductGegevens.ToListAsync();
+            var products = await _context.ProductGegevens.ToListAsync();
+            
+            // Output validatie - filter en clean de data
+            var validatedProducts = products
+                .Where(p => p.ProductId > 0 && 
+                           !string.IsNullOrWhiteSpace(p.ProductNaam))
+                .Select(p => new ProductGegevens
+                {
+                    ProductId = p.ProductId,
+                    ProductNaam = p.ProductNaam?.Trim() ?? "",
+                    ProductBeschrijving = string.IsNullOrWhiteSpace(p.ProductBeschrijving) ? "" : p.ProductBeschrijving.Trim(),
+                    Fotos = string.IsNullOrWhiteSpace(p.Fotos) ? "" : p.Fotos.Trim(),
+                    Hoeveelheid = Math.Max(0, p.Hoeveelheid), // Negatieve hoeveelheid niet toegestaan
+                    EindPrijs = Math.Max(0, p.EindPrijs) // Negatieve prijs niet toegestaan
+                })
+                .Take(100) // Limit voor performance
+                .ToList();
+
+            return Ok(validatedProducts);
         }
 
         // GET: api/ProductGegevens/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductGegevens>> GetProductGegevens(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest("Product ID moet positief zijn.");
+            }
+
             var productGegevens = await _context.ProductGegevens.FindAsync(id);
 
             if (productGegevens == null)
@@ -41,7 +64,18 @@ namespace backend.Controllers
                 return NotFound();
             }
 
-            return productGegevens;
+            // Output validatie - clean de single product data
+            var validatedProduct = new ProductGegevens
+            {
+                ProductId = productGegevens.ProductId,
+                ProductNaam = productGegevens.ProductNaam?.Trim() ?? "",
+                ProductBeschrijving = string.IsNullOrWhiteSpace(productGegevens.ProductBeschrijving) ? "" : productGegevens.ProductBeschrijving.Trim(),
+                Fotos = string.IsNullOrWhiteSpace(productGegevens.Fotos) ? "" : productGegevens.Fotos.Trim(),
+                Hoeveelheid = Math.Max(0, productGegevens.Hoeveelheid),
+                EindPrijs = Math.Max(0, productGegevens.EindPrijs)
+            };
+
+            return Ok(validatedProduct);
         }
 
         // PUT: api/ProductGegevens/5

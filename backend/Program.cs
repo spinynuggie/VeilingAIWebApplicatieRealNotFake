@@ -2,6 +2,8 @@ using System.Text;
 using System.Linq;
 using backend.Data;
 using backend.Services;
+using backend.Validators;
+using backend.Filters;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -10,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using backend.Hubs;
 using backend.Middleware;
 using backend.Validation;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -61,9 +64,13 @@ Console.WriteLine($"[DEBUG] FRONTEND_URL Env: {Environment.GetEnvironmentVariabl
 Console.WriteLine($"[DEBUG] Final Allowed Origins: {string.Join(", ", frontendOrigins)}");
 
 // add controllers, dbcontext, swagger, authentication, authorization, password hasher
-builder.Services.AddControllers()
-    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ProductGegevensValidator>());
-
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();
+})
+.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ProductGegevensCreateUpdateDtoValidator>());
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<GebruikerCreateDtoValidator>();
 builder.Services.AddHealthChecks();
 
 builder.Services.AddDbContext<AppDbContext>(options =>

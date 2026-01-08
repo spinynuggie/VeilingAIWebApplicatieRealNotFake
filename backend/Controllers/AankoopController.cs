@@ -118,14 +118,49 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<ActionResult<AankoopResponseDto>> PostAankoop(AankoopCreateDto aankoopDto)
         {
-            // 1. Haal de GebruikerId op (veiligheid)
+            // 1. DTO validatie is al uitgevoerd door ValidationFilter
+            
+            // 2. Haal de GebruikerId op (veiligheid)
             var gebruikerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (gebruikerIdClaim == null || !int.TryParse(gebruikerIdClaim, out int koperId))
             {
                 return Unauthorized("U moet ingelogd zijn om een aankoop te doen.");
             }
 
-            // 2. Converteer DTO naar Entiteit
+            // 3. Business logic validatie
+            var product = await _context.ProductGegevens.FindAsync(aankoopDto.ProductId);
+            if (product == null)
+            {
+                return BadRequest("Product bestaat niet.");
+            }
+
+            // 4. Controleer of gebruiker dit product al heeft gekocht
+            var existingAankoop = await _context.Aankoop
+                .FirstOrDefaultAsync(a => a.GebruikerId == koperId && a.ProductId == aankoopDto.ProductId);
+            
+            if (existingAankoop != null)
+            {
+                return BadRequest("U heeft dit product al gekocht.");
+            }
+
+            // 5. Controleer of er genoeg voorraad is
+            if (product.Hoeveelheid < aankoopDto.AanKoopHoeveelheid)
+            {
+                return BadRequest($"Niet genoeg voorraad. Beschikbaar: {product.Hoeveelheid}, Gewenst: {aankoopDto.AanKoopHoeveelheid}");
+            }
+
+            // 6. Controleer of de prijs redelijk is (niet te hoog of te laag)
+            if (aankoopDto.Prijs <= 0)
+            {
+                return BadRequest("Prijs moet groter dan 0 zijn.");
+            }
+
+            if (aankoopDto.Prijs > product.Eindprijs * 2) // Max 2x de eindprijs
+            {
+                return BadRequest($"Prijs is te hoog. Maximale prijs: €{product.Eindprijs * 2}");
+            }
+
+            // 7. Converteer DTO naar Entiteit
             var aankoop = new Aankoop
             {
                 ProductId = aankoopDto.ProductId,
@@ -137,10 +172,14 @@ namespace backend.Controllers
                 IsBetaald = false // Standaard onbetaald
             };
 
+            // 8. Update voorraad
+            product.Hoeveelheid -= aankoopDto.AanKoopHoeveelheid;
+            _context.Entry(product).State = EntityState.Modified;
+
             _context.Aankoop.Add(aankoop);
             await _context.SaveChangesAsync();
 
-            // 3. Retourneer de DTO
+            // 9. Retourneer de DTO
             return CreatedAtAction("GetAankoop", new { id = aankoop.AankoopId }, MapToResponseDto(aankoop));
         }
 

@@ -164,21 +164,45 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Verkoper>> PostVerkoper(VerkoperDto verkoperDto)
         {
-            // 1. Map de DTO naar een nieuw domeinmodel
+            // 1. DTO validatie is al uitgevoerd door ValidationFilter
+            
+            // 2. Business logic validatie
+            var existingKvk = await _context.Verkopers
+                .FirstOrDefaultAsync(v => v.KvkNummer == verkoperDto.KvkNummer);
+            
+            if (existingKvk != null)
+            {
+                return BadRequest("Dit KVK nummer is al geregistreerd.");
+            }
+
+            // 3. Controleer of gebruiker al een verkoper account heeft (als GebruikerId bekend is)
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId != null)
+            {
+                var existingVerkoperForUser = await _context.Verkopers
+                    .FirstOrDefaultAsync(v => v.GebruikerId == currentUserId);
+                
+                if (existingVerkoperForUser != null)
+                {
+                    return BadRequest("U heeft al een verkoper account.");
+                }
+            }
+
+            // 4. Map de DTO naar een nieuw domeinmodel
             var verkoper = new Verkoper
             {
                 KvkNummer = verkoperDto.KvkNummer,
                 Bedrijfsgegevens = verkoperDto.Bedrijfsgegevens,
                 Adresgegevens = verkoperDto.Adresgegevens,
-                FinancieleGegevens = verkoperDto.FinancieleGegevens
-                // VerkoperId wordt automatisch door de database ingesteld
+                FinancieleGegevens = verkoperDto.FinancieleGegevens,
+                GebruikerId = currentUserId ?? 0 // 0 als niet ingelogd, kan later worden gekoppeld
             };
             
-            // 2. Voeg toe aan de context
+            // 5. Voeg toe aan de context
             _context.Verkopers.Add(verkoper);
             await _context.SaveChangesAsync();
 
-            // 3. Retourneer het aangemaakte domeinmodel
+            // 6. Retourneer het aangemaakte domeinmodel
             return CreatedAtAction("GetVerkoper", new { id = verkoper.VerkoperId }, verkoper);
         }
 

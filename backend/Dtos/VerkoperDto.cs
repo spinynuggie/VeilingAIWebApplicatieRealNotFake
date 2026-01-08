@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace backend.Dtos
 {
     /// <summary>
@@ -7,14 +5,9 @@ namespace backend.Dtos
     /// </summary>
     public class VerkoperDto
     {
-        [Required(ErrorMessage = "KvkNummer is verplicht.")]
-        [StringLength(50, ErrorMessage = "KvkNummer mag maximaal 50 karakters bevatten.")]
         public string KvkNummer { get; set; } = string.Empty;
-
         public string Bedrijfsgegevens { get; set; } = string.Empty;
-
         public string Adresgegevens { get; set; } = string.Empty;
-
         public string FinancieleGegevens { get; set; } = string.Empty;
 
         // GebruikerId wordt server-side bepaald; client hoeft deze niet te sturen

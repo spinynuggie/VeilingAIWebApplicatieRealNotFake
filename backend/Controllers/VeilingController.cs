@@ -87,7 +87,30 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Veiling>> PostVeiling(VeilingDto veilingDto)
         {
-            // 1. Map de inkomende DTO naar een nieuw domeinmodel
+            // 1. DTO validatie is al uitgevoerd door ValidationFilter
+            
+            // 2. Business logic validatie
+            var existingVeilingMeester = await _context.VeilingMeesters
+                .FindAsync(veilingDto.VeilingMeesterId);
+            
+            if (existingVeilingMeester == null)
+            {
+                return BadRequest("VeilingMeesterId bestaat niet.");
+            }
+
+            // 3. Controleer of er geen conflicterende veilingen zijn
+            var conflictingVeiling = await _context.Veiling
+                .Where(v => v.VeilingMeesterId == veilingDto.VeilingMeesterId &&
+                           ((v.Starttijd <= veilingDto.Starttijd && v.Eindtijd >= veilingDto.Starttijd) ||
+                            (v.Starttijd <= veilingDto.Eindtijd && v.Eindtijd >= veilingDto.Eindtijd)))
+                .FirstOrDefaultAsync();
+
+            if (conflictingVeiling != null)
+            {
+                return BadRequest("Deze veilingmeester heeft al een veiling op dit tijdstip.");
+            }
+            
+            // 4. Map de inkomende DTO naar een nieuw domeinmodel
             var veiling = new Veiling
             {
                 Naam = veilingDto.Naam,
@@ -99,11 +122,11 @@ namespace backend.Controllers
                 LocatieId = veilingDto.LocatieId
             };
             
-            // 2. Voeg het domeinmodel toe en sla op
+            // 5. Voeg het domeinmodel toe en sla op
             _context.Veiling.Add(veiling);
             await _context.SaveChangesAsync();
 
-            // 3. Retourneer het aangemaakte Veiling domeinmodel
+            // 6. Retourneer het aangemaakte Veiling domeinmodel
             return CreatedAtAction("GetVeiling", new { id = veiling.VeilingId }, veiling);
         }
 
