@@ -126,6 +126,7 @@ namespace backend.Controllers
                 HttpOnly = true,
                 Secure = true, // Must be true for SameSite=None
                 SameSite = SameSiteMode.None, // Required for cross-site (Vercel -> sslip.io)
+                Path = "/",
                 Expires = DateTimeOffset.UtcNow.AddMinutes(AccessTokenMinutes)
             };
 
@@ -134,6 +135,7 @@ namespace backend.Controllers
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
+                Path = "/",
                 Expires = refreshToken.ExpiresAt
             };
 
@@ -144,6 +146,7 @@ namespace backend.Controllers
                 HttpOnly = false,
                 Secure = true,
                 SameSite = SameSiteMode.None,
+                Path = "/",
                 Expires = DateTimeOffset.UtcNow.AddMinutes(AccessTokenMinutes)
             };
 
@@ -158,7 +161,8 @@ namespace backend.Controllers
             {
                 Expires = DateTimeOffset.UtcNow.AddDays(-1),
                 Secure = true,
-                SameSite = SameSiteMode.None
+                SameSite = SameSiteMode.None,
+                Path = "/"
             };
 
             Response.Cookies.Append("access_token", string.Empty, expired);

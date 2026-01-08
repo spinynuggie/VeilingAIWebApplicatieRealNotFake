@@ -152,6 +152,10 @@ app.Use(async (context, next) =>
     var referer = context.Request.Headers.Referer.ToString();
     if (context.Request.Path.StartsWithSegments("/hubs") ||
         context.Request.Path.StartsWithSegments("/swagger") ||
+        context.Request.Path.Equals(new PathString("/api/Gebruiker/login"), StringComparison.OrdinalIgnoreCase) ||
+        context.Request.Path.Equals(new PathString("/api/Gebruiker/register"), StringComparison.OrdinalIgnoreCase) ||
+        context.Request.Path.Equals(new PathString("/api/Gebruiker/logout"), StringComparison.OrdinalIgnoreCase) ||
+        context.Request.Path.Equals(new PathString("/api/Gebruiker/refresh"), StringComparison.OrdinalIgnoreCase) ||
         (!string.IsNullOrWhiteSpace(referer) &&
          referer.Contains("/swagger", StringComparison.OrdinalIgnoreCase)))
     {
