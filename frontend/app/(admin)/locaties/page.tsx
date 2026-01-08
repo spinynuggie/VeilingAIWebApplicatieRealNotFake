@@ -38,14 +38,14 @@ export default function LocatiePage() {
         <BoxMui sx={{ display: "flex", justifyContent: "center", width: "100%", pt: 6, px: 4 }}>
           <Grid container spacing={4} sx={{ maxWidth: "1200px" }}>
             {/* Links: Het Formulier in een Box */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Box>
                 <LocatieFormCard onSuccess={fetchLocaties} />
               </Box>
             </Grid>
 
             {/* Rechts: De Lijst in een Box */}
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Box>
                 <LocatieListCard locaties={locaties} loading={loading} />
               </Box>
