@@ -153,6 +153,9 @@ namespace backend.Controllers
             Response.Cookies.Append("access_token", accessToken, accessOptions);
             Response.Cookies.Append("refresh_token", refreshToken.Token, refreshOptions);
             Response.Cookies.Append("XSRF-TOKEN", xsrfToken, xsrfOptions);
+
+            // Also send as header for Cross-Origin clients that can't read cookies
+            Response.Headers["X-XSRF-TOKEN"] = xsrfToken;
         }
 
         private void ClearAuthCookies()
@@ -395,6 +398,11 @@ namespace backend.Controllers
             {
                 return Unauthorized();
             }
+
+            // Ensure we have a fresh CSRF token for the session (improtant for page reloads)
+            // We usually don't need to refresh the access token here, but we MUST send the CSRF token header
+            // Re-issuing tokens is the easiest way to keep everything in sync
+            await IssueTokensAsync(gebruiker);
 
             // Retourneer DTO
             return MapToResponseDto(gebruiker);

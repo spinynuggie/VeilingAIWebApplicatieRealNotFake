@@ -7,11 +7,8 @@ if (!apiBase) {
   throw new Error("NEXT_PUBLIC_BACKEND_LINK is not defined.");
 }
 
-function getXsrfToken(): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.split(";").map((c) => c.trim()).find((c) => c.startsWith("XSRF-TOKEN="));
-  return match ? decodeURIComponent(match.split("=")[1]) : null;
-}
+// In-memory storage for Cross-Site CSRF token
+let currentXsrfToken: string | null = null;
 
 function applyCsrfHeader(init: RequestInit = {}): RequestInit {
   const method = (init.method ?? "GET").toUpperCase();
@@ -19,13 +16,12 @@ function applyCsrfHeader(init: RequestInit = {}): RequestInit {
     return { ...init };
   }
 
-  const token = getXsrfToken();
-  if (!token) {
+  if (!currentXsrfToken) {
     return { ...init };
   }
 
   const headers = new Headers(init.headers ?? {});
-  headers.set("X-XSRF-TOKEN", token);
+  headers.set("X-XSRF-TOKEN", currentXsrfToken);
 
   return { ...init, headers };
 }
@@ -38,6 +34,12 @@ async function refreshTokens(): Promise<boolean> {
       credentials: "include",
     })
   );
+
+  const token = res.headers.get("X-XSRF-TOKEN");
+  if (token) {
+    currentXsrfToken = token;
+  }
+
   return res.ok;
 }
 
@@ -48,6 +50,13 @@ export async function authFetch(input: RequestInfo | URL, init?: RequestInit, re
   });
 
   const res = await fetch(input, enhancedInit);
+
+  // Capture CSRF token from ANY response that sends it
+  const headerToken = res.headers.get("X-XSRF-TOKEN");
+  if (headerToken) {
+    currentXsrfToken = headerToken;
+  }
+
   if (res.status === 401 && retry) {
     const refreshed = await refreshTokens();
     if (refreshed) {
@@ -106,6 +115,8 @@ export async function logout(): Promise<void> {
   const res = await authFetch(`${apiBase}/api/Gebruiker/logout`, {
     method: "POST",
   });
+
+  currentXsrfToken = null; // Clear token on logout
 
   if (!res.ok && res.status !== 401) {
     const text = await res.text();

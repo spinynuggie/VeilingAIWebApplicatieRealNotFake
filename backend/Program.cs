@@ -53,7 +53,8 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(frontendOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials();
+            .AllowCredentials()
+            .WithExposedHeaders("X-XSRF-TOKEN");
     });
 });
 
