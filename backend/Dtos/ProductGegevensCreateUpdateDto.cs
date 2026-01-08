@@ -22,6 +22,10 @@ namespace backend.Dtos
         public int Hoeveelheid { get; set; }
         
         [Range(0.01, double.MaxValue)]
+        [JsonPropertyName("startPrijs")]
+        public decimal StartPrijs { get; set; }
+        
+        [Range(0.01, double.MaxValue)]
         [JsonPropertyName("eindprijs")]
         public decimal Eindprijs { get; set; }
 

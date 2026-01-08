@@ -1,16 +1,40 @@
+version: '3.8'
+
 services:
-  postgres:
+  db:
     image: postgres:16-alpine
-    container_name: WebsiteProject
-    restart: unless-stopped
+    container_name: veiling-db
+    restart: always
     environment:
+      POSTGRES_DB: VeilingWebsiteDB
       POSTGRES_USER: devuser
       POSTGRES_PASSWORD: Shrek
-      POSTGRES_DB: VeilingWebsiteDB
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - veiling-network
+
+  app:
+    # This will be updated with your username in a moment!
+    image: rayantjedo/veiling-backend:latest
+    container_name: veiling-app
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=db;Database=VeilingWebsiteDB;Username=devuser;Password=Shrek
+      - ASPNETCORE_URLS=http://+:8080
+      - Jwt__Key=dev-secret-change-me-please-change-now!!
+      - Jwt__Issuer=VeilingAI
+      - Jwt__Audience=VeilingAIUsers
+      - FRONTEND_URL=https://${VERCEL_URL}
+    depends_on:
+      - db
+    networks:
+      - veiling-network
+
+networks:
+  veiling-network:
+    driver: bridge
 
 volumes:
   postgres_data:

@@ -12,6 +12,7 @@ using backend.Middleware;
 using backend.Validation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,6 +92,11 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
 app.UseMiddleware<GlobalExceptionMiddleware>(); // Global Error Handling (Top Priority)
 
 app.UseSwagger();
@@ -145,6 +151,10 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
+    
+    // Automatically apply any pending migrations on startup
+    context.Database.Migrate();
+    
     var passwordHasher = services.GetRequiredService<PasswordHasher>();
 
     const string adminEmail = "admin@example.com";
