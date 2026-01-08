@@ -1,5 +1,9 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace backend.Models;
 
+[Table("locatie")]
 public class Locatie
 {
     public int LocatieId { get; set; }

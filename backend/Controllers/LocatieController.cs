@@ -1,41 +1,46 @@
 using backend.Models;
 using backend.DTOs;
+using backend.Data; // Zorg dat je de juiste namespace voor je DbContext hebt
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
 [ApiController]
-[Route("api/[controller]")] // Dit resulteert in /api/Locatie
+[Route("api/[controller]")]
 public class LocatieController : ControllerBase
 {
-    // Voorbeeld lijst voor demo doeleinden (normaal gebruik je een DBContext)
-    private static readonly List<Locatie> _locaties = new();
+    private readonly AppDbContext _context;
+
+    // Injecteer de DbContext via de constructor
+    public LocatieController(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetLocaties()
+    {
+        // Haalt alle locaties op uit de PostgreSQL database
+        var locaties = await _context.Locaties.ToListAsync();
+        return Ok(locaties);
+    }
 
     [HttpPost]
-    public IActionResult CreateLocatie([FromBody] LocatieCreateDto dto)
+    public async Task<IActionResult> CreateLocatie([FromBody] LocatieCreateDto dto)
     {
-        if (dto == null)
-        {
-            return BadRequest("Data is ongeldig");
-        }
+        if (dto == null) return BadRequest("Data is ongeldig");
 
-        // Mapping van DTO naar Model
         var nieuweLocatie = new Locatie
         {
-            LocatieId = _locaties.Count + 1, // Simpele ID generatie
+            // Je hoeft hier GEEN ID te zetten, de DB (Postgres) doet dit automatisch
             LocatieNaam = dto.LocatieNaam,
             Foto = dto.Foto
         };
 
-        _locaties.Add(nieuweLocatie);
+        _context.Locaties.Add(nieuweLocatie);
+        await _context.SaveChangesAsync(); // Schrijft de data daadwerkelijk naar de DB
 
-        // Retourneer 201 Created met het nieuwe object, inclusief ID
         return CreatedAtAction(nameof(GetLocaties), new { id = nieuweLocatie.LocatieId }, nieuweLocatie);
-    }
-
-    [HttpGet]
-    public IActionResult GetLocaties()
-    {
-        return Ok(_locaties);
     }
 }
