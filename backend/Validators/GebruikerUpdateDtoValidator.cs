@@ -15,7 +15,7 @@ namespace backend.Validators
                 .MaximumLength(150)
                 .WithMessage("E-mailadres mag maximaal 150 karakters bevatten.")
                 .Must(BeValidEmailDomain)
-                .WithMessage("E-mailadres moet een geldig domein hebben.");
+                .WithMessage("E-mailadres moet een geldig domein hebben of bevat ongeldige tekens.");
 
             RuleFor(x => x.Naam)
                 .MaximumLength(100)
@@ -39,7 +39,7 @@ namespace backend.Validators
                 .MaximumLength(20)
                 .WithMessage("Huisnummer mag maximaal 20 karakters bevatten.")
                 .When(x => !string.IsNullOrEmpty(x.Huisnummer))
-                .Matches(@"^[0-9A-Za-z\s-]+$")
+                .Matches(@"^[0-9A-Za-z\s-]+")
                 .WithMessage("Huisnummer mag alleen cijfers, letters, spaties en koppeltekens bevatten.")
                 .Must(BeSafeFromSqlInjection)
                 .WithMessage("Huisnummer bevat ongeldige tekens.");
@@ -48,7 +48,7 @@ namespace backend.Validators
                 .MaximumLength(10)
                 .WithMessage("Postcode mag maximaal 10 karakters bevatten.")
                 .When(x => !string.IsNullOrEmpty(x.Postcode))
-                .Matches(@"^[0-9A-Za-z\s-]+$")
+                .Matches(@"^[0-9A-Za-z\s-]+")
                 .WithMessage("Postcode mag alleen cijfers, letters, spaties en koppeltekens bevatten.")
                 .Must(BeSafeFromSqlInjection)
                 .WithMessage("Postcode bevat ongeldige tekens.");
@@ -68,15 +68,10 @@ namespace backend.Validators
             if (string.IsNullOrEmpty(email))
                 return false;
 
-            // SQL injection protection - block dangerous characters
-            var dangerousChars = new[] { ';', '--', '/*', '*/', 'xp_', 'sp_', 'DROP', 'DELETE', 'INSERT', 'UPDATE', 'SELECT', 'UNION', 'EXEC', 'CAST', 'CONVERT' };
-            var upperEmail = email.ToUpperInvariant();
-            
-            foreach (var dangerousChar in dangerousChars)
-            {
-                if (upperEmail.Contains(dangerousChar))
-                    return false;
-            }
+            // Simple validation - block basic SQL injection patterns
+            if (email.Contains(';') || email.Contains("--") || email.Contains("/*") || 
+                email.Contains("*/") || email.Contains("xp_") || email.Contains("sp_"))
+                return false;
 
             var domain = email.Split('@').LastOrDefault();
             if (string.IsNullOrEmpty(domain))
@@ -90,22 +85,10 @@ namespace backend.Validators
             if (string.IsNullOrEmpty(input))
                 return true;
 
-            // SQL injection protection - block dangerous patterns
-            var dangerousPatterns = new[] 
-            { 
-                ';', '--', '/*', '*/', 'xp_', 'sp_', 'DROP', 'DELETE', 'INSERT', 
-                'UPDATE', 'SELECT', 'UNION', 'EXEC', 'CAST', 'CONVERT', 'ALTER', 
-                'CREATE', 'TRUNCATE', 'GRANT', 'REVOKE', 'SHUTDOWN', '<script', 
-                '</script>', 'javascript:', 'vbscript:', 'onload=', 'onerror=' 
-            };
-            
-            var upperInput = input.ToUpperInvariant();
-            
-            foreach (var pattern in dangerousPatterns)
-            {
-                if (upperInput.Contains(pattern))
-                    return false;
-            }
+            // Simple validation - block basic SQL injection patterns
+            if (input.Contains(';') || input.Contains("--") || input.Contains("/*") || 
+                input.Contains("*/") || input.Contains("xp_") || input.Contains("sp_"))
+                return false;
 
             return true;
         }

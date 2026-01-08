@@ -155,9 +155,9 @@ namespace backend.Controllers
                 return BadRequest("Prijs moet groter dan 0 zijn.");
             }
 
-            if (aankoopDto.Prijs > product.Eindprijs * 2) // Max 2x de eindprijs
+            if (aankoopDto.Prijs > product.EindPrijs * 2) // Max 2x de eindprijs
             {
-                return BadRequest($"Prijs is te hoog. Maximale prijs: €{product.Eindprijs * 2}");
+                return BadRequest($"Prijs is te hoog. Maximale prijs: €{product.EindPrijs * 2}");
             }
 
             // 7. Converteer DTO naar Entiteit

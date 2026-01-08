@@ -96,22 +96,9 @@ namespace backend.Validators
             if (string.IsNullOrEmpty(input))
                 return true;
 
-            // SQL injection protection - block dangerous patterns
-            var dangerousPatterns = new[] 
-            { 
-                ';', '--', '/*', '*/', 'xp_', 'sp_', 'DROP', 'DELETE', 'INSERT', 
-                'UPDATE', 'SELECT', 'UNION', 'EXEC', 'CAST', 'CONVERT', 'ALTER', 
-                'CREATE', 'TRUNCATE', 'GRANT', 'REVOKE', 'SHUTDOWN', '<script', 
-                '</script>', 'javascript:', 'vbscript:', 'onload=', 'onerror=' 
-            };
-            
-            var upperInput = input.ToUpperInvariant();
-            
-            foreach (var pattern in dangerousPatterns)
-            {
-                if (upperInput.Contains(pattern))
-                    return false;
-            }
+            if (input.Contains(';') || input.Contains("--") || input.Contains("/*") || 
+                input.Contains("*/") || input.Contains("xp_") || input.Contains("sp_"))
+                return false;
 
             return true;
         }
