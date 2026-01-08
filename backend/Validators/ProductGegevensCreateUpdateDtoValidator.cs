@@ -39,18 +39,16 @@ namespace backend.Validators
                 .WithMessage("Hoeveelheid mag niet meer dan 10.000 zijn.");
 
             RuleFor(x => x.StartPrijs)
-                .GreaterThan(0)
-                .WithMessage("StartPrijs moet groter dan 0 zijn.")
-                .LessThanOrEqualTo(1000000)
-                .WithMessage("StartPrijs mag niet meer dan €1.000.000 zijn.")
-                .PrecisionScale(18, 2, false)
-                .WithMessage("StartPrijs mag maximaal 2 decimalen hebben.")
-                .LessThanOrEqualTo(x => x.Eindprijs)
-                .WithMessage("StartPrijs mag niet hoger zijn dan Eindprijs.");
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("StartPrijs mag niet negatief zijn.")
+                .GreaterThanOrEqualTo(x => x.Eindprijs)
+                .WithMessage("StartPrijs moet hoger of gelijk zijn aan Eindprijs.");
 
             RuleFor(x => x.Eindprijs)
-                .GreaterThan(0)
-                .WithMessage("Eindprijs moet groter dan 0 zijn.")
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("Eindprijs mag niet negatief zijn.")
+                .LessThanOrEqualTo(x => x.StartPrijs)
+                .WithMessage("Eindprijs mag niet hoger zijn dan StartPrijs.")
                 .LessThanOrEqualTo(1000000)
                 .WithMessage("Eindprijs mag niet meer dan €1.000.000 zijn.")
                 .PrecisionScale(18, 2, false)
