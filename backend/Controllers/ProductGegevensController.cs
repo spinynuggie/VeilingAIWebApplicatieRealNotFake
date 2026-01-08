@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -17,139 +12,66 @@ namespace backend.Controllers
     public class ProductGegevensController : ControllerBase
     {
         private readonly AppDbContext _context;
+        public ProductGegevensController(AppDbContext context) { _context = context; }
 
-        public ProductGegevensController(AppDbContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/ProductGegevens
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductGegevens>>> GetProductGegevens()
-        {
-            return await _context.ProductGegevens.ToListAsync();
-        }
-
-        // GET: api/ProductGegevens/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ProductGegevens>> GetProductGegevens(int id)
-        {
-            var productGegevens = await _context.ProductGegevens.FindAsync(id);
-
-            if (productGegevens == null)
-            {
-                return NotFound();
-            }
-
-            return productGegevens;
-        }
-
-        // PUT: api/ProductGegevens/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProductGegevens(int id, ProductVeilingUpdateDto productUpdate)
-        {
-            // 1. Check of ID in URL matcht met ID in body
-            if (id != productUpdate.ProductId)
-            {
-                return BadRequest($"Product ID in URL ({id}) matcht niet met Body ({productUpdate.ProductId}).");
-            }
-
-            // 2. Haal het BESTAANDE product op uit de database
-            var existingProduct = await _context.ProductGegevens.FindAsync(id);
-
-            if (existingProduct == null)
-            {
-                return NotFound();
-            }
-
-            // 3. Update de velden
-            existingProduct.VeilingId = productUpdate.VeilingId;
-            existingProduct.StartPrijs = productUpdate.StartPrijs;
-            existingProduct.EindPrijs = productUpdate.EindPrijs;
-
-            try
-            {
-                // 4. Sla de wijzigingen op
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductGegevensExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-        
-        // POST: api/ProductGegevens
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754// POST: api/ProductGegevens
-        [Authorize(Roles = "VERKOPER,ADMIN")]
         [HttpPost]
-        public async Task<ActionResult<ProductGegevens>> PostProductGegevens(ProductGegevensCreateUpdateDto productDto)
+        [Authorize(Roles = "VERKOPER,ADMIN")]
+        public async Task<ActionResult<ProductGegevens>> PostProductGegevens(ProductCreateDto dto)
         {
-            // 1. Map the DTO to the Entity
             var product = new ProductGegevens
             {
-                ProductNaam = productDto.ProductNaam,
-                ProductBeschrijving = productDto.ProductBeschrijving,
-                Fotos = productDto.Fotos,
-                Hoeveelheid = productDto.Hoeveelheid,
-                EindPrijs = productDto.Eindprijs,
-                VerkoperId = productDto.VerkoperId,
-                LocatieId = productDto.LocatieId
-                // Don't map SpecificatieIds here, they don't exist on the Product table
+                ProductNaam = dto.ProductNaam,
+                ProductBeschrijving = dto.ProductBeschrijving,
+                Fotos = dto.Fotos,
+                Hoeveelheid = dto.Hoeveelheid,
+                EindPrijs = dto.Eindprijs,
+                StartPrijs = dto.Eindprijs, // Default waarde bij creatie
+                VerkoperId = dto.VerkoperId,
+                LocatieId = dto.LocatieId
             };
 
-            // 2. Save the Product first (This generates the ProductId)
             _context.ProductGegevens.Add(product);
-            await _context.SaveChangesAsync(); 
-
-            // 3. Now loop through the IDs and create the links in the Join Table
-            if (productDto.SpecificatieIds != null && productDto.SpecificatieIds.Count > 0)
-            {
-                foreach (var specId in productDto.SpecificatieIds)
-                {
-                    var productSpecificatie = new ProductSpecificatie
-                    {
-                        ProductId = product.ProductId, // Use the ID created in Step 2
-                        SpecificatieId = specId
-                    };
-            
-                    _context.ProductSpecificaties.Add(productSpecificatie);
-                }
-        
-                // 4. Save the links
-                await _context.SaveChangesAsync();
-            }
-
-            return CreatedAtAction("GetProductGegevens", new { id = product.ProductId }, product);
-        }
-
-        // DELETE: api/ProductGegevens/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProductGegevens(int id)
-        {
-            var productGegevens = await _context.ProductGegevens.FindAsync(id);
-            if (productGegevens == null)
-            {
-                return NotFound();
-            }
-
-            _context.ProductGegevens.Remove(productGegevens);
             await _context.SaveChangesAsync();
 
+            if (dto.SpecificatieIds?.Count > 0)
+            {
+                foreach (var id in dto.SpecificatieIds)
+                {
+                    _context.ProductSpecificaties.Add(new ProductSpecificatie { ProductId = product.ProductId, SpecificatieId = id });
+                }
+                await _context.SaveChangesAsync();
+            }
+            return CreatedAtAction(nameof(GetProductGegevens), new { id = product.ProductId }, product);
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "VERKOPER,ADMIN")]
+        public async Task<IActionResult> PutProductGegevens(int id, ProductUpdateDto dto)
+        {
+            if (id != dto.ProductId) return BadRequest("ID mismatch");
+
+            var product = await _context.ProductGegevens.Include(p => p.ProductSpecificaties).FirstOrDefaultAsync(p => p.ProductId == id);
+            if (product == null) return NotFound();
+
+            product.ProductNaam = dto.ProductNaam;
+            product.Fotos = dto.Fotos;
+            product.ProductBeschrijving = dto.ProductBeschrijving;
+            product.Hoeveelheid = dto.Hoeveelheid;
+            product.StartPrijs = dto.StartPrijs;
+            product.EindPrijs = dto.Eindprijs;
+            product.LocatieId = dto.LocatieId;
+
+            _context.ProductSpecificaties.RemoveRange(product.ProductSpecificaties);
+            foreach (var specId in dto.SpecificatieIds)
+            {
+                _context.ProductSpecificaties.Add(new ProductSpecificatie { ProductId = id, SpecificatieId = specId });
+            }
+
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        private bool ProductGegevensExists(int id)
-        {
-            return _context.ProductGegevens.Any(e => e.ProductId == id);
-        }
+        [HttpGet] public async Task<ActionResult<IEnumerable<ProductGegevens>>> GetProductGegevens() => await _context.ProductGegevens.ToListAsync();
+        [HttpGet("{id}")] public async Task<ActionResult<ProductGegevens>> GetProductGegevens(int id) => await _context.ProductGegevens.FindAsync(id) ?? (ActionResult<ProductGegevens>)NotFound();
     }
 }
