@@ -11,7 +11,11 @@ namespace backend.Models
         public int Id { get; set; }
 
         public int ProductId { get; set; }
+        [ForeignKey("ProductId")]
+        public virtual ProductGegevens Product { get; set; }
 
         public int SpecificatieId { get; set; }
+        [ForeignKey("SpecificatieId")]
+        public virtual Specificaties Specificatie { get; set; }
     }
 }
