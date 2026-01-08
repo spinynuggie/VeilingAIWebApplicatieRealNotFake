@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import VeilingDisplay from "../../../components/VeilingDisplay";
 import { getVeilingen } from "../../../services/veilingService";
-import { NavBar } from "@/features/(NavBar)/NavBar";
+import NavBar from "@/features/(NavBar)/AppNavBar";
 import RequireAuth from "@/components/(oud)/RequireAuth";
 import { Button } from "@mui/material";
 
@@ -38,7 +38,7 @@ export default function VeilingList() {
   return (
     <RequireAuth>
       <div style={{ backgroundColor: "white", minHeight: "100vh" }}>
-        <NavBar mode='customer' />
+        <NavBar />
 
         {/* Live Auctions */}
         <div style={{ padding: "30px" }}>
