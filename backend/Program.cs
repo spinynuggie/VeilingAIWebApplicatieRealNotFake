@@ -16,18 +16,21 @@ using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load environment variables (for local dev)
 Env.Load();
 
-// Split FRONTEND_URL by commas to support multiple domains (e.g. Vercel prod + previews)
-var frontendOrigins = (Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://localhost:3000")
-    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+// Support multiple domains + auto-trim trailing slashes (which often breaks CORS)
+var frontendOrigins = (Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "https://veiling-ai-web-applicatie-real-not.vercel.app,http://localhost:3000")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+    .Select(o => o.TrimEnd('/')) 
+    .ToArray();
 
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "dev-secret-change-me";
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "VeilingAI";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "VeilingAIUsers";
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
 
-// CORS
+// CORS - Must be specific origins to allow Credentials (Cookies)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -39,8 +42,8 @@ builder.Services.AddCors(options =>
     });
 });
 
-Console.WriteLine($"[DEBUG] Frontend Origins: {string.Join(", ", frontendOrigins)}");
-Console.WriteLine($"[DEBUG] Environment: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}");
+Console.WriteLine($"[DEBUG] FRONTEND_URL Env: {Environment.GetEnvironmentVariable("FRONTEND_URL")}");
+Console.WriteLine($"[DEBUG] Final Allowed Origins: {string.Join(", ", frontendOrigins)}");
 
 // add controllers, dbcontext, swagger, authentication, authorization, password hasher
 builder.Services.AddControllers()
