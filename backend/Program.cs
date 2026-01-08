@@ -29,12 +29,15 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(frontendUrl, frontendUrlAlt) // your frontend origins
+        policy.SetIsOriginAllowed(origin => true) // Allow any origin for now!
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
     });
 });
+
+Console.WriteLine($"[DEBUG] Frontend URL: {frontendUrl}");
+Console.WriteLine($"[DEBUG] Environment: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}");
 
 // add controllers, dbcontext, swagger, authentication, authorization, password hasher
 builder.Services.AddControllers()
