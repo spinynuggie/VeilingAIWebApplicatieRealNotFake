@@ -6,15 +6,11 @@ export interface Product {
   hoeveelheid: number;
   startPrijs: number;
   eindPrijs: number;
-  huidigePrijs: number;
+  huidigeprijs: number;
   veilingId: number;
   verkoperId: number;
-  // Optioneel: specficaties, als je die lokaal gebruikt in de frontend
+  locatieId: number;
   specificaties?: string[];
-}
-
-export interface ProductDisplayProps {
-  product: Product[];
 }
 
 export interface CreateProductInput {
@@ -24,7 +20,9 @@ export interface CreateProductInput {
   hoeveelheid: number;
   startPrijs: number;
   eindPrijs: number;
-  verkoperId: number;     
+  verkoperId: number;
+  locatieId: number;
+  specificatieIds: number[];
 }
 
 export interface UpdateProductAuctionInput {
@@ -32,4 +30,8 @@ export interface UpdateProductAuctionInput {
   veilingId: number;
   startPrijs: number;
   eindPrijs: number;
+}
+
+export interface ProductDisplayProps {
+  product: Product[];
 }

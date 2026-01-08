@@ -2,14 +2,14 @@
 
 import { Veiling, VeilingDisplayProps } from '@/types/veiling';
 import { useRouter } from "next/navigation";
-import { 
-  Box, 
-  Typography, 
-  Card, 
-  CardActionArea, 
-  CardMedia, 
-  CardContent, 
-  Stack 
+import {
+  Box,
+  Typography,
+  Card,
+  CardActionArea,
+  CardMedia,
+  CardContent,
+  Stack
 } from '@mui/material';
 
 // Types voor de modus
@@ -62,78 +62,114 @@ export default function VeilingDisplay({
         "&::-webkit-scrollbar-thumb:hover": { background: "#555" },
       }}
     >
-      {veilingen.map((v, idx) => (
-        <Card
-          key={v.veilingId ?? idx}
-          sx={{
-            minWidth: 300,
-            maxWidth: 300,
-            height: 200,
-            flexShrink: 0,
-            display: 'flex',
-            transition: "transform 0.2s ease-in-out",
-            "&:hover": {
-              transform: "scale(1.02)",
-            },
-          }}
-        >
-          <CardActionArea 
-            onClick={() => handleVeilingClick(v)}
-            sx={{ display: 'flex', flexDirection: 'row', alignItems: 'stretch' }}
+      {veilingen.map((v, idx) => {
+        const now = new Date().getTime();
+        const start = new Date(v.starttijd).getTime();
+        const end = new Date(v.eindtijd).getTime();
+
+        let status: "pending" | "active" | "ended" = "pending";
+        let progress = 0;
+
+        if (now >= end) {
+          status = "ended";
+          progress = 100;
+        } else if (now >= start) {
+          status = "active";
+          const total = end - start;
+          const elapsed = now - start;
+          progress = (elapsed / total) * 100;
+        } else {
+          status = "pending";
+          progress = 0;
+        }
+
+        const statusColor = status === "active" ? "#10b981" : status === "pending" ? "#f59e0b" : "#ef4444";
+
+        return (
+          <Card
+            key={v.veilingId ?? idx}
+            sx={{
+              minWidth: 300,
+              maxWidth: 300,
+              height: 200,
+              flexShrink: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative',
+              transition: "transform 0.2s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.02)",
+              },
+            }}
           >
-            {/* Linkerkant: Afbeelding */}
-            <CardMedia
-              component="img"
-              image={v.image || '/placeholder-auction.jpg'}
-              alt={v.naam}
-              sx={{ width: "50%", height: "100%", objectFit: "cover" }}
-            />
-
-            {/* Rechterkant: Content */}
-            <CardContent 
-              sx={{ 
-                width: "50%", 
-                display: "flex", 
-                flexDirection: "column", 
-                height: "100%",
-                p: 2 
-              }}
+            <CardActionArea
+              onClick={() => handleVeilingClick(v)}
+              sx={{ display: 'flex', flexDirection: 'row', alignItems: 'stretch', flex: 1 }}
             >
-              <Typography 
-                variant="h6" 
-                component="h3" 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  fontSize: '1.1rem',
-                  lineHeight: 1.2,
-                  mb: 1,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden'
-                }}
-              >
-                {v.naam}
-              </Typography>
+              {/* Linkerkant: Afbeelding */}
+              <CardMedia
+                component="img"
+                image={v.image || '/placeholder-auction.jpg'}
+                alt={v.naam}
+                sx={{ width: "50%", height: "100%", objectFit: "cover" }}
+              />
 
-              <Typography 
-                variant="body2" 
-                color="text.secondary"
+              {/* Rechterkant: Content */}
+              <CardContent
                 sx={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: 4,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  fontSize: "0.85rem"
+                  width: "50%",
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "100%",
+                  p: 2
                 }}
               >
-                {v.beschrijving}
-              </Typography>
-            </CardContent>
-          </CardActionArea>
-        </Card>
-      ))}
+                <Typography
+                  variant="h6"
+                  component="h3"
+                  sx={{
+                    fontWeight: 'bold',
+                    fontSize: '1.1rem',
+                    lineHeight: 1.2,
+                    mb: 1,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {v.naam}
+                </Typography>
+
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: 4,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    fontSize: "0.85rem"
+                  }}
+                >
+                  {v.beschrijving}
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+
+            {/* Minimal Status Bar */}
+            <Box sx={{ height: 4, width: '100%', bgcolor: '#e0e0e0', position: 'absolute', bottom: 0, left: 0 }}>
+              <Box sx={{
+                height: '100%',
+                width: `${progress}%`,
+                bgcolor: statusColor,
+                transition: 'width 1s linear'
+              }} />
+            </Box>
+          </Card>
+        );
+      })}
     </Stack>
   );
 }

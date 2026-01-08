@@ -60,6 +60,7 @@ namespace backend.Controllers
             veiling.Starttijd = veilingDto.Starttijd;
             veiling.Eindtijd   = veilingDto.Eindtijd;
             veiling.VeilingMeesterId = veilingDto.VeilingMeesterId;
+            veiling.LocatieId = veilingDto.LocatieId;
 
             _context.Entry(veiling).State = EntityState.Modified;
 
@@ -94,7 +95,8 @@ namespace backend.Controllers
                 Image = veilingDto.Image,
                 Starttijd = veilingDto.Starttijd,
                 Eindtijd   = veilingDto.Eindtijd,
-                VeilingMeesterId = veilingDto.VeilingMeesterId
+                VeilingMeesterId = veilingDto.VeilingMeesterId,
+                LocatieId = veilingDto.LocatieId
             };
             
             // 2. Voeg het domeinmodel toe en sla op

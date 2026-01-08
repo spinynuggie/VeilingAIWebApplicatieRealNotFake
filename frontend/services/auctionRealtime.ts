@@ -16,6 +16,7 @@ export type BidEvent = {
 
 export type PriceTickEvent = {
   veilingId: string;
+  productId: number;
   price: number;
   timestamp: string;
 };

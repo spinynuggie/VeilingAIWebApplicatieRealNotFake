@@ -124,16 +124,16 @@ namespace backend.Controllers
             var accessOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = _useSecureCookies,
-                SameSite = SameSiteMode.Lax,
+                Secure = true, // Must be true for SameSite=None
+                SameSite = SameSiteMode.None, // Required for cross-site (Vercel -> sslip.io)
                 Expires = DateTimeOffset.UtcNow.AddMinutes(AccessTokenMinutes)
             };
 
             var refreshOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = _useSecureCookies,
-                SameSite = SameSiteMode.Lax,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = refreshToken.ExpiresAt
             };
 
@@ -142,8 +142,8 @@ namespace backend.Controllers
             var xsrfOptions = new CookieOptions
             {
                 HttpOnly = false,
-                Secure = _useSecureCookies,
-                SameSite = SameSiteMode.Lax,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddMinutes(AccessTokenMinutes)
             };
 
@@ -157,8 +157,8 @@ namespace backend.Controllers
             var expired = new CookieOptions
             {
                 Expires = DateTimeOffset.UtcNow.AddDays(-1),
-                Secure = _useSecureCookies,
-                SameSite = SameSiteMode.Lax
+                Secure = true,
+                SameSite = SameSiteMode.None
             };
 
             Response.Cookies.Append("access_token", string.Empty, expired);

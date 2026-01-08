@@ -6,7 +6,6 @@ namespace backend.Data
     public class AppDbContext : DbContext
     {
         public DbSet<Gebruiker>  Gebruikers { get; set; }
-        public DbSet<Locatie> Locaties { get; set; }
         public DbSet<ProductGegevens>  ProductGegevens { get; set; }
         public DbSet<VeilingMeester> VeilingMeesters { get; set; }
         public DbSet<Verkoper>  Verkopers { get; set; }
@@ -20,6 +19,6 @@ namespace backend.Data
         public DbSet<backend.Models.Veiling> Veiling { get; set; } = default!;
         public DbSet<backend.Models.Specificaties> Specificaties { get; set; } = default!;
         public DbSet<backend.Models.ProductSpecificatie> ProductSpecificaties { get; set; } = default!;
-        
+        public DbSet<backend.Models.Locatie> Locaties { get; set; } = default!;
     }
 }

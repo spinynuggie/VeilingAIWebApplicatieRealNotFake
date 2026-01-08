@@ -8,6 +8,7 @@ import { Person as PersonIcon,
   Add as AddIcon,
   Dashboard as DashboardIcon,
   AlignHorizontalLeft as AlignHorizontalIcon,
+  AddLocation,
 } from "@mui/icons-material";
 import { Button } from "@/components/Buttons/Button"; // Your custom button
 import { CreateVeilingButton } from "@/components/Buttons/CreateVeilingButton";
@@ -79,6 +80,9 @@ export function NavBar({ mode, onLogout }: NavBarProps) {
             </IconButton>
             <IconButton color="primary" component={Link} href="/specificaties">
               <AlignHorizontalIcon/>
+            </IconButton>
+              <IconButton color="primary" component={Link} href="/locaties">
+            <AddLocation/>
             </IconButton>
             <IconButton onClick={onLogout} color="error">
               <LogoutIcon />

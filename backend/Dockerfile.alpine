@@ -1,0 +1,26 @@
+# Build Stage
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
+WORKDIR /src
+
+# Copy csproj and restore
+COPY ["backend.csproj", "./"]
+RUN dotnet restore "./backend.csproj"
+
+# Copy everything else and build
+COPY . .
+RUN dotnet publish "backend.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Runtime Stage (Lightweight Alpine)
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+WORKDIR /app
+EXPOSE 8080
+
+# Install ICU (Internationalization) support for Postgres/EF
+RUN apk add --no-cache icu-libs
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+# Copy build artifacts
+COPY --from=build /app/publish .
+
+# Define entrypoint
+ENTRYPOINT ["dotnet", "backend.dll"]

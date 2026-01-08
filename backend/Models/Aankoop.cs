@@ -16,6 +16,7 @@ namespace backend.Models
         public decimal Prijs { get; set; }
         public int AanKoopHoeveelheid { get; set; }
         public bool IsBetaald { get; set; }
+        public DateTime Datum { get; set; }
 
     }
 }

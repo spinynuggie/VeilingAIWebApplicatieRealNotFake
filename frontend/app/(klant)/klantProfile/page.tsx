@@ -437,7 +437,7 @@ export default function KlantProfile() {
             </Box>
 
             <Grid container spacing={2.4}>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Naam"
                   value={formValues.naam}
@@ -448,7 +448,7 @@ export default function KlantProfile() {
                   sx={fieldStyle}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="E-mail"
                   value={formValues.emailadres}
@@ -460,7 +460,7 @@ export default function KlantProfile() {
                   sx={fieldStyle}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Woonplaats"
                   value={formValues.woonplaats}
@@ -471,7 +471,7 @@ export default function KlantProfile() {
                   sx={fieldStyle}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Straat"
                   value={formValues.straat}
@@ -482,7 +482,7 @@ export default function KlantProfile() {
                   sx={fieldStyle}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Postcode"
                   value={formValues.postcode}
@@ -493,7 +493,7 @@ export default function KlantProfile() {
                   sx={fieldStyle}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   label="Huisnummer"
                   value={formValues.huisnummer}
@@ -618,7 +618,7 @@ export default function KlantProfile() {
               </Box>
 
               <Grid container spacing={2.4}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <TextField
                     label="Bedrijfsnaam"
                     placeholder="Vul je bedrijfsnaam in"
@@ -630,7 +630,7 @@ export default function KlantProfile() {
                     sx={fieldStyle}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <TextField
                     label="KvK-nummer"
                     placeholder="00000000"
@@ -642,7 +642,7 @@ export default function KlantProfile() {
                     sx={fieldStyle}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <TextField
                     label="Woonplaats"
                     placeholder="Aalsmeer"
@@ -654,7 +654,7 @@ export default function KlantProfile() {
                     sx={fieldStyle}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <TextField
                     label="Straat"
                     placeholder="Zuidereinde"
@@ -666,7 +666,7 @@ export default function KlantProfile() {
                     sx={fieldStyle}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <TextField
                     label="Postcode"
                     placeholder="1234 AB"
@@ -678,7 +678,7 @@ export default function KlantProfile() {
                     sx={fieldStyle}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <TextField
                     label="Huisnummer"
                     placeholder="42"

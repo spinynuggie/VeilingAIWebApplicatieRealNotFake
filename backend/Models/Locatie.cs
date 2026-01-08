@@ -6,6 +6,8 @@ namespace backend.Models;
 [Table("locatie")]
 public class Locatie
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int LocatieId { get; set; }
     
     public string LocatieNaam { get; set; }

@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { Product } from "@/types/product";
 import { getProducts, updateProductAuctionData } from "@/services/productService";
+import { getLocaties, Locatie } from "@/services/locatieService";
+import { getVeilingById } from "@/services/veilingService";
 
 // Haal huidige gebruiker op
 const getCurrentUserId = () => 1;
 
-export function useVeilingAanmaken() {
-  const [currentVeilingId, setCurrentVeilingId] = useState<number | null>(null);
+export function useVeilingAanmaken(initialVeilingId?: number | null) {
+  const [currentVeilingId, setCurrentVeilingId] = useState<number | null>(initialVeilingId || null);
   const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
   const [filteredAvailable, setFilteredAvailable] = useState<Product[]>([]);
   const [auctionProducts, setAuctionProducts] = useState<Product[]>([]);
@@ -16,14 +18,43 @@ export function useVeilingAanmaken() {
   const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [locations, setLocations] = useState<Locatie[]>([]);
+  const [auctionLocationId, setAuctionLocationId] = useState<number | null>(null);
+
+  useEffect(() => {
+    getLocaties().then(setLocations).catch(console.error);
+  }, []);
+
+  // Fetch auction details if we have an ID
+  useEffect(() => {
+    if (currentVeilingId) {
+      getVeilingById(currentVeilingId).then(v => {
+        setAuctionLocationId(v.locatieId);
+      }).catch(console.error);
+    }
+  }, [currentVeilingId]);
 
   useEffect(() => {
     async function fetchData() {
       try {
         const data = await getProducts();
-        const leftList = data.filter((p) => p.veilingId === 0 || p.veilingId === null);
+        let leftList = data.filter((p) => p.veilingId === 0 || p.veilingId === null);
+
+        // OPTIONAL: Filter by location if we have an active auction location
+        // This is commented out to ensure all products are visible
+        // Uncomment if you want strict location-based filtering
+        // if (auctionLocationId !== null) {
+        //   leftList = leftList.filter(p => p.locatieId === auctionLocationId);
+        // }
+
         setAvailableProducts(leftList);
         setFilteredAvailable(leftList);
+
+        if (currentVeilingId) {
+          const auctionList = data.filter((p) => p.veilingId === currentVeilingId);
+          setAuctionProducts(auctionList);
+          setFilteredAuction(auctionList);
+        }
       } catch (err) {
         console.error("Data fetch error:", err);
       } finally {
@@ -31,7 +62,7 @@ export function useVeilingAanmaken() {
       }
     }
     fetchData();
-  }, []);
+  }, [auctionLocationId]);
 
   const handleCreateVeiling = async (formData: any) => {
     try {
@@ -51,9 +82,10 @@ export function useVeilingAanmaken() {
 
       console.log("Versturen naar API:", payload);
 
-      const response = await fetch("http://localhost:5000/api/Veiling", {
+      const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
+      const response = await fetch(`${apiBase}/api/Veiling`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
@@ -62,22 +94,23 @@ export function useVeilingAanmaken() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        
+
         // DIT LOGT DE EXACTE FOUTEN (bijv. "The locatieId field is required")
         console.error("BACKEND VALIDATIE FOUT:", errorData.errors);
-        
+
         // Combineer de foutmeldingen voor de gebruiker
-        const messages = errorData.errors 
+        const messages = errorData.errors
           ? Object.entries(errorData.errors).map(([field, msg]) => `${field}: ${msg}`).join(", ")
           : errorData.title || "Validatie fout";
 
         throw new Error(messages);
       }
-      
+
       const newVeiling = await response.json();
       // Afhankelijk van je backend: .veilingId of .id
       const createdId = newVeiling.veilingId || newVeiling.id;
       setCurrentVeilingId(createdId);
+      setAuctionLocationId(payload.locatieId);
       return createdId;
 
     } catch (err: any) {
@@ -117,7 +150,7 @@ export function useVeilingAanmaken() {
 
   return {
     loading, filteredAvailable, filteredAuction, selectedProduct, setSelectedProduct, error, setError,
-    handleCreateVeiling, handleAddToAuction, handleRemoveFromAuction,
+    handleCreateVeiling, handleAddToAuction, handleRemoveFromAuction, locations,
     handleSearchAvailable: (t: string) => setFilteredAvailable(availableProducts.filter(p => p.productNaam.toLowerCase().includes(t.toLowerCase()))),
     handleSearchAuction: (t: string) => setFilteredAuction(auctionProducts.filter(p => p.productNaam.toLowerCase().includes(t.toLowerCase()))),
   };
