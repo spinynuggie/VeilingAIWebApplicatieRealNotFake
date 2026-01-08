@@ -16,9 +16,16 @@ using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Env.Load();
+
 // Split FRONTEND_URL by commas to support multiple domains (e.g. Vercel prod + previews)
 var frontendOrigins = (Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://localhost:3000")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "dev-secret-change-me";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "VeilingAI";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "VeilingAIUsers";
+var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
 
 // CORS
 builder.Services.AddCors(options =>
