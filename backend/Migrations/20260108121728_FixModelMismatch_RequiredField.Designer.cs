@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using backend.Data;
@@ -11,9 +12,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260108121728_FixModelMismatch_RequiredField")]
+    partial class FixModelMismatch_RequiredField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,7 +53,7 @@ namespace backend.Migrations
 
                     b.HasKey("AankoopId");
 
-                    b.ToTable("aankoop", (string)null);
+                    b.ToTable("aankoop");
                 });
 
             modelBuilder.Entity("backend.Models.Gebruiker", b =>
@@ -92,7 +95,7 @@ namespace backend.Migrations
 
                     b.HasKey("GebruikerId");
 
-                    b.ToTable("gebruiker", (string)null);
+                    b.ToTable("gebruiker");
                 });
 
             modelBuilder.Entity("backend.Models.Locatie", b =>
@@ -113,7 +116,7 @@ namespace backend.Migrations
 
                     b.HasKey("LocatieId");
 
-                    b.ToTable("locatie", (string)null);
+                    b.ToTable("locatie");
                 });
 
             modelBuilder.Entity("backend.Models.ProductGegevens", b =>
@@ -159,7 +162,7 @@ namespace backend.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.ToTable("product_gegevens", (string)null);
+                    b.ToTable("product_gegevens");
                 });
 
             modelBuilder.Entity("backend.Models.ProductSpecificatie", b =>
@@ -182,7 +185,7 @@ namespace backend.Migrations
 
                     b.HasIndex("SpecificatieId");
 
-                    b.ToTable("product_specificaties", (string)null);
+                    b.ToTable("product_specificaties");
                 });
 
             modelBuilder.Entity("backend.Models.RefreshToken", b =>
@@ -215,7 +218,7 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("refresh_tokens", (string)null);
+                    b.ToTable("refresh_tokens");
                 });
 
             modelBuilder.Entity("backend.Models.Specificaties", b =>
@@ -236,7 +239,7 @@ namespace backend.Migrations
 
                     b.HasKey("SpecificatieId");
 
-                    b.ToTable("specificaties", (string)null);
+                    b.ToTable("specificaties");
                 });
 
             modelBuilder.Entity("backend.Models.Veiling", b =>
@@ -273,7 +276,7 @@ namespace backend.Migrations
 
                     b.HasKey("VeilingId");
 
-                    b.ToTable("veiling", (string)null);
+                    b.ToTable("veiling");
                 });
 
             modelBuilder.Entity("backend.Models.VeilingMeester", b =>
@@ -289,7 +292,7 @@ namespace backend.Migrations
 
                     b.HasKey("MeesterId");
 
-                    b.ToTable("veiling_meester", (string)null);
+                    b.ToTable("veiling_meester");
                 });
 
             modelBuilder.Entity("backend.Models.Verkoper", b =>
@@ -322,7 +325,7 @@ namespace backend.Migrations
 
                     b.HasKey("VerkoperId");
 
-                    b.ToTable("verkoper", (string)null);
+                    b.ToTable("verkoper");
                 });
 
             modelBuilder.Entity("backend.Models.ProductSpecificatie", b =>
