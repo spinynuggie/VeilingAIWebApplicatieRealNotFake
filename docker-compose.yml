@@ -15,8 +15,8 @@ services:
       - veiling-network
 
   app:
-    # Final stabilized version
-    image: rayantjedo/veiling-backend:v4-cors-force
+    # Cookie & Cross-Site handshake fix
+    image: rayantjedo/veiling-backend:v5-cookie-fix
     container_name: veiling-app
     restart: always
     environment:

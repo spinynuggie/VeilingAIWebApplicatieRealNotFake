@@ -121,6 +121,19 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
+// Since we're in Docker behind Apache, we need to be aggressive about trusting headers
+// or SameSite=None cookies will be rejected because .NET thinks it's on HTTP.
+// (Already handled in Program.cs earlier, but let's ensure it's not restricted)
+// Actually, let's add the fix directly here to be sure:
+app.Use(async (context, next) =>
+{
+    if (context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto))
+    {
+        context.Request.Scheme = proto;
+    }
+    await next();
+});
+
 app.UseMiddleware<GlobalExceptionMiddleware>(); // Global Error Handling (Top Priority)
 
 app.UseSwagger();

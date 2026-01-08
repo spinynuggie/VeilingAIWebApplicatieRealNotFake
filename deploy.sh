@@ -3,7 +3,7 @@
 # Configuration - EDIT THESE
 DOCKER_USERNAME="rayantjedo"
 VERCEL_URL="veiling-ai-web-applicatie-real-not.vercel.app"
-TAG="v4-cors-force" # Force-include usage
+TAG="v5-cookie-fix" # SameSite=None + ForwardedProto
 
 echo "🚀 Starting Magic Deployment (Tag: $TAG)..."
 
