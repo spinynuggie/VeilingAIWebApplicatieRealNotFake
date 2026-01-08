@@ -16,7 +16,7 @@ return (
       <h1 className="mt-8 text-8xl font-bold leading-tight">
         De grootste<br />
         internationale<br />
-        sierteeltmarktplaatsbooooooooooep
+        sierteeltmarktplaats
       </h1>
     </main>
   </Background>
