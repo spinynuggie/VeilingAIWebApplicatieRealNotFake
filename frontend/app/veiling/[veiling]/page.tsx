@@ -304,8 +304,8 @@ export default function VeilingDetailPage() {
                 remainingQuantity={remainingQty ?? activeProduct?.hoeveelheid}
                 livePrice={livePrice}
                 closingPrice={activeBidClosed ? lastBid?.amount : undefined}
-                status={isPaused ? "pending" : activeProduct ? "active" : "ended"}
-                countdownText={pauseMessage || "Wachten..."}
+                status={auctionStatus === "ended" ? "ended" : (auctionStatus === "pending" || isPaused ? "pending" : "active")}
+                countdownText={auctionStatus === "pending" && countdown !== null ? formatCountdown(countdown) : pauseMessage || "Wachten..."}
                 onBid={handleLiveBid}
                 isClosed={activeBidClosed}
               />

@@ -3,7 +3,7 @@
 # Configuration - EDIT THESE
 DOCKER_USERNAME="rayantjedo"
 VERCEL_URL="veiling-ai-web-applicatie-real-not.vercel.app"
-TAG="v8-maybe-final-ihope-csrffix" # SameSite=None + ForwardedProto
+TAG="v9-maybe-final-ihope-csrffix-REALL" # SameSite=None + ForwardedProto
 
 echo "🚀 Starting Magic Deployment (Tag: $TAG)..."
 

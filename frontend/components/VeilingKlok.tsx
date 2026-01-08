@@ -55,7 +55,7 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
         }
     };
 
-    const statusColor = isPending ? "#f59e0b" : isEnded ? "#ef4444" : "#10b981";
+    const statusColor = isPending ? "#6b7280" : isEnded ? "#ef4444" : "#10b981";
 
     return (
         <Box sx={{
@@ -113,7 +113,7 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
                     justifyContent: 'center', alignItems: 'center', textAlign: 'center'
                 }}>
                     {isPending ? (
-                        <Typography variant="h4" fontWeight={800} color="warning.main">{countdownText || "..."}</Typography>
+                        <Typography variant="h4" fontWeight={800} sx={{ color: '#6b7280' }}>{countdownText || "..."}</Typography>
                     ) : isEnded ? (
                         <>
                             <Typography variant="caption" color="text.secondary">Prijs bij sluiting</Typography>

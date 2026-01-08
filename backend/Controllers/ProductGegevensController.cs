@@ -46,26 +46,16 @@ namespace backend.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "VERKOPER,ADMIN")]
-        public async Task<IActionResult> PutProductGegevens(int id, ProductUpdateDto dto)
+        public async Task<IActionResult> PutProductGegevens(int id, ProductVeilingUpdateDto dto)
         {
             if (id != dto.ProductId) return BadRequest("ID mismatch");
 
-            var product = await _context.ProductGegevens.Include(p => p.ProductSpecificaties).FirstOrDefaultAsync(p => p.ProductId == id);
+            var product = await _context.ProductGegevens.FindAsync(id);
             if (product == null) return NotFound();
 
-            product.ProductNaam = dto.ProductNaam;
-            product.Fotos = dto.Fotos;
-            product.ProductBeschrijving = dto.ProductBeschrijving;
-            product.Hoeveelheid = dto.Hoeveelheid;
+            product.VeilingId = dto.VeilingId;
             product.StartPrijs = dto.StartPrijs;
-            product.EindPrijs = dto.Eindprijs;
-            product.LocatieId = dto.LocatieId;
-
-            _context.ProductSpecificaties.RemoveRange(product.ProductSpecificaties);
-            foreach (var specId in dto.SpecificatieIds)
-            {
-                _context.ProductSpecificaties.Add(new ProductSpecificatie { ProductId = id, SpecificatieId = specId });
-            }
+            product.EindPrijs = dto.EindPrijs;
 
             await _context.SaveChangesAsync();
             return NoContent();
