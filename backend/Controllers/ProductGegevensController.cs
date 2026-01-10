@@ -12,14 +12,12 @@ namespace backend.Controllers
     public class ProductGegevensController : ControllerBase
     {
         private readonly AppDbContext _context;
-
-        public ProductGegevensController(AppDbContext context)
-        {
-            _context = context;
-        }
+        public ProductGegevensController(AppDbContext context) { _context = context; }
 
         [HttpPost]
+        [HttpPost]
         [Authorize(Roles = "VERKOPER,ADMIN")]
+        public async Task<ActionResult<ProductGegevens>> PostProductGegevens(ProductCreateDto dto)
         public async Task<ActionResult<ProductGegevens>> PostProductGegevens(ProductCreateDto dto)
         {
             var product = new ProductGegevens
@@ -32,13 +30,24 @@ namespace backend.Controllers
                 StartPrijs = dto.Eindprijs, // Default waarde bij creatie
                 VerkoperId = dto.VerkoperId,
                 LocatieId = dto.LocatieId
+                ProductNaam = dto.ProductNaam,
+                ProductBeschrijving = dto.ProductBeschrijving,
+                Fotos = dto.Fotos,
+                Hoeveelheid = dto.Hoeveelheid,
+                EindPrijs = dto.Eindprijs,
+                StartPrijs = dto.Eindprijs, // Default waarde bij creatie
+                VerkoperId = dto.VerkoperId,
+                LocatieId = dto.LocatieId
             };
 
             _context.ProductGegevens.Add(product);
             await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             if (dto.SpecificatieIds?.Count > 0)
+            if (dto.SpecificatieIds?.Count > 0)
             {
+                foreach (var id in dto.SpecificatieIds)
                 foreach (var id in dto.SpecificatieIds)
                 {
                     _context.ProductSpecificaties.Add(new ProductSpecificatie
