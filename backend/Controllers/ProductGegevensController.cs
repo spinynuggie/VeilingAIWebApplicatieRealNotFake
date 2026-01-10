@@ -110,6 +110,7 @@ namespace backend.Controllers
                 ProductBeschrijving = product.ProductBeschrijving,
                 Hoeveelheid = product.Hoeveelheid,
                 StartPrijs = product.StartPrijs,
+                EindPrijs = product.EindPrijs,
                 Huidigeprijs = product.Huidigeprijs,
                 VeilingId = product.VeilingId,
                 VerkoperId = product.VerkoperId,
