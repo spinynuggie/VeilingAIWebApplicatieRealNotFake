@@ -154,7 +154,6 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
     setIsSubmitting(false);
   }
 };
-
   const showAlert = (message: string, severity: "error" | "success") => (
     <Snackbar
       open={true}
