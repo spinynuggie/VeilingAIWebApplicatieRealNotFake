@@ -50,7 +50,7 @@ namespace backend.Migrations
 
                     b.HasKey("AankoopId");
 
-                    b.ToTable("aankoop", (string)null);
+                    b.ToTable("aankoop");
                 });
 
             modelBuilder.Entity("backend.Models.Gebruiker", b =>
@@ -92,7 +92,7 @@ namespace backend.Migrations
 
                     b.HasKey("GebruikerId");
 
-                    b.ToTable("gebruiker", (string)null);
+                    b.ToTable("gebruiker");
                 });
 
             modelBuilder.Entity("backend.Models.Locatie", b =>
@@ -113,7 +113,7 @@ namespace backend.Migrations
 
                     b.HasKey("LocatieId");
 
-                    b.ToTable("locatie", (string)null);
+                    b.ToTable("locatie");
                 });
 
             modelBuilder.Entity("backend.Models.ProductGegevens", b =>
@@ -159,7 +159,7 @@ namespace backend.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.ToTable("product_gegevens", (string)null);
+                    b.ToTable("product_gegevens");
                 });
 
             modelBuilder.Entity("backend.Models.ProductSpecificatie", b =>
@@ -170,6 +170,9 @@ namespace backend.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ProductGegevensProductId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
@@ -178,11 +181,9 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductGegevensProductId");
 
-                    b.HasIndex("SpecificatieId");
-
-                    b.ToTable("product_specificaties", (string)null);
+                    b.ToTable("product_specificaties");
                 });
 
             modelBuilder.Entity("backend.Models.RefreshToken", b =>
@@ -215,7 +216,7 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("refresh_tokens", (string)null);
+                    b.ToTable("refresh_tokens");
                 });
 
             modelBuilder.Entity("backend.Models.Specificaties", b =>
@@ -236,7 +237,7 @@ namespace backend.Migrations
 
                     b.HasKey("SpecificatieId");
 
-                    b.ToTable("specificaties", (string)null);
+                    b.ToTable("specificaties");
                 });
 
             modelBuilder.Entity("backend.Models.Veiling", b =>
@@ -273,7 +274,7 @@ namespace backend.Migrations
 
                     b.HasKey("VeilingId");
 
-                    b.ToTable("veiling", (string)null);
+                    b.ToTable("veiling");
                 });
 
             modelBuilder.Entity("backend.Models.VeilingMeester", b =>
@@ -289,7 +290,7 @@ namespace backend.Migrations
 
                     b.HasKey("MeesterId");
 
-                    b.ToTable("veiling_meester", (string)null);
+                    b.ToTable("veiling_meester");
                 });
 
             modelBuilder.Entity("backend.Models.Verkoper", b =>
@@ -322,26 +323,14 @@ namespace backend.Migrations
 
                     b.HasKey("VerkoperId");
 
-                    b.ToTable("verkoper", (string)null);
+                    b.ToTable("verkoper");
                 });
 
             modelBuilder.Entity("backend.Models.ProductSpecificatie", b =>
                 {
-                    b.HasOne("backend.Models.ProductGegevens", "Product")
+                    b.HasOne("backend.Models.ProductGegevens", null)
                         .WithMany("ProductSpecificaties")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("backend.Models.Specificaties", "Specificatie")
-                        .WithMany()
-                        .HasForeignKey("SpecificatieId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Specificatie");
+                        .HasForeignKey("ProductGegevensProductId");
                 });
 
             modelBuilder.Entity("backend.Models.ProductGegevens", b =>

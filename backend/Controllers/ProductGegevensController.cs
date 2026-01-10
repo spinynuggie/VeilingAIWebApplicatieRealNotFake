@@ -12,12 +12,14 @@ namespace backend.Controllers
     public class ProductGegevensController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public ProductGegevensController(AppDbContext context) { _context = context; }
+
+        public ProductGegevensController(AppDbContext context)
+        {
+            _context = context;
+        }
 
         [HttpPost]
-        [HttpPost]
         [Authorize(Roles = "VERKOPER,ADMIN")]
-        public async Task<ActionResult<ProductGegevens>> PostProductGegevens(ProductCreateDto dto)
         public async Task<ActionResult<ProductGegevens>> PostProductGegevens(ProductCreateDto dto)
         {
             var product = new ProductGegevens
@@ -27,51 +29,57 @@ namespace backend.Controllers
                 Fotos = dto.Fotos,
                 Hoeveelheid = dto.Hoeveelheid,
                 EindPrijs = dto.Eindprijs,
-                StartPrijs = dto.Eindprijs, // Default waarde bij creatie
+                StartPrijs = dto.Eindprijs + 2.00m,
                 VerkoperId = dto.VerkoperId,
-                LocatieId = dto.LocatieId
-                ProductNaam = dto.ProductNaam,
-                ProductBeschrijving = dto.ProductBeschrijving,
-                Fotos = dto.Fotos,
-                Hoeveelheid = dto.Hoeveelheid,
-                EindPrijs = dto.Eindprijs,
-                StartPrijs = dto.Eindprijs, // Default waarde bij creatie
-                VerkoperId = dto.VerkoperId,
-                LocatieId = dto.LocatieId
+                LocatieId = dto.LocatieId,
+                ProductSpecificaties = new List<ProductSpecificatie>() // Initialize
             };
 
-            _context.ProductGegevens.Add(product);
-            await _context.SaveChangesAsync();
-            await _context.SaveChangesAsync();
-
-            if (dto.SpecificatieIds?.Count > 0)
-            if (dto.SpecificatieIds?.Count > 0)
+            if (dto.SpecificatieIds != null)
             {
                 foreach (var id in dto.SpecificatieIds)
-                foreach (var id in dto.SpecificatieIds)
                 {
-                    _context.ProductSpecificaties.Add(new ProductSpecificatie
-                        { ProductId = product.ProductId, SpecificatieId = id });
+                    // Just add to the list, DON'T call SaveChanges yet
+                    product.ProductSpecificaties.Add(new ProductSpecificatie { SpecificatieId = id });
                 }
-
-                await _context.SaveChangesAsync();
             }
 
-            return CreatedAtAction(nameof(GetProductGegevens), new { id = product.ProductId }, product);
-        }
+            _context.ProductGegevens.Add(product);
+    
+            // This single call saves both the product AND its specs safely
+            await _context.SaveChangesAsync(); 
 
+            // Instead of returning the 'product' entity, return a simple status or a flat DTO
+            return CreatedAtAction(nameof(GetProductGegevens), new { id = product.ProductId }, new { 
+                product.ProductId, 
+                product.ProductNaam, 
+                Message = "Product successfully created" 
+            });
+        }
+        
         [HttpPut("{id}")]
         [Authorize(Roles = "VERKOPER,ADMIN")]
-        public async Task<IActionResult> PutProductGegevens(int id, ProductVeilingUpdateDto dto)
+        public async Task<IActionResult> PutProductGegevens(int id, ProductUpdateDto dto)
         {
             if (id != dto.ProductId) return BadRequest("ID mismatch");
 
-            var product = await _context.ProductGegevens.FindAsync(id);
+            var product = await _context.ProductGegevens.Include(p => p.ProductSpecificaties)
+                .FirstOrDefaultAsync(p => p.ProductId == id);
             if (product == null) return NotFound();
 
-            product.VeilingId = dto.VeilingId;
+            product.ProductNaam = dto.ProductNaam;
+            product.Fotos = dto.Fotos;
+            product.ProductBeschrijving = dto.ProductBeschrijving;
+            product.Hoeveelheid = dto.Hoeveelheid;
             product.StartPrijs = dto.StartPrijs;
-            product.EindPrijs = dto.EindPrijs;
+            product.EindPrijs = dto.Eindprijs;
+            product.LocatieId = dto.LocatieId;
+
+            _context.ProductSpecificaties.RemoveRange(product.ProductSpecificaties);
+            foreach (var specId in dto.SpecificatieIds)
+            {
+                _context.ProductSpecificaties.Add(new ProductSpecificatie { ProductId = id, SpecificatieId = specId });
+            }
 
             await _context.SaveChangesAsync();
             return NoContent();
