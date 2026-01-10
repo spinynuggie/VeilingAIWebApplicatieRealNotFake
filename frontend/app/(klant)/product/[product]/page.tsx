@@ -3,72 +3,73 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "@/features/(NavBar)/AppNavBar";
-import { getProducts } from "@/services/productService";
+import { getProductById } from "@/services/productService"; 
 import RequireAuth from "@/components/(oud)/RequireAuth";
 import ProductCard from "@/features/ProductCard";
-// Make sure to import the type to ensure type safety
 import { Product } from '@/types/product';
 import { Background } from "@/components/Background";
 import { Box as BoxMui } from "@mui/material";
 
 export default function VeilingDetailPage() {
-  // Use the correct type for state
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   const pathname = usePathname();
-  // Ensure we get a number
   const id = parseInt(pathname.split('/').pop() || '0');
 
-  // 1. Fetch Products (Only once)
   useEffect(() => {
-    getProducts()
-      .then(data => {
-        console.log("Alle producten geladen:", data);
-        setAllProducts(data);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+    if (id > 0) {
+      getProductById(id)
+        .then(data => {
+          console.log("Product details met specs geladen:", data);
+          setCurrentProduct(data);
+        })
+        .catch(err => {
+          console.error("Fout bij laden product:", err);
+        })
+        .finally(() => setLoading(false));
+    } else {
+        setLoading(false);
+    }
+  }, [id]);
 
-  // 2. THE FIX: Use 'productId' (from your interface) instead of 'id'
-  const currentProduct = allProducts.find(product => product.productId === id);
+  // ❌ VERWIJDERD: De oude 'allProducts.find' logica. 
+  // Die veroorzaakte errors omdat allProducts niet meer bestaat 
+  // en currentProduct al door useState is bezet.
 
-  console.log("Looking for productId:", id);
-  console.log("Found:", currentProduct);
-
-  // 3. Loading State
   if (loading) {
     return <p style={{textAlign: "center", marginTop: "20px"}}>Laden van product...</p>;
   }
 
-  // 4. Product Not Found State
   if (!currentProduct) {
     return (
       <Background>
-       <RequireAuth>
+        <RequireAuth>
           <Navbar/>
-              <h1>Product niet gevonden</h1>
-              <p>Er is geen product met productId: {id}</p>
-       </RequireAuth>
-       </Background>
+          <BoxMui sx={{ p: 4 }}>
+            <h1>Product niet gevonden</h1>
+            <p>Er is geen product met productId: {id}</p>
+          </BoxMui>
+        </RequireAuth>
+      </Background>
     );
   }
 
   return (
     <RequireAuth>
       <Background>
-        <Navbar        />
+        <Navbar />
         <BoxMui 
-        style={{
-          gap: "60px",
-          padding: "60px 40px"
-        }}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            padding: "60px 40px"
+          }}
         >
-        <ProductCard mode="display" product={currentProduct}/>
+          {/* ✅ Gebruikt nu het product uit de useState (incl. specificaties) */}
+          <ProductCard mode="display" product={currentProduct}/>
         </BoxMui>
       </Background>
     </RequireAuth>
-    
   );
 }

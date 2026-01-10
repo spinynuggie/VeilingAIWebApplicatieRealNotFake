@@ -3,6 +3,18 @@ import { authFetch } from "./authService";
 
 const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
 
+export async function getProductById(id: number): Promise<Product> {
+  const res = await authFetch(`${apiBase}/api/ProductGegevens/${id}`, {
+    cache: "no-store"
+  });
+
+  if (!res.ok) {
+    throw new Error("Kon product details niet ophalen");
+  }
+
+  return res.json();
+}
+
 export async function getProducts(): Promise<Product[]> {
   const res = await authFetch(`${apiBase}/api/ProductGegevens`, {
     cache: "no-store"
@@ -15,17 +27,25 @@ export async function getProducts(): Promise<Product[]> {
   return res.json();
 }
 
-export async function createProduct(payload: CreateProductInput): Promise<Product> {
+export async function createProduct(payload: CreateProductInput): Promise<any> {
   const res = await authFetch(`${apiBase}/api/ProductGegevens`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      productNaam: payload.productNaam,
+      productBeschrijving: payload.productBeschrijving,
+      fotos: payload.fotos,
+      hoeveelheid: payload.hoeveelheid,
+      eindprijs: payload.eindPrijs,
+      verkoperId: payload.verkoperId,
+      locatieId: payload.locatieId,
+      specificatieIds: payload.specificatieIds
+    }),
   });
 
   if (!res.ok) {
     const errorText = await res.text();
-    console.error("Backend Error Details:", errorText);
-    throw new Error(`Server Error: ${res.status} - ${errorText}`);
+    throw new Error(errorText || "Fout bij aanmaken product");
   }
 
   return res.json();

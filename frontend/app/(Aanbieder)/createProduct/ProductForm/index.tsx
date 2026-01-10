@@ -104,55 +104,56 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
   };
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
+  e.preventDefault();
+  setError(null);
+  setSuccess(null);
 
-    if (!validateForm()) return;
+  if (!validateForm()) return;
+  if (!user) {
+    setError("Je moet ingelogd zijn.");
+    return;
+  }
 
-    if (!user) {
-      setError("Je moet ingelogd zijn om een product aan te maken");
-      return;
-    }
+  try {
+    setIsSubmitting(true);
 
-    try {
-      setIsSubmitting(true);
+    // ✅ Explicitly cast to match Backend DTO types
+    const productPayload: CreateProductInput = {
+      productNaam: formData.name,
+      productBeschrijving: formData.description || "Geen beschrijving",
+      fotos: formData.image,
+      hoeveelheid: Number(formData.quantity),
+      startPrijs: parseFloat(formData.price), 
+      eindPrijs: parseFloat(formData.price), // This goes to DTO.Eindprijs
+      specificatieIds: formData.specificationIds, // Array of numbers
+      verkoperId: user.gebruikerId, 
+      locatieId: Number(formData.locationId), // Ensure it's not a string
+    };
 
-      // ✅ Prepare Payload matching your Backend DTO
-      const productData = {
-        productNaam: formData.name,
-        productBeschrijving: formData.description || "Geen beschrijving",
-        fotos: formData.image,
-        hoeveelheid: Number(formData.quantity),
-        startPrijs: 0,
-        eindPrijs: parseFloat(formData.price), // Assuming this is logic for auctions
-        specificatieIds: formData.specificationIds, // ✅ SENDING IDs TO BACKEND
-        verkoperId: user.gebruikerId,
-        locatieId: Number(formData.locationId),
-      };
+    // This calls the coupled service
+    await createProduct(productPayload);
+    
+    setSuccess("Product succesvol aangemaakt!");
 
-      await createProduct(productData);
-      setSuccess("Product succesvol aangemaakt!");
+    // Reset the form state
+    setFormData({
+      name: "",
+      description: "",
+      quantity: "",
+      price: "",
+      specifications: [],
+      specificationIds: [],
+      image: "",
+      locationId: locations.length > 0 ? (locations[0].locatieId || "") : "",
+    });
 
-      // Clear the form
-      setFormData({
-        name: "",
-        description: "",
-        quantity: "",
-        price: "",
-        specifications: [],
-        specificationIds: [],
-        image: "",
-        locationId: locations.length > 0 ? (locations[0].locatieId || "") : "",
-      });
-
-    } catch (err: any) {
-      console.error("Error creating product:", err);
-      setError(err.message || "Er is een fout opgetreden");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  } catch (err: any) {
+    console.error("Submit error:", err);
+    setError(err.message || "Er is iets misgegaan");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const showAlert = (message: string, severity: "error" | "success") => (
     <Snackbar

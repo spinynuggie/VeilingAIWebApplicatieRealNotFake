@@ -41,6 +41,7 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
   // --- MAPPING LOGICA ---
   const displayTitle = product.name || product.productNaam || "Product Naam";
   const displayDesc = product.description || product.productBeschrijving || "Geen beschrijving beschikbaar.";
+  const rawSpecs = product.specifications || (product as any).specificaties || [];
   
   // Get the price from the most appropriate field - prioritize eindPrijs as minimum price
   const displayPrice = 
@@ -101,20 +102,26 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
         <Divider sx={{ my: 2 }} />
 
         {/* SPECIFICATIONS */}
-        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-          Product specificaties
-        </Typography>
-        <List dense sx={{ p: 0, mb: 2 }}>
-          {product.specifications && product.specifications.length > 0 ? (
-            product.specifications.map((spec, index) => (
-              <ListItem key={index} disableGutters sx={{ py: 0 }}>
-                <ListItemText primary={`• ${spec}`} primaryTypographyProps={{ variant: 'caption' }} />
-              </ListItem>
-            ))
-          ) : (
-            <Typography variant="caption" color="text.secondary">Geen Specificaties</Typography>
-          )}
-        </List>
+<List dense sx={{ p: 0, mb: 2 }}>
+  {rawSpecs.length > 0 ? (
+    rawSpecs.map((spec: any, index: number) => {
+      // Als spec een string is (Preview), gebruik die. 
+      // Als het een object is (API), pak de .naam of .Naam
+      const displayName = typeof spec === 'string' ? spec : (spec.naam || spec.Naam);
+      
+      return (
+        <ListItem key={index} disableGutters sx={{ py: 0 }}>
+          <ListItemText 
+            primary={`• ${displayName || "Onbekend"}`} 
+            primaryTypographyProps={{ variant: 'caption' }} 
+          />
+        </ListItem>
+      );
+    })
+  ) : (
+    <Typography variant="caption" color="text.secondary">Geen Specificaties</Typography>
+  )}
+</List>
 
         {/* PRICE DISPLAY */}
         {mounted && (
