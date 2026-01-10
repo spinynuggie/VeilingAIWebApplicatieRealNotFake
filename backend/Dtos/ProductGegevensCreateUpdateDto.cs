@@ -25,7 +25,6 @@ namespace backend.Dtos
     {
         [Required]
         public int ProductId { get; set; }
-        [Required]
         public string ProductNaam { get; set; } = string.Empty;
         public string Fotos { get; set; } = string.Empty;
         public string ProductBeschrijving { get; set; } = string.Empty;
