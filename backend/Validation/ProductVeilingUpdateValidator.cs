@@ -10,9 +10,6 @@ public class ProductVeilingUpdateValidator : AbstractValidator<ProductVeilingUpd
         RuleFor(x => x.ProductId)
             .NotEmpty().WithMessage("ProductId is verplicht.");
 
-        RuleFor(x => x.VeilingId)
-            .NotEmpty().WithMessage("VeilingId is verplicht.");
-
         RuleFor(x => x.StartPrijs)
             .GreaterThan(0).WithMessage("De startprijs moet groter zijn dan 0.");
 
