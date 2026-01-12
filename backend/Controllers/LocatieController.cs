@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
+/// <summary>
+/// Controller voor het beheren van geografische locaties binnen het veilingplatform.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class LocatieController : ControllerBase
@@ -18,6 +21,11 @@ public class LocatieController : ControllerBase
         _context = context;
     }
 
+    /// <summary>
+    /// Haalt een lijst op van alle beschikbare locaties in het systeem.
+    /// </summary>
+    /// <returns>Een lijst met locatie-objecten.</returns>
+    /// <response code="200">Lijst succesvol opgehaald.</response>
     [HttpGet]
     public async Task<IActionResult> GetLocaties()
     {
@@ -26,6 +34,13 @@ public class LocatieController : ControllerBase
         return Ok(locaties);
     }
 
+    /// <summary>
+    /// Maakt een nieuwe locatie aan in de database. Het unieke ID wordt automatisch gegenereerd door de database.
+    /// </summary>
+    /// <param name="dto">De gegevens voor de nieuwe locatie (Naam en Foto URL).</param>
+    /// <returns>De aangemaakte locatie inclusief het gegenereerde LocatieId.</returns>
+    /// <response code="201">Locatie succesvol aangemaakt.</response>
+    /// <response code="400">De meegestuurde data is ongeldig of leeg.</response>
     [HttpPost]
     public async Task<IActionResult> CreateLocatie([FromBody] LocatieCreateDto dto)
     {

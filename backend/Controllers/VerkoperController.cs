@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers
 {
+    /// <summary>
+    /// Controller voor het beheren van verkopergegevens, zakelijke informatie en de koppeling tussen gebruikers en hun verkopersstatus.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class VerkoperController : ControllerBase
@@ -33,13 +36,22 @@ namespace backend.Controllers
             return gebruikerId;
         }
 
-        // GET: api/Verkoper (Blijft ongewijzigd, retourneert het domeinmodel)
+        /// <summary>
+        /// Haalt een lijst op van alle geregistreerde verkopers in het systeem.
+        /// </summary>
+        /// <response code="200">Lijst succesvol opgehaald.</response>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Verkoper>>> GetVerkopers()
         {
             return await _context.Verkopers.ToListAsync();
         }
 
+        /// <summary>
+        /// Haalt het verkoperprofiel op dat gekoppeld is aan de momenteel ingelogde gebruiker.
+        /// </summary>
+        /// <response code="200">Eigen verkoperprofiel gevonden.</response>
+        /// <response code="401">Niet geautoriseerd.</response>
+        /// <response code="404">Geen verkoperprofiel gevonden voor deze gebruiker.</response>
         [HttpGet("me")]
         [Authorize]
         public async Task<ActionResult<Verkoper>> GetMyVerkoper()
@@ -53,7 +65,11 @@ namespace backend.Controllers
             return verkoper;
         }
 
-        // GET: api/Verkoper/5 (Blijft ongewijzigd, retourneert het domeinmodel)
+        /// <summary>
+        /// Haalt een specifiek verkoperprofiel op basis van het unieke VerkoperId.
+        /// </summary>
+        /// <response code="200">Verkoper gevonden.</response>
+        /// <response code="404">Verkoper niet gevonden.</response>
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Verkoper>> GetVerkoper(int id)
         {
@@ -67,7 +83,11 @@ namespace backend.Controllers
             return verkoper;
         }
 
-        // PUT: api/Verkoper/5 - GEBRUIKT DTO VOOR INPUT
+        /// <summary>
+        /// Werkt een specifiek verkoperprofiel bij op basis van VerkoperId.
+        /// </summary>
+        /// <response code="204">Profiel succesvol bijgewerkt.</response>
+        /// <response code="404">Verkoper niet gevonden.</response>
         [HttpPut("{id:int}")]
         public async Task<IActionResult> PutVerkoper(int id, VerkoperDto verkoperDto)
         {
@@ -106,6 +126,11 @@ namespace backend.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Maakt een nieuw verkoperprofiel aan voor de huidige gebruiker of werkt het bestaande profiel bij (Upsert).
+        /// </summary>
+        /// <response code="201">Nieuw profiel aangemaakt.</response>
+        /// <response code="200">Bestaand profiel bijgewerkt.</response>
         [HttpPost("me")]
         [Authorize]
         public async Task<ActionResult<Verkoper>> UpsertMyVerkoper(VerkoperDto verkoperDto)
@@ -139,6 +164,11 @@ namespace backend.Controllers
             return CreatedAtAction(nameof(GetMyVerkoper), new { id = verkoper.VerkoperId }, verkoper);
         }
 
+        /// <summary>
+        /// Werkt de verkopergegevens van de momenteel ingelogde gebruiker bij.
+        /// </summary>
+        /// <response code="204">Succesvol bijgewerkt.</response>
+        /// <response code="404">Geen verkoperprofiel gevonden om bij te werken.</response>
         [HttpPut("me")]
         [Authorize]
         public async Task<IActionResult> UpdateMyVerkoper(VerkoperDto verkoperDto)
@@ -160,7 +190,10 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        // POST: api/Verkoper - GEBRUIKT DTO VOOR INPUT
+        /// <summary>
+        /// Maakt handmatig een nieuw verkoperprofiel aan zonder automatische koppeling aan de huidige gebruiker.
+        /// </summary>
+        /// <response code="201">Verkoper succesvol aangemaakt.</response>
         [HttpPost]
         public async Task<ActionResult<Verkoper>> PostVerkoper(VerkoperDto verkoperDto)
         {
@@ -182,7 +215,11 @@ namespace backend.Controllers
             return CreatedAtAction("GetVerkoper", new { id = verkoper.VerkoperId }, verkoper);
         }
 
-        // DELETE: api/Verkoper/5 (Blijft ongewijzigd)
+        /// <summary>
+        /// Verwijdert een verkoperprofiel definitief uit de database.
+        /// </summary>
+        /// <response code="204">Verkoper succesvol verwijderd.</response>
+        /// <response code="404">Verkoper niet gevonden.</response>
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteVerkoper(int id)
         {

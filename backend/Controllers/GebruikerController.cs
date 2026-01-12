@@ -13,6 +13,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Controllers
 {
+    /// <summary>
+    /// Beheert gebruikersaccounts, beveiligde authenticatie via cookies en rol-gebaseerde autorisatie.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class GebruikerController : ControllerBase
@@ -172,8 +175,12 @@ namespace backend.Controllers
             Response.Cookies.Append("refresh_token", string.Empty, expired);
             Response.Cookies.Append("XSRF-TOKEN", string.Empty, expired);
         }
-
-        // GET: api/Gebruiker (GEBRUIKT DTO VOOR OUTPUT)
+        
+        /// <summary>
+        /// Haalt een lijst op van alle geregistreerde gebruikers (alleen toegankelijk voor geautoriseerde gebruikers).
+        /// </summary>
+        /// <response code="200">Lijst succesvol opgehaald.</response>
+        /// <response code="401">Niet geautoriseerd.</response>
         [HttpGet]
         [Authorize]
         public async Task<ActionResult<IEnumerable<GebruikerResponseDto>>> GetGebruikers()
@@ -183,8 +190,12 @@ namespace backend.Controllers
             // Map ORM models to DTOs before returning
             return gebruikers.Select(MapToResponseDto).ToList();
         }
-
-        // GET: api/Gebruiker/5 (GEBRUIKT DTO VOOR OUTPUT)
+        
+        /// <summary>
+        /// Haalt de details van een specifieke gebruiker op via ID.
+        /// </summary>
+        /// <response code="200">Gebruiker gevonden.</response>
+        /// <response code="404">Gebruiker niet gevonden.</response>
         [HttpGet("{id}")]
         [Authorize]
         public async Task<ActionResult<GebruikerResponseDto>> GetGebruiker(int id)
@@ -199,8 +210,12 @@ namespace backend.Controllers
             // Stuur DTO terug i.p.v. de Entiteit
             return MapToResponseDto(gebruiker);
         }
-
-        // PUT: api/Gebruiker/5 (GEBRUIKT DTO VOOR INPUT)
+        
+        /// <summary>
+        /// Wijzigt de profielgegevens (NAW) van een bestaande gebruiker.
+        /// </summary>
+        /// <response code="204">Profiel succesvol bijgewerkt.</response>
+        /// <response code="404">Gebruiker niet gevonden.</response>
         [HttpPut("{id}")]
         [Authorize]
         public async Task<IActionResult> PutGebruiker(int id, GebruikerUpdateDto gebruikerDto)
@@ -235,6 +250,12 @@ namespace backend.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Wijzigt de rol van de gebruiker (KOPER, VERKOPER, VEILINGMEESTER). Genereert nieuwe tokens voor claim-synchronisatie.
+        /// </summary>
+        /// <response code="200">Rol succesvol bijgewerkt.</response>
+        /// <response code="400">Ongeldige rol opgegeven.</response>
+        /// <response code="403">Geen rechten om de rol van een andere gebruiker te wijzigen.</response>
         [HttpPut("{id}/role")]
         [Authorize]
         public async Task<ActionResult<GebruikerResponseDto>> UpdateRole(int id, [FromBody] RoleUpdateDto dto)
@@ -272,7 +293,10 @@ namespace backend.Controllers
             return MapToResponseDto(gebruiker);
         }
 
-        // POST: api/Gebruiker (GEBRUIKT DTO VOOR INPUT, VERVANGT OUDE POST)
+        /// <summary>
+        /// Maakt een nieuwe gebruiker aan met de standaardrol KOPER.
+        /// </summary>
+        /// <response code="201">Gebruiker aangemaakt en ingelogd.</response>
         [HttpPost]
         public async Task<ActionResult<GebruikerResponseDto>> PostGebruiker(GebruikerCreateDto gebruikerDto)
         {
@@ -292,8 +316,12 @@ namespace backend.Controllers
 
             return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, MapToResponseDto(gebruiker));
         }
-
-        // DELETE: api/Gebruiker/5 (Onveranderd, werkt met ID)
+        
+        /// <summary>
+        /// Verwijdert een gebruiker definitief uit het systeem.
+        /// </summary>
+        /// <response code="204">Gebruiker succesvol verwijderd.</response>
+        /// <response code="404">Gebruiker niet gevonden.</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGebruiker(int id)
         {
@@ -315,7 +343,12 @@ namespace backend.Controllers
         // nu ook aparte DTO-klassen moeten zijn in de backend.Dtos namespace.
         // We laten de huidige nested classes staan, maar gebruiken de DTO's voor de response.
 
-        // POST: api/Gebruiker/register
+
+        /// <summary>
+        /// Registreert een nieuwe gebruiker via het publieke registratieformulier.
+        /// </summary>
+        /// <response code="201">Registratie geslaagd.</response>
+        /// <response code="400">E-mailadres is al in gebruik.</response>
         [HttpPost("register")]
         public async Task<ActionResult<GebruikerResponseDto>> Register([FromBody] RegisterRequest request)
         {
@@ -350,8 +383,13 @@ namespace backend.Controllers
 
             return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, MapToResponseDto(gebruiker));
         }
-
-        // POST: api/Gebruiker/login (Onveranderd, retourneert al een anoniem object)
+        
+        /// <summary>
+        /// Valideert credentials en stelt de HttpOnly Auth-cookies in.
+        /// </summary>
+        /// <response code="200">Login succesvol.</response>
+        /// <response code="401">Ongeldig wachtwoord.</response>
+        /// <response code="404">E-mailadres niet bekend.</response>
         [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] LoginRequest loginRequest)
         {
@@ -381,8 +419,12 @@ namespace backend.Controllers
                 gebruiker = new { gebruiker.GebruikerId, gebruiker.Naam, gebruiker.Emailadres, Role = gebruiker.Role }
             });
         }
-
-        // GET: api/Gebruiker/me (GEBRUIKT DTO VOOR OUTPUT)
+        
+        /// <summary>
+        /// Haalt de gegevens van de huidige ingelogde gebruiker op en ververst de CSRF-tokens.
+        /// </summary>
+        /// <response code="200">Gebruikergegevens geretourneerd.</response>
+        /// <response code="401">Sessie niet langer geldig.</response>
         [HttpGet("me")]
         [Authorize]
         public async Task<ActionResult<GebruikerResponseDto>> GetCurrentUser()
@@ -407,8 +449,11 @@ namespace backend.Controllers
             // Retourneer DTO
             return MapToResponseDto(gebruiker);
         }
-
-        // POST: api/Gebruiker/logout (Onveranderd)
+        
+        /// <summary>
+        /// Logt de gebruiker uit door het Refresh Token te revoken en de cookies te wissen.
+        /// </summary>
+        /// <response code="204">Succesvol uitgelogd.</response>
         [HttpPost("logout")]
         [Authorize]
         public async Task<IActionResult> Logout()
@@ -428,6 +473,11 @@ namespace backend.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Gebruikt het Refresh Token om een nieuw Access Token aan te vragen zonder opnieuw in te loggen.
+        /// </summary>
+        /// <response code="200">Tokens succesvol vernieuwd.</response>
+        /// <response code="401">Refresh Token is ongeldig of verlopen.</response>
         [HttpPost("refresh")]
         public async Task<ActionResult> Refresh()
         {

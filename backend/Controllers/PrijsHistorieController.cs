@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
+    /// <summary>
+    /// Controller voor het opvragen van historische prijsontwikkelingen van producten binnen het platform.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class PrijsHistorieController : ControllerBase
@@ -15,13 +18,18 @@ namespace backend.Controllers
         {
             _service = service;
         }
-
+        
         /// <summary>
-        /// Get price history for a product.
+        /// Haalt de prijshistorie op voor een specifiek product, gegroepeerd op naam en verkoper.
         /// </summary>
-        /// <param name="productId">The ID of the product</param>
-        /// <param name="verkoperId">The seller's user ID</param>
-        /// <param name="productNaam">The product name (for grouping similar items)</param>
+        /// <param name="productId">Het unieke ID van het huidige product.</param>
+        /// <param name="verkoperId">Het ID van de verkoper om vergelijkbare producten van dezelfde aanbieder te vinden.</param>
+        /// <param name="productNaam">De naam van het product om historische data van gelijknamige items te aggregeren.</param>
+        /// <returns>Een lijst met historische prijspunten en datums.</returns>
+        /// <response code="200">Historische gegevens succesvol opgehaald.</response>
+        /// <response code="400">Verplichte parameters (zoals productNaam) ontbreken.</response>
+        /// <response code="401">Gebruiker is niet geautoriseerd.</response>
+        /// <response code="500">Interne serverfout bij het berekenen van de historie.</response>
         [Authorize(Roles = "VERKOPER,VEILINGMEESTER,ADMIN,KLANT")]
         [HttpGet("{productId}")]
         public async Task<IActionResult> GetHistory(

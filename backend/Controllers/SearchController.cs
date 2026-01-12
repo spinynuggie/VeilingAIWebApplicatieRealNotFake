@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace backend.Controllers
 {
+    /// <summary>
+    /// Controller voor het uitvoeren van zoekopdrachten binnen het gehele platform, inclusief producten, veilingen en specificaties.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class SearchController : ControllerBase
@@ -18,7 +21,12 @@ namespace backend.Controllers
         {
             _context = context;
         }
-        
+        /// <summary>
+        /// Zoekt specifiek naar product-specificaties op basis van naam of beschrijving.
+        /// </summary>
+        /// <param name="query">De zoekterm voor de specificatie.</param>
+        /// <returns>Een lijst met gevonden specificaties in DTO-formaat.</returns>
+        /// <response code="200">Zoekopdracht geslaagd, resultaten geretourneerd.</response>
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<SpecificatiesResponseDto>>> SearchSpecificaties([FromQuery] string query)
         {
@@ -41,6 +49,12 @@ namespace backend.Controllers
             return Ok(results);
         }
 
+        /// <summary>
+        /// Voert een algemene zoekopdracht uit over zowel Producten als Veilingen.
+        /// </summary>
+        /// <param name="query">De zoekterm (naam van product of veiling).</param>
+        /// <returns>Een gecombineerde lijst van SearchResultDto's met vermelding van het type (Product/Veiling).</returns>
+        /// <response code="200">Gecombineerde resultaten succesvol opgehaald.</response>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SearchResultDto>>> Search([FromQuery] string query)
         {

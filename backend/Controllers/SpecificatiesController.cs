@@ -6,6 +6,9 @@ using backend.Data;
 
 namespace backend.Controllers;
 
+/// <summary>
+/// Controller voor het beheren van de centrale lijst met productspecificaties.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class SpecificatiesController : ControllerBase
@@ -19,6 +22,13 @@ public class SpecificatiesController : ControllerBase
         _context = context;
     }
 
+    /// <summary>
+    /// Maakt een nieuwe productspecificatie aan in de database.
+    /// </summary>
+    /// <param name="specificatieCreateDto">De gegevens voor de nieuwe specificatie (Naam en Beschrijving).</param>
+    /// <returns>De aangemaakte specificatie-gegevens.</returns>
+    /// <response code="201">Specificatie succesvol aangemaakt.</response>
+    /// <response code="400">De data is ongeldig of de body is leeg.</response>
     [HttpPost]
     public async Task<ActionResult<SpecificatiesCreateDto>> CreateSpecificatie(
         [FromBody] SpecificatiesCreateDto specificatieCreateDto)
@@ -36,6 +46,11 @@ public class SpecificatiesController : ControllerBase
         return CreatedAtAction(nameof(CreateSpecificatie), specificatieCreateDto);
     }
 
+    /// <summary>
+    /// Haalt alle beschikbare specificaties op uit het systeem.
+    /// </summary>
+    /// <returns>Een lijst met specificaties in DTO-formaat.</returns>
+    /// <response code="200">Lijst succesvol opgehaald.</response>
     [HttpGet]
     public async Task<ActionResult<List<SpecificatiesResponseDto>>> GetSpecificaties()
     {

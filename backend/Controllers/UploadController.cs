@@ -6,10 +6,21 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
+    /// <summary>
+    /// Controller voor het afhandelen van bestands-uploads naar de lokale serveropslag.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class UploadController : ControllerBase
     {
+        /// <summary>
+        /// Uploadt een bestand naar de server en retourneert de publiek toegankelijke URL.
+        /// </summary>
+        /// <param name="file">Het bestand dat via een multipart/form-data request wordt verstuurd.</param>
+        /// <returns>Een JSON-object met de relatieve URL naar het opgeslagen bestand.</returns>
+        /// <response code="200">Bestand succesvol geüpload en opgeslagen.</response>
+        /// <response code="400">Bestand ontbreekt of is leeg.</response>
+        /// <response code="500">Fout bij het wegschrijven van het bestand naar de servermap.</response>
         [HttpPost]
         public async Task<IActionResult> Upload(IFormFile file)
         {

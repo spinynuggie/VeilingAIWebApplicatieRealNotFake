@@ -9,6 +9,9 @@ using backend.Dtos; // Importeer de DTO namespace
 
 namespace backend.Controllers
 {
+    /// <summary>
+    /// Controller voor het beheren van veilingmeesters en hun koppeling aan gebruikersaccounts.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class VeilingMeesterController : ControllerBase
@@ -19,10 +22,15 @@ namespace backend.Controllers
         {
             _context = context;
         }
-
-        // ... GET methoden blijven ongewijzigd ...
-
-        // PUT: api/VeilingMeester/5 - GEBRUIKT DTO VOOR INPUT
+        
+        /// <summary>
+        /// Wijzigt een bestaande veilingmeester-koppeling.
+        /// </summary>
+        /// <param name="id">Het unieke MeesterId van de veilingmeester.</param>
+        /// <param name="veilingMeesterDto">De DTO met het (nieuwe) GebruikerId.</param>
+        /// <returns>Geen inhoud bij succes.</returns>
+        /// <response code="204">Koppeling succesvol bijgewerkt.</response>
+        /// <response code="404">Veilingmeester niet gevonden.</response>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutVeilingMeester(int id, VeilingMeesterDto veilingMeesterDto)
         {
@@ -57,7 +65,12 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        // POST: api/VeilingMeester - GEBRUIKT DTO VOOR INPUT
+        /// <summary>
+        /// Promoveert een gebruiker naar de rol van Veilingmeester.
+        /// </summary>
+        /// <param name="veilingMeesterDto">De gegevens die nodig zijn om de koppeling te maken.</param>
+        /// <returns>De aangemaakte Veilingmeester-entiteit inclusief MeesterId.</returns>
+        /// <response code="201">Gebruiker succesvol gepromoveerd tot veilingmeester.</response>
         [HttpPost]
         public async Task<ActionResult<VeilingMeester>> PostVeilingMeester(VeilingMeesterDto veilingMeesterDto)
         {
@@ -75,7 +88,13 @@ namespace backend.Controllers
 
         // ... DELETE en VeilingMeesterExists methoden blijven ongewijzigd ...
 
-        // DELETE: api/VeilingMeester/5
+        /// <summary>
+        /// Verwijdert de veilingmeester-status van een gebruiker.
+        /// </summary>
+        /// <param name="id">Het unieke MeesterId.</param>
+        /// <returns>Geen inhoud bij succes.</returns>
+        /// <response code="204">Veilingmeester succesvol verwijderd.</response>
+        /// <response code="404">Veilingmeester niet gevonden.</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVeilingMeester(int id)
         {
