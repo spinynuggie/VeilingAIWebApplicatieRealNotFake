@@ -3,13 +3,11 @@ using System.ComponentModel.DataAnnotations;
 namespace backend.Dtos
 {
     /// <summary>
-    /// Data Transfer Object voor het aanmaken of bijwerken van VeilingMeester gegevens.
-    /// Sluit de automatisch gegenereerde MeesterId uit.
+    /// Gebruikt om een bestaande gebruiker te promoveren tot of te registreren als veilingmeester.
     /// </summary>
     public class VeilingMeesterDto
     {
-        [Required(ErrorMessage = "GebruikerId is verplicht.")]
-        [Range(1, int.MaxValue, ErrorMessage = "GebruikerId moet een geldige positieve integer zijn.")]
+        /// <summary>De identifier van de gebruiker die de veilingmeester-permissies krijgt.</summary>
         public int GebruikerId { get; set; }
     }
 }
