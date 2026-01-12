@@ -12,6 +12,10 @@ using System.Security.Claims;
 
 namespace backend.Controllers
 {
+    /// <summary>
+    /// Beheert de aankooptransacties van gebruikers. 
+    /// Alle acties binnen deze controller vereisen een geautoriseerde gebruiker.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Authorize] // Alle Aankoop endpoints vereisen authenticatie
@@ -37,7 +41,12 @@ namespace backend.Controllers
             };
         }
 
-        // GET: api/Aankoop (Toont ALLEEN aankopen van de huidige gebruiker)
+        /// <summary>
+        /// Haalt een lijst op van alle aankopen die zijn gedaan door de momenteel ingelogde gebruiker.
+        /// </summary>
+        /// <returns>Een lijst van aankopen in DTO-formaat.</returns>
+        /// <response code="200">Lijst van aankopen succesvol opgehaald.</response>
+        /// <response code="401">Gebruiker is niet geautoriseerd of ID niet gevonden in claims.</response>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AankoopResponseDto>>> GetMijnAankopen()
         {
@@ -56,7 +65,14 @@ namespace backend.Controllers
             return Ok(aankopen.Select(MapToResponseDto).ToList());
         }
 
-        // GET: api/Aankoop/5 (Toont EEN SPECIFIEKE aankoop, mits deze van de gebruiker is)
+        /// <summary>
+        /// Haalt de details op van een specifieke aankoop, mits deze toebehoort aan de huidige gebruiker.
+        /// </summary>
+        /// <param name="id">Het unieke ID van de aankoop.</param>
+        /// <returns>De gevraagde aankoopgegevens.</returns>
+        /// <response code="200">Aankoop gevonden en geretourneerd.</response>
+        /// <response code="401">Niet geautoriseerd.</response>
+        /// <response code="404">Aankoop niet gevonden of niet eigendom van de gebruiker.</response>
         [HttpGet("{id}")]
         public async Task<ActionResult<AankoopResponseDto>> GetAankoop(int id)
         {
@@ -79,8 +95,15 @@ namespace backend.Controllers
             return MapToResponseDto(aankoop);
         }
 
-        // PUT: api/Aankoop/5
-        // Dit endpoint zou meestal alleen door beheerders of interne services worden gebruikt
+        /// <summary>
+        /// Werkt een bestaande aankoop bij in de database.
+        /// </summary>
+        /// <param name="id">Het ID van de bij te werken aankoop.</param>
+        /// <param name="aankoop">Het volledige aankoopobject met wijzigingen.</param>
+        /// <returns>Geen inhoud bij succes.</returns>
+        /// <response code="204">Succesvol bijgewerkt.</response>
+        /// <response code="400">ID mismatch tussen URL en body.</response>
+        /// <response code="404">Aankoop niet gevonden.</response>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAankoop(int id, Aankoop aankoop) 
         {
@@ -114,7 +137,13 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        // POST: api/Aankoop (GEBRUIKT DTO VOOR INPUT)
+        /// <summary>
+        /// Registreert een nieuwe aankoop voor de momenteel ingelogde gebruiker.
+        /// </summary>
+        /// <param name="aankoopDto">De aankoopgegevens vanuit de client.</param>
+        /// <returns>De nieuw aangemaakte aankoop inclusief gegenereerd ID.</returns>
+        /// <response code="201">Aankoop succesvol aangemaakt.</response>
+        /// <response code="401">Niet geautoriseerd om een aankoop te doen.</response>
         [HttpPost]
         public async Task<ActionResult<AankoopResponseDto>> PostAankoop(AankoopCreateDto aankoopDto)
         {
@@ -144,7 +173,13 @@ namespace backend.Controllers
             return CreatedAtAction("GetAankoop", new { id = aankoop.AankoopId }, MapToResponseDto(aankoop));
         }
 
-        // DELETE: api/Aankoop/5 (Onveranderd, werkt met ID)
+        /// <summary>
+        /// Verwijdert een specifieke aankoop uit de database.
+        /// </summary>
+        /// <param name="id">Het ID van de te verwijderen aankoop.</param>
+        /// <returns>Geen inhoud bij succes.</returns>
+        /// <response code="204">Succesvol verwijderd.</response>
+        /// <response code="404">Aankoop niet gevonden.</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAankoop(int id)
         {
