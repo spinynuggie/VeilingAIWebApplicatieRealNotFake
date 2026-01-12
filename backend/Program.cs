@@ -63,7 +63,7 @@ Console.WriteLine($"[DEBUG] Final Allowed Origins: {string.Join(", ", frontendOr
 
 // add controllers, dbcontext, swagger, authentication, authorization, password hasher
 builder.Services.AddControllers()
-    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ProductGegevensValidator>());
+    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ProductCreateValidator>());
 
 builder.Services.AddHealthChecks();
 

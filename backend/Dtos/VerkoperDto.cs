@@ -7,8 +7,6 @@ namespace backend.Dtos
     /// </summary>
     public class VerkoperDto
     {
-        [Required(ErrorMessage = "KvkNummer is verplicht.")]
-        [StringLength(50, ErrorMessage = "KvkNummer mag maximaal 50 karakters bevatten.")]
         public string KvkNummer { get; set; } = string.Empty;
 
         public string Bedrijfsgegevens { get; set; } = string.Empty;
