@@ -69,3 +69,14 @@ export async function updateProductAuctionData(payload: UpdateProductAuctionInpu
     throw new Error("Bijwerken veilinggegevens mislukt");
   }
 }
+export async function getProductsByVerkoper(verkoperId: number): Promise<Product[]> {
+  const res = await authFetch(`${apiBase}/api/ProductGegevens/verkoper/${verkoperId}`, {
+    cache: "no-store"
+  });
+
+  if (!res.ok) {
+    throw new Error("Kon producten voor deze verkoper niet ophalen");
+  }
+
+  return res.json();
+}
