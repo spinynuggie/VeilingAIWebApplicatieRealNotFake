@@ -149,7 +149,7 @@ export function useVeilingAanmaken(initialVeilingId?: number | null) {
 
   const handleRemoveFromAuction = async (productToRemove: Product) => {
     try {
-      await updateProductAuctionData({ productId: productToRemove.productId, veilingId: 0, startPrijs: 0, eindPrijs: productToRemove.eindPrijs });
+      await updateProductAuctionData({ productId: productToRemove.productId, veilingId: 0, startPrijs: productToRemove.startPrijs, eindPrijs: productToRemove.eindPrijs });
       const reset = { ...productToRemove, veilingId: 0 };
       setAuctionProducts(p => p.filter(x => x.productId !== productToRemove.productId));
       setFilteredAuction(p => p.filter(x => x.productId !== productToRemove.productId));
