@@ -84,6 +84,23 @@ namespace backend.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+        [HttpPatch("{id}/koppel-veiling")]
+        [Authorize(Roles = "VEILINGMEESTER,ADMIN")]
+        public async Task<IActionResult> KoppelAanVeiling(int id, ProductVeilingUpdateDto dto)
+        {
+            if (id != dto.ProductId) return BadRequest("Product ID mismatch");
+
+            var product = await _context.ProductGegevens.FindAsync(id);
+            if (product == null) return NotFound();
+
+            // Update alleen de veiling-gerelateerde velden
+            product.VeilingId = dto.VeilingId;
+            product.StartPrijs = dto.StartPrijs;
+            product.EindPrijs = dto.EindPrijs;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductGegevens>>> GetProductGegevens() =>

@@ -7,8 +7,6 @@ public class SpecificatiesCreateValidator : AbstractValidator<SpecificatiesCreat
 {
     public SpecificatiesCreateValidator()
     {
-        RuleFor(x => x.specificatieId)
-            .NotEmpty().WithMessage("specificatieId is verplicht.");
 
         RuleFor(x => x.naam)
             .NotEmpty().WithMessage("naam is verplicht.")

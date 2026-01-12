@@ -31,8 +31,7 @@ public class SpecificatiesController : ControllerBase
 
         _context.Specificaties.Add(specificatie);
         await _context.SaveChangesAsync();
-
-        specificatieCreateDto.specificatieId = specificatie.SpecificatieId;
+        
 
         return CreatedAtAction(nameof(CreateSpecificatie), specificatieCreateDto);
     }

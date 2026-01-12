@@ -7,9 +7,6 @@ namespace backend.Dtos;
 /// </summary>
 public class SpecificatiesCreateDto
 {
-    /// <summary>Het unieke ID van de specificatie.</summary>
-    public int specificatieId { get; set; }
-
     /// <summary>De naam van het kenmerk (bijv. "Kleur", "Lengte", "Versheid").</summary>
     public string naam { get; set; } = string.Empty;
 
