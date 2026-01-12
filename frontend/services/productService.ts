@@ -52,8 +52,8 @@ export async function createProduct(payload: CreateProductInput): Promise<any> {
 }
 
 export async function updateProductAuctionData(payload: UpdateProductAuctionInput): Promise<void> {
-  const res = await authFetch(`${apiBase}/api/ProductGegevens/${payload.productId}`, {
-    method: 'PUT',
+  const res = await authFetch(`${apiBase}/api/ProductGegevens/${payload.productId}/koppel-veiling`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       productId: payload.productId,
@@ -64,7 +64,8 @@ export async function updateProductAuctionData(payload: UpdateProductAuctionInpu
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || "Bijwerken mislukt");
+    const errorData = await res.json();
+    console.error("Validatie fouten:", errorData.errors);
+    throw new Error("Bijwerken veilinggegevens mislukt");
   }
 }

@@ -136,7 +136,7 @@ export function useVeilingAanmaken(initialVeilingId?: number | null) {
         productId: selectedProduct.productId,
         veilingId: currentVeilingId,
         startPrijs: maxPrice,
-        eindPrijs: selectedProduct.eindPrijs
+        eindPrijs: selectedProduct.eindPrijs,
       });
       const updated = { ...selectedProduct, veilingId: currentVeilingId, startPrijs: maxPrice };
       setAvailableProducts(p => p.filter(x => x.productId !== selectedProduct.productId));
