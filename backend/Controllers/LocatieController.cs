@@ -1,5 +1,5 @@
 using backend.Models;
-using backend.DTOs;
+using backend.Dtos;
 using backend.Data; // Zorg dat je de juiste namespace voor je DbContext hebt
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
