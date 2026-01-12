@@ -101,6 +101,40 @@ namespace backend.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+        
+        [HttpGet("verkoper/{verkoperId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<ProductGegevensResponseDto>>> GetProductsByVerkoper(int verkoperId)
+        {
+            var producten = await _context.ProductGegevens
+                .Include(p => p.ProductSpecificaties)
+                .ThenInclude(ps => ps.Specificatie)
+                .Where(p => p.VerkoperId == verkoperId)
+                .ToListAsync();
+
+            // Map naar DTO's om de 500 error/cycles te voorkomen
+            var response = producten.Select(product => new ProductGegevensResponseDto
+            {
+                ProductId = product.ProductId,
+                Fotos = product.Fotos,
+                ProductNaam = product.ProductNaam,
+                ProductBeschrijving = product.ProductBeschrijving,
+                Hoeveelheid = product.Hoeveelheid,
+                StartPrijs = product.StartPrijs,
+                EindPrijs = product.EindPrijs,
+                Huidigeprijs = product.Huidigeprijs,
+                VeilingId = product.VeilingId,
+                VerkoperId = product.VerkoperId,
+                Specificaties = product.ProductSpecificaties.Select(ps => new SpecificatiesResponseDto
+                {
+                    SpecificatieId = ps.SpecificatieId,
+                    Naam = ps.Specificatie?.Naam ?? string.Empty,
+                    Beschrijving = ps.Specificatie?.Beschrijving ?? string.Empty
+                }).ToList()
+            }).ToList();
+
+            return Ok(response);
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductGegevens>>> GetProductGegevens() =>
