@@ -216,7 +216,8 @@ namespace backend.Controllers
         }
 
         /// <summary>
-        /// Verwijdert een verkoperprofiel definitief uit de database.
+        /// Verwijdert een verkoperprofiel definitief uit de database,
+        /// maar alleen wanneer de verkoper geen producten meer heeft
         /// </summary>
         /// <response code="204">Verkoper succesvol verwijderd.</response>
         /// <response code="404">Verkoper niet gevonden.</response>
@@ -224,9 +225,13 @@ namespace backend.Controllers
         public async Task<IActionResult> DeleteVerkoper(int id)
         {
             var verkoper = await _context.Verkopers.FindAsync(id);
-            if (verkoper == null)
+            if (verkoper == null) return NotFound();
+
+            // VALIDATIE: Controleer of deze verkoper nog producten in de database heeft staan
+            var heeftProducten = await _context.ProductGegevens.AnyAsync(p => p.VerkoperId == id);
+            if (heeftProducten)
             {
-                return NotFound();
+                return BadRequest("Kan verkoper niet verwijderen: er zijn nog producten gekoppeld aan dit profiel. Verwijder eerst de producten.");
             }
 
             _context.Verkopers.Remove(verkoper);
