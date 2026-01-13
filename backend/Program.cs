@@ -13,6 +13,9 @@ using backend.Validation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.AI;
+using OpenAI;
+using System.ClientModel;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,6 +87,25 @@ builder.Services.AddResponseCompression(options =>
     // Enable compression for SignalR JSON payloads to shave latency/bandwidth.
     options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
 });
+
+builder.Services.AddHttpClient();
+
+// Keyed AI Clients
+builder.Services.AddKeyedSingleton<IChatClient>("Gemini", (sp, key) => 
+{
+    var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+    var apiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY") ?? "MISSING_KEY";
+    return new GeminiChatClient(httpClientFactory.CreateClient(), apiKey);
+});
+
+builder.Services.AddKeyedSingleton<IChatClient>("Groq", (sp, key) => 
+{
+    var apiKey = Environment.GetEnvironmentVariable("GROQ_API_KEY") ?? "MISSING_KEY";
+    var client = new OpenAIClient(new ApiKeyCredential(apiKey), new OpenAIClientOptions { Endpoint = new Uri("https://api.groq.com/openai/v1") });
+    return client.AsChatClient("llama-3.3-70b-versatile");
+});
+
+builder.Services.AddHostedService<AiBidderService>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

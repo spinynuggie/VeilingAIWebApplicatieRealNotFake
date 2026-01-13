@@ -6,10 +6,10 @@ VERCEL_URL="veiling-ai-web-applicatie-real-not.vercel.app"
 
 # Automated Tagging: Uses timestamp so you don't have to manually update this file
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
-TAG="prod-${TIMESTAMP}"
+TAG="ai-ext-${TIMESTAMP}"
 
 echo "-----------------------------------"
-echo "🚀 Starting Magic Deployment"
+echo "🚀 Starting AI Experimental Deployment"
 echo "📦 Image: $DOCKER_USERNAME/veiling-backend:$TAG"
 echo "-----------------------------------"
 
@@ -20,7 +20,7 @@ if ! docker info > /dev/null 2>&1; then
 fi
 
 # 1. Build the backend image
-echo "🔨 Building Docker image (Alpine)..."
+echo "🔨 Building AI Experimental Docker image (Alpine)..."
 docker build -t $DOCKER_USERNAME/veiling-backend:$TAG -f backend/Dockerfile.alpine backend/
 
 if [ $? -ne 0 ]; then
