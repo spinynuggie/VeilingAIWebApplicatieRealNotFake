@@ -62,7 +62,7 @@ namespace backend.Test
                     Naam = "Test Auction 1",
                     Image = "auction1.jpg",
                     Beschrijving = "Test auction description",
-                    Locatie = "Aalsmeer",
+                    LocatieId = 1,
                     Starttijd = new DateTimeOffset(2025, 1, 1, 10, 0, 0, TimeSpan.Zero),
                     Eindtijd = new DateTimeOffset(2025, 1, 1, 12, 0, 0, TimeSpan.Zero),
                     VeilingMeesterId = 1
@@ -73,7 +73,7 @@ namespace backend.Test
                     Naam = "Special Auction",
                     Image = "auction2.jpg",
                     Beschrijving = "Special auction description",
-                    Locatie = "Naaldwijk",
+                    LocatieId = 2,
                     Starttijd = new DateTimeOffset(2025, 2, 1, 10, 0, 0, TimeSpan.Zero),
                     Eindtijd = new DateTimeOffset(2025, 2, 1, 12, 0, 0, TimeSpan.Zero),
                     VeilingMeesterId = 2
@@ -93,7 +93,7 @@ namespace backend.Test
         public async Task Search_EmptyQuery_ReturnsEmptyList()
         {
             // Act
-            var result = await _controller.Search("");
+            var result = await _controller.Search(new SearchQueryDto { Query = "" });
 
             // Assert
             Assert.IsInstanceOfType(result.Result, typeof(OkObjectResult));
@@ -106,7 +106,7 @@ namespace backend.Test
         public async Task Search_NullQuery_ReturnsEmptyList()
         {
             // Act
-            var result = await _controller.Search(null);
+            var result = await _controller.Search(new SearchQueryDto { Query = "" });
 
             // Assert
             Assert.IsInstanceOfType(result.Result, typeof(OkObjectResult));
@@ -119,7 +119,7 @@ namespace backend.Test
         public async Task Search_ProductMatch_ReturnsMatchingProducts()
         {
             // Act
-            var result = await _controller.Search("Test Product");
+            var result = await _controller.Search(new SearchQueryDto { Query = "Test Product" });
 
             // Assert
             Assert.IsInstanceOfType(result.Result, typeof(OkObjectResult));
@@ -136,7 +136,7 @@ namespace backend.Test
         public async Task Search_AuctionMatch_ReturnsMatchingAuctions()
         {
             // Act
-            var result = await _controller.Search("Special Auction");
+            var result = await _controller.Search(new SearchQueryDto { Query = "Special Auction" });
 
             // Assert
             Assert.IsInstanceOfType(result.Result, typeof(OkObjectResult));
@@ -153,7 +153,7 @@ namespace backend.Test
         public async Task Search_MultipleMatches_ReturnsAllMatches()
         {
             // Act
-            var result = await _controller.Search("Test");
+            var result = await _controller.Search(new SearchQueryDto { Query = "Test" });
 
             // Assert
             Assert.IsInstanceOfType(result.Result, typeof(OkObjectResult));
@@ -169,7 +169,7 @@ namespace backend.Test
         public async Task Search_CaseInsensitive_ReturnsMatches()
         {
             // Act
-            var result = await _controller.Search("tEsT pRoDuCt");
+            var result = await _controller.Search(new SearchQueryDto { Query = "tEsT pRoDuCt" });
 
             // Assert
             Assert.IsInstanceOfType(result.Result, typeof(OkObjectResult));
@@ -184,7 +184,7 @@ namespace backend.Test
         public async Task Search_NoMatches_ReturnsEmptyList()
         {
             // Act
-            var result = await _controller.Search("Nonexistent");
+            var result = await _controller.Search(new SearchQueryDto { Query = "Nonexistent" });
 
             // Assert
             Assert.IsInstanceOfType(result.Result, typeof(OkObjectResult));

@@ -42,7 +42,7 @@ namespace backend.Test
                     Naam = "Electronics",
                     Beschrijving = "Gadgets",
                     Image = "img1.jpg",
-                    Locatie = "Aalsmeer",
+                    LocatieId = 1,
                     Starttijd = new DateTimeOffset(2025, 1, 1, 10, 0, 0, TimeSpan.Zero),
                     Eindtijd = new DateTimeOffset(2025, 1, 1, 12, 0, 0, TimeSpan.Zero),
                     VeilingMeesterId = 1
@@ -53,7 +53,7 @@ namespace backend.Test
                     Naam = "Art",
                     Beschrijving = "Paintings",
                     Image = "img2.jpg",
-                    Locatie = "Rijnsburg",
+                    LocatieId = 2,
                     Starttijd = new DateTimeOffset(2025, 2, 1, 10, 0, 0, TimeSpan.Zero),
                     Eindtijd = new DateTimeOffset(2025, 2, 1, 12, 0, 0, TimeSpan.Zero),
                     VeilingMeesterId = 2
@@ -106,7 +106,7 @@ namespace backend.Test
                 Naam = "Books",
                 Beschrijving = "Novels",
                 Image = "img3.jpg",
-                Locatie = "Naaldwijk",
+                LocatieId = 3,
                 Starttijd = new DateTimeOffset(2025, 3, 1, 10, 0, 0, TimeSpan.Zero),
                 Eindtijd = new DateTimeOffset(2025, 3, 1, 12, 0, 0, TimeSpan.Zero),
                 VeilingMeesterId = 3
@@ -134,7 +134,7 @@ namespace backend.Test
                 Naam = "X",
                 Beschrijving = "Y",
                 Image = "Z",
-                Locatie = "Aalsmeer",
+                LocatieId = 4,
                 Starttijd = new DateTimeOffset(2025, 4, 1, 10, 0, 0, TimeSpan.Zero),
                 Eindtijd = new DateTimeOffset(2025, 4, 1, 12, 0, 0, TimeSpan.Zero),
                 VeilingMeesterId = 1
@@ -152,7 +152,7 @@ namespace backend.Test
                 Naam = "Electronics Updated",
                 Beschrijving = "Gadgets+",
                 Image = "img1u.jpg",
-                Locatie = "Online",
+                LocatieId = 5,
                 Starttijd = new DateTimeOffset(2025, 1, 1, 11, 0, 0, TimeSpan.Zero),
                 Eindtijd = new DateTimeOffset(2025, 1, 1, 13, 0, 0, TimeSpan.Zero),
                 VeilingMeesterId = 5
@@ -165,7 +165,7 @@ namespace backend.Test
             Assert.AreEqual("Electronics Updated", updated.Naam);
             Assert.AreEqual("Gadgets+", updated.Beschrijving);
             Assert.AreEqual("img1u.jpg", updated.Image);
-            Assert.AreEqual("Online", updated.Locatie);
+            Assert.AreEqual(5, updated.LocatieId);
             Assert.AreEqual(new DateTimeOffset(2025, 1, 1, 11, 0, 0, TimeSpan.Zero), updated.Starttijd);
             Assert.AreEqual(new DateTimeOffset(2025, 1, 1, 13, 0, 0, TimeSpan.Zero), updated.Eindtijd);
             Assert.AreEqual(5, updated.VeilingMeesterId);

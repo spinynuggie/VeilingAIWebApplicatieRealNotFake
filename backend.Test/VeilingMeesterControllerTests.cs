@@ -98,7 +98,7 @@ namespace backend.Test
         public async Task DeleteVeilingMeester_NotFound_ReturnsNotFound()
         {
             var result = await _controller.DeleteVeilingMeester(999);
-            Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+            Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
         }
     }
 }

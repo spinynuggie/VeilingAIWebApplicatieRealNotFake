@@ -219,5 +219,22 @@ namespace backend.Controllers
 
             return Ok(response);
         }
+
+        /// <summary>
+        /// Verwijdert een product uit de database.
+        /// </summary>
+        /// <param name="id">Het ID van het product dat verwijderd moet worden.</param>
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "VERKOPER,ADMIN")]
+        public async Task<IActionResult> DeleteProductGegevens(int id)
+        {
+            var product = await _context.ProductGegevens.FindAsync(id);
+            if (product == null) return NotFound();
+
+            _context.ProductGegevens.Remove(product);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }

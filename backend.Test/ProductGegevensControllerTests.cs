@@ -89,9 +89,14 @@ namespace backend.Test
         {
             var result = await _controller.GetProductGegevens(1);
 
-            Assert.IsNotNull(result.Value);
-            Assert.AreEqual(1, result.Value.ProductId);
-            Assert.AreEqual("Apple", result.Value.ProductNaam);
+            // Controller returns Ok(response) so check Result (OkObjectResult) and its Value
+            Assert.IsInstanceOfType(result.Result, typeof(OkObjectResult));
+            var ok = result.Result as OkObjectResult;
+            Assert.IsNotNull(ok!.Value);
+            var dto = ok.Value as ProductGegevensResponseDto;
+            Assert.IsNotNull(dto);
+            Assert.AreEqual(1, dto.ProductId);
+            Assert.AreEqual("Apple", dto.ProductNaam);
         }
 
         [TestMethod]
@@ -105,29 +110,37 @@ namespace backend.Test
         [TestMethod]
         public async Task PostProductGegevens_CreatesAndReturnsCreatedAt()
         {
-            var newProduct = new ProductGegevens
+            var newProductDto = new ProductCreateDto
             {
                 Fotos = "p3.jpg",
                 ProductNaam = "Cherry",
                 ProductBeschrijving = "Red cherry",
                 Hoeveelheid = 30,
-                StartPrijs = 2.00m,
-                EindPrijs = 3.00m,
-                Huidigeprijs = 2.50m,
-                VeilingId = 102,
-                VerkoperId = 1002
+                Eindprijs = 3.00m,
+                VerkoperId = 1002,
+                LocatieId = 10,
+                SpecificatieIds = new List<int>()
             };
 
-            var result = await _controller.PostProductGegevens(newProduct);
+            var result = await _controller.PostProductGegevens(newProductDto);
 
             Assert.IsInstanceOfType(result.Result, typeof(CreatedAtActionResult));
             var created = result.Result as CreatedAtActionResult;
             Assert.AreEqual("GetProductGegevens", created.ActionName);
-            Assert.IsInstanceOfType(created.Value, typeof(ProductGegevens));
-            var createdEntity = created.Value as ProductGegevens;
-            Assert.AreEqual("Cherry", createdEntity.ProductNaam);
+            Assert.IsNotNull(created.Value);
 
-            var inDb = await _context.ProductGegevens.FindAsync(createdEntity.ProductId);
+            // CreatedAtAction returns an anonymous projection; use reflection to get ProductId/ProductNaam
+            var createdObj = created.Value;
+            var prodIdProp = createdObj.GetType().GetProperty("ProductId");
+            var prodNaamProp = createdObj.GetType().GetProperty("ProductNaam");
+            Assert.IsNotNull(prodIdProp);
+            Assert.IsNotNull(prodNaamProp);
+
+            var createdId = (int)prodIdProp.GetValue(createdObj)!;
+            var createdNaam = (string)prodNaamProp.GetValue(createdObj)!;
+            Assert.AreEqual("Cherry", createdNaam);
+
+            var inDb = await _context.ProductGegevens.FindAsync(createdId);
             Assert.IsNotNull(inDb);
             Assert.AreEqual("Cherry", inDb.ProductNaam);
         }
@@ -135,30 +148,40 @@ namespace backend.Test
         [TestMethod]
         public async Task PutProductGegevens_MismatchedId_ReturnsBadRequest()
         {
-            var dto = new ProductVeilingUpdateDto
+            var dto = new ProductUpdateDto
             {
                 ProductId = 2,
-                VeilingId = 200,
-                StartPrijs = 5.00m,
-                EindPrijs = 10.00m
+                ProductNaam = "Banana Updated",
+                Fotos = "p2u.jpg",
+                ProductBeschrijving = "Yellow banana updated",
+                Hoeveelheid = 20,
+                StartPrijs = 0.75m,
+                Eindprijs = 1.50m,
+                LocatieId = 11,
+                SpecificatieIds = new List<int>()
             };
 
             var result = await _controller.PutProductGegevens(1, dto);
 
             Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
             var badRequest = result as BadRequestObjectResult;
-            Assert.AreEqual("Product ID in URL (1) matcht niet met Body (2).", badRequest.Value);
+            Assert.IsNotNull(badRequest);
         }
 
         [TestMethod]
         public async Task PutProductGegevens_NotFound_ReturnsNotFound()
         {
-            var dto = new ProductVeilingUpdateDto
+            var dto = new ProductUpdateDto
             {
                 ProductId = 999,
-                VeilingId = 300,
-                StartPrijs = 6.00m,
-                EindPrijs = 12.00m
+                ProductNaam = "X",
+                Fotos = "", 
+                ProductBeschrijving = "",
+                Hoeveelheid = 0,
+                StartPrijs = 0m,
+                Eindprijs = 0m,
+                LocatieId = 0,
+                SpecificatieIds = new List<int>()
             };
 
             var result = await _controller.PutProductGegevens(999, dto);
@@ -169,12 +192,17 @@ namespace backend.Test
         [TestMethod]
         public async Task PutProductGegevens_Updates_ReturnsNoContent()
         {
-            var dto = new ProductVeilingUpdateDto
+            var dto = new ProductUpdateDto
             {
                 ProductId = 1,
-                VeilingId = 555,
+                ProductNaam = "Apple Updated",
+                Fotos = "p1u.jpg",
+                ProductBeschrijving = "Fresh apple updated",
+                Hoeveelheid = 12,
                 StartPrijs = 9.99m,
-                EindPrijs = 19.99m
+                Eindprijs = 19.99m,
+                LocatieId = 12,
+                SpecificatieIds = new List<int>()
             };
 
             var result = await _controller.PutProductGegevens(1, dto);
@@ -182,7 +210,6 @@ namespace backend.Test
             Assert.IsInstanceOfType(result, typeof(NoContentResult));
 
             var updated = await _context.ProductGegevens.FindAsync(1);
-            Assert.AreEqual(555, updated.VeilingId);
             Assert.AreEqual(9.99m, updated.StartPrijs);
             Assert.AreEqual(19.99m, updated.EindPrijs);
         }

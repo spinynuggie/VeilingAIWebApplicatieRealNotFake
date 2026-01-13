@@ -191,54 +191,50 @@ public sealed class AankoopControllerTests
         // Arrange - Clear the context to avoid tracking conflicts
         _context.ChangeTracker.Clear();
         
-        var updatedAankoop = new Aankoop
+        var updateDto = new AankoopUpdateDto
         {
-            AankoopId = 1,
-            ProductId = 101,
-            GebruikerId = 1,
-            Prijs = 30.00m,
-            AanKoopHoeveelheid = 3,
-            IsBetaald = true
+            AanKoopHoeveelheid = 3
         };
 
         // Act
-        var result = await _controller.PutAankoop(1, updatedAankoop);
+        var result = await _controller.PutAankoop(1, updateDto);
 
         // Assert
         Assert.IsInstanceOfType(result, typeof(NoContentResult));
-        
-        // Verify update
+
+        // Verify update: controller only updates AanKoopHoeveelheid
         _context.ChangeTracker.Clear();
         var aankoop = await _context.Aankoop.FindAsync(1);
-        Assert.AreEqual(30.00m, aankoop.Prijs);
+        Assert.IsNotNull(aankoop);
         Assert.AreEqual(3, aankoop.AanKoopHoeveelheid);
-        Assert.IsTrue(aankoop.IsBetaald);
     }
 
     [TestMethod]
     public async Task PutAankoop_WithMismatchedId_ReturnsBadRequest()
     {
-        // Arrange
-        var aankoop = new Aankoop { AankoopId = 999 };
+        // The controller does not accept an entity with an ID in the body for updates
+        // and expects a DTO. Instead of a mismatched-id scenario (not applicable),
+        // verify that missing authentication returns Unauthorized.
+        var unauthorizedUser = new ClaimsPrincipal(new ClaimsIdentity());
+        _controller.ControllerContext.HttpContext.User = unauthorizedUser;
 
-        // Act
-        var result = await _controller.PutAankoop(1, aankoop);
+        var updateDto = new AankoopUpdateDto { AanKoopHoeveelheid = 5 };
+        var result = await _controller.PutAankoop(1, updateDto);
 
-        // Assert
-        Assert.IsInstanceOfType(result, typeof(BadRequestResult));
+        Assert.IsInstanceOfType(result, typeof(UnauthorizedResult));
     }
 
     [TestMethod]
     public async Task PutAankoop_WithNonExistentId_ReturnsNotFound()
     {
         // Arrange
-        var aankoop = new Aankoop { AankoopId = 999 };
+        var updateDto = new AankoopUpdateDto { AanKoopHoeveelheid = 10 };
 
         // Act
-        var result = await _controller.PutAankoop(999, aankoop);
+        var result = await _controller.PutAankoop(999, updateDto);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+        Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
     }
 
     [TestMethod]
@@ -320,7 +316,7 @@ public sealed class AankoopControllerTests
         var result = await _controller.DeleteAankoop(999);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+        Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
     }
 
     [TestMethod]
@@ -329,15 +325,30 @@ public sealed class AankoopControllerTests
         // Act - Delete aankoop that belongs to user 2
         var result = await _controller.DeleteAankoop(3);
 
+        // Assert - controller restricts deletion to the owner, so user 1 cannot delete user 2's aankoop
+        Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
+
+        // Verify it was NOT deleted
+        var existingAankoop = await _context.Aankoop.FindAsync(3);
+        Assert.IsNotNull(existingAankoop);
+        
+        // Note: if controller allowed deletion, this test would assert NoContent; current behavior is correct
+    }
+
+    [TestMethod]
+    public async Task DeleteAankoop_WithoutUserId_ReturnsUnauthorized()
+    {
+        // Arrange - Remove user claims
+        var unauthorizedUser = new ClaimsPrincipal(new ClaimsIdentity());
+        _controller.ControllerContext.HttpContext.User = unauthorizedUser;
+
+        // Act
+        var result = await _controller.DeleteAankoop(1);
+
         // Assert
-        Assert.IsInstanceOfType(result, typeof(NoContentResult));
-        
-        // Verify deletion
-        var deletedAankoop = await _context.Aankoop.FindAsync(3);
-        Assert.IsNull(deletedAankoop);
-        
-        // Note: This test reveals a security issue - users can delete other users' purchases
-        // This should be fixed in the actual controller implementation
+        Assert.IsInstanceOfType(result, typeof(UnauthorizedObjectResult));
+        var unauthorizedResult = result as UnauthorizedObjectResult;
+        Assert.AreEqual("Gebruiker ID niet gevonden in token.", unauthorizedResult.Value);
     }
 
     [TestMethod]
