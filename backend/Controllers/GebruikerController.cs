@@ -292,20 +292,16 @@ namespace backend.Controllers
 
             return MapToResponseDto(gebruiker);
         }
-
         /// <summary>
         /// Maakt een nieuwe gebruiker aan met de standaardrol KOPER.
         /// </summary>
-        /// <response code="201">Gebruiker aangemaakt en ingelogd.</response>
         [HttpPost]
         public async Task<ActionResult<GebruikerResponseDto>> PostGebruiker(GebruikerCreateDto gebruikerDto)
         {
-            // Entiteit aanmaken op basis van DTO
             var gebruiker = new Gebruiker
             {
                 Emailadres = gebruikerDto.Emailadres,
-                Naam = gebruikerDto.Naam,
-                Role = "KOPER", // Role wordt hardgecodeerd
+                Role = "KOPER",
                 Wachtwoord = _passwordHasher.Hash(gebruikerDto.Wachtwoord)
             };
 
@@ -313,8 +309,36 @@ namespace backend.Controllers
             await _context.SaveChangesAsync();
 
             await IssueTokensAsync(gebruiker);
-
             return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, MapToResponseDto(gebruiker));
+        }
+        /// <summary>
+        /// Registreert een nieuwe gebruiker via het publieke formulier.
+        /// </summary>
+        [HttpPost("register")]
+        public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterRequestDto request)
+        {
+            var existing = await _context.Gebruikers
+                .FirstOrDefaultAsync(g => g.Emailadres.ToLower() == request.Emailadres.ToLower());
+
+            if (existing != null) return BadRequest("E-mailadres is al geregistreerd.");
+
+            var gebruiker = new Gebruiker
+            {
+                Emailadres = request.Emailadres,
+                Wachtwoord = _passwordHasher.Hash(request.Wachtwoord),
+                Role = "KOPER"
+            };
+
+            _context.Gebruikers.Add(gebruiker);
+            await _context.SaveChangesAsync();
+
+            await IssueTokensAsync(gebruiker);
+
+            return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, new AuthResponseDto 
+            { 
+                Message = "Registratie geslaagd", 
+                Gebruiker = MapToResponseDto(gebruiker) 
+            });
         }
         
         /// <summary>
@@ -323,66 +347,31 @@ namespace backend.Controllers
         /// <response code="204">Gebruiker succesvol verwijderd.</response>
         /// <response code="404">Gebruiker niet gevonden.</response>
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteGebruiker(int id)
         {
-            var gebruiker = await _context.Gebruikers.FindAsync(id);
-            if (gebruiker == null)
+            var idClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(idClaim) || !int.TryParse(idClaim, out var currentUserId))
             {
-                return NotFound();
+                return Unauthorized();
             }
+
+            // Alleen toestaan als de ID in de route matcht met de ID in de JWT claim
+            if (currentUserId != id)
+            {
+                return Forbid(); 
+            }
+
+            var gebruiker = await _context.Gebruikers.FindAsync(id);
+            if (gebruiker == null) return NotFound();
 
             _context.Gebruikers.Remove(gebruiker);
             await _context.SaveChangesAsync();
 
+            ClearAuthCookies(); 
             return NoContent();
         }
         
-        // --- AUTHENTICATION ENDPOINTS (Gebruikt nu DTO's voor Login/Register) ---
-        
-        // Opmerking: Voor een schone architectuur zouden RegisterRequest en LoginRequest
-        // nu ook aparte DTO-klassen moeten zijn in de backend.Dtos namespace.
-        // We laten de huidige nested classes staan, maar gebruiken de DTO's voor de response.
-
-
-        /// <summary>
-        /// Registreert een nieuwe gebruiker via het publieke registratieformulier.
-        /// </summary>
-        /// <response code="201">Registratie geslaagd.</response>
-        /// <response code="400">E-mailadres is al in gebruik.</response>
-        [HttpPost("register")]
-        public async Task<ActionResult<GebruikerResponseDto>> Register([FromBody] RegisterRequest request)
-        {
-            var existing = await _context.Gebruikers
-                .FirstOrDefaultAsync(g => g.Emailadres.ToLower() == request.Emailadres.ToLower());
-
-            if (existing != null)
-            {
-                return BadRequest("E-mailadres is al geregistreerd.");
-            }
-
-            // Input validatie zou hier al door DTO's moeten worden gedaan, maar we houden de check
-            if (string.IsNullOrWhiteSpace(request.Wachtwoord))
-            {
-                return BadRequest("Wachtwoord is verplicht.");
-            }
-
-            var gebruiker = new Gebruiker
-            {
-                Emailadres = request.Emailadres,
-                Naam = request.Naam,
-                Wachtwoord = _passwordHasher.Hash(request.Wachtwoord),
-                Role = "KOPER"
-            };
-
-            _context.Gebruikers.Add(gebruiker);
-            await _context.SaveChangesAsync();
-
-            var accessToken = GenerateAccessToken(gebruiker);
-            var refreshToken = await CreateRefreshTokenAsync(gebruiker.GebruikerId);
-            SetAuthCookies(accessToken, refreshToken);
-
-            return CreatedAtAction("GetGebruiker", new { id = gebruiker.GebruikerId }, MapToResponseDto(gebruiker));
-        }
         
         /// <summary>
         /// Valideert credentials en stelt de HttpOnly Auth-cookies in.
@@ -391,20 +380,12 @@ namespace backend.Controllers
         /// <response code="401">Ongeldig wachtwoord.</response>
         /// <response code="404">E-mailadres niet bekend.</response>
         [HttpPost("login")]
-        public async Task<ActionResult> Login([FromBody] LoginRequest loginRequest)
+        public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginRequestDto loginRequest)
         {
-            if (string.IsNullOrEmpty(loginRequest.Emailadres) || string.IsNullOrEmpty(loginRequest.Wachtwoord))
-            {
-                return BadRequest("E-mail en wachtwoord zijn verplicht.");
-            }
-
             var gebruiker = await _context.Gebruikers
                 .FirstOrDefaultAsync(g => g.Emailadres.ToLower() == loginRequest.Emailadres.ToLower());
 
-            if (gebruiker == null)
-            {
-                return NotFound("Gebruiker niet gevonden.");
-            }
+            if (gebruiker == null) return NotFound("Gebruiker niet gevonden.");
 
             if (!_passwordHasher.Verify(loginRequest.Wachtwoord, gebruiker.Wachtwoord))
             {
@@ -413,10 +394,10 @@ namespace backend.Controllers
 
             await IssueTokensAsync(gebruiker);
 
-            return Ok(new
+            return Ok(new AuthResponseDto
             {
-                message = "Login geslaagd!",
-                gebruiker = new { gebruiker.GebruikerId, gebruiker.Naam, gebruiker.Emailadres, Role = gebruiker.Role }
+                Message = "Login geslaagd!",
+                Gebruiker = MapToResponseDto(gebruiker)
             });
         }
         
@@ -479,34 +460,27 @@ namespace backend.Controllers
         /// <response code="200">Tokens succesvol vernieuwd.</response>
         /// <response code="401">Refresh Token is ongeldig of verlopen.</response>
         [HttpPost("refresh")]
-        public async Task<ActionResult> Refresh()
+        public async Task<ActionResult<AuthResponseDto>> Refresh()
         {
             var refreshToken = Request.Cookies["refresh_token"];
-            if (string.IsNullOrWhiteSpace(refreshToken))
-            {
-                return Unauthorized("Geen refresh token gevonden.");
-            }
+            if (string.IsNullOrWhiteSpace(refreshToken)) return Unauthorized();
 
             var tokenEntity = await _context.RefreshTokens.FirstOrDefaultAsync(r => r.Token == refreshToken);
             if (tokenEntity == null || tokenEntity.Revoked || tokenEntity.ExpiresAt < DateTime.UtcNow)
             {
-                return Unauthorized("Refresh token ongeldig of verlopen.");
-            }
-
-            var gebruiker = await _context.Gebruikers.FindAsync(tokenEntity.GebruikerId);
-            if (gebruiker == null)
-            {
                 return Unauthorized();
             }
 
+            var gebruiker = await _context.Gebruikers.FindAsync(tokenEntity.GebruikerId);
+            if (gebruiker == null) return Unauthorized();
+
             await IssueTokensAsync(gebruiker, tokenEntity);
 
-            return Ok(new { message = "Token vernieuwd." });
-        }
-
-        private bool GebruikerExists(int id)
-        {
-            return _context.Gebruikers.Any(e => e.GebruikerId == id);
+            return Ok(new AuthResponseDto 
+            { 
+                Message = "Token vernieuwd", 
+                Gebruiker = MapToResponseDto(gebruiker) 
+            });
         }
         
         // De nested classes RegisterRequest en LoginRequest kunnen hier blijven staan,
