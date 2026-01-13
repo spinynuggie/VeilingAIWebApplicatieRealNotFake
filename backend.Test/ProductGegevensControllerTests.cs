@@ -15,8 +15,8 @@ namespace backend.Test
     [TestClass]
     public class ProductGegevensControllerTests
     {
-        private AppDbContext _context;
-        private ProductGegevensController _controller;
+    private AppDbContext? _context;
+    private ProductGegevensController? _controller;
 
         [TestInitialize]
         public void Setup()
@@ -35,7 +35,7 @@ namespace backend.Test
 
         private void SeedTestData()
         {
-            _context.ProductGegevens.AddRange(
+            _context!.ProductGegevens.AddRange(
                 new ProductGegevens
                 {
                     ProductId = 1,
@@ -47,7 +47,9 @@ namespace backend.Test
                     EindPrijs = 2.00m,
                     Huidigeprijs = 1.50m,
                     VeilingId = 100,
-                    VerkoperId = 1000
+                    VerkoperId = 1000,
+                    LocatieId = 1,
+                    ProductSpecificaties = new List<ProductSpecificatie>()
                 },
                 new ProductGegevens
                 {
@@ -60,22 +62,24 @@ namespace backend.Test
                     EindPrijs = 1.50m,
                     Huidigeprijs = 1.00m,
                     VeilingId = 101,
-                    VerkoperId = 1001
+                    VerkoperId = 1001,
+                    LocatieId = 1,
+                    ProductSpecificaties = new List<ProductSpecificatie>()
                 }
             );
-            _context.SaveChanges();
+            _context!.SaveChanges();
         }
 
         [TestCleanup]
         public void Cleanup()
         {
-            _context.Dispose();
+            _context!.Dispose();
         }
 
         [TestMethod]
         public async Task GetProductGegevens_ReturnsAll()
         {
-            var result = await _controller.GetProductGegevens();
+            var result = await _controller!.GetProductGegevens();
 
             Assert.IsNotNull(result.Value);
             var list = result.Value as List<ProductGegevens> ?? result.Value.ToList();
@@ -87,7 +91,7 @@ namespace backend.Test
         [TestMethod]
         public async Task GetProductGegevens_ById_Found()
         {
-            var result = await _controller.GetProductGegevens(1);
+            var result = await _controller!.GetProductGegevens(1);
 
             // Controller returns Ok(response) so check Result (OkObjectResult) and its Value
             Assert.IsInstanceOfType(result.Result, typeof(OkObjectResult));
@@ -102,7 +106,7 @@ namespace backend.Test
         [TestMethod]
         public async Task GetProductGegevens_ById_NotFound()
         {
-            var result = await _controller.GetProductGegevens(999);
+            var result = await _controller!.GetProductGegevens(999);
 
             Assert.IsInstanceOfType(result.Result, typeof(NotFoundResult));
         }
@@ -122,11 +126,12 @@ namespace backend.Test
                 SpecificatieIds = new List<int>()
             };
 
-            var result = await _controller.PostProductGegevens(newProductDto);
+            var result = await _controller!.PostProductGegevens(newProductDto);
 
             Assert.IsInstanceOfType(result.Result, typeof(CreatedAtActionResult));
             var created = result.Result as CreatedAtActionResult;
-            Assert.AreEqual("GetProductGegevens", created.ActionName);
+            Assert.IsNotNull(created);
+            Assert.AreEqual("GetProductGegevens", created!.ActionName);
             Assert.IsNotNull(created.Value);
 
             // CreatedAtAction returns an anonymous projection; use reflection to get ProductId/ProductNaam
@@ -140,7 +145,7 @@ namespace backend.Test
             var createdNaam = (string)prodNaamProp.GetValue(createdObj)!;
             Assert.AreEqual("Cherry", createdNaam);
 
-            var inDb = await _context.ProductGegevens.FindAsync(createdId);
+            var inDb = await _context!.ProductGegevens.FindAsync(createdId);
             Assert.IsNotNull(inDb);
             Assert.AreEqual("Cherry", inDb.ProductNaam);
         }
@@ -161,7 +166,7 @@ namespace backend.Test
                 SpecificatieIds = new List<int>()
             };
 
-            var result = await _controller.PutProductGegevens(1, dto);
+            var result = await _controller!.PutProductGegevens(1, dto);
 
             Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
             var badRequest = result as BadRequestObjectResult;
@@ -184,7 +189,7 @@ namespace backend.Test
                 SpecificatieIds = new List<int>()
             };
 
-            var result = await _controller.PutProductGegevens(999, dto);
+            var result = await _controller!.PutProductGegevens(999, dto);
 
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
@@ -205,30 +210,31 @@ namespace backend.Test
                 SpecificatieIds = new List<int>()
             };
 
-            var result = await _controller.PutProductGegevens(1, dto);
+            var result = await _controller!.PutProductGegevens(1, dto);
 
             Assert.IsInstanceOfType(result, typeof(NoContentResult));
 
-            var updated = await _context.ProductGegevens.FindAsync(1);
-            Assert.AreEqual(9.99m, updated.StartPrijs);
-            Assert.AreEqual(19.99m, updated.EindPrijs);
+            var updated = await _context!.ProductGegevens.FindAsync(1);
+            Assert.IsNotNull(updated);
+            Assert.AreEqual(9.99m, updated!.StartPrijs);
+            Assert.AreEqual(19.99m, updated!.EindPrijs);
         }
 
         [TestMethod]
         public async Task DeleteProductGegevens_Existing_ReturnsNoContent_AndRemoves()
         {
-            var result = await _controller.DeleteProductGegevens(1);
+            var result = await _controller!.DeleteProductGegevens(1);
 
             Assert.IsInstanceOfType(result, typeof(NoContentResult));
 
-            var deleted = await _context.ProductGegevens.FindAsync(1);
+            var deleted = await _context!.ProductGegevens.FindAsync(1);
             Assert.IsNull(deleted);
         }
 
         [TestMethod]
         public async Task DeleteProductGegevens_NotFound_ReturnsNotFound()
         {
-            var result = await _controller.DeleteProductGegevens(999);
+            var result = await _controller!.DeleteProductGegevens(999);
 
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
