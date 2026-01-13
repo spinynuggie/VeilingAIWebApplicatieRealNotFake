@@ -18,8 +18,10 @@ Deze documentatie beschrijft de volledige structuur van het VeilingAI project: f
    - [Controllers](#controllers)
    - [DTOs](#dtos)
    - [Models](#models)
-5. [Deployment](#deployment)
-6. [Omgevingsvariabelen](#omgevingsvariabelen)
+5. [Validatie & Beveiliging](#validatie--beveiliging)
+6. [Deployment](#deployment)
+7. [Omgevingsvariabelen](#omgevingsvariabelen)
+8. [Contact](#contact)
 
 ---
 
@@ -217,6 +219,25 @@ Locatie: `backend/Models/`
 | `Veiling.cs`           | `veiling`            | Veilinginformatie.                    |
 | `VeilingMeester.cs`    | `veiling_meester`    | Veilingmeester account.               |
 | `Verkoper.cs`          | `verkoper`           | Verkoper (bedrijf).                   |
+
+---
+
+## Validatie & Beveiliging
+
+Het project maakt gebruik van een "Double-Check" strategie waarbij gegevens zowel in de frontend als in de backend gevalideerd worden.
+
+### Backend Validatie (DTOs)
+Alle data die de API binnenkomt wordt gecontroleerd via Data Annotations in de DTOs:
+- **[Required]**: Verplicht veld.
+- **[EmailAddress]**: Controleert op geldig e-mailformaat.
+- **[StringLength]**: Beperkt de lengte van tekstinvoer (bijv. wachtwoorden min. 6 tekens).
+- **[Range]**: Controleert numerieke waarden (bijv. hoeveelheid ≥ 1, prijs > 0).
+
+### Frontend Validatie (React)
+Forms in de frontend geven directe feedback aan de gebruiker:
+- **Real-time meldingen**: Foutmeldingen worden direct onder de inputvelden getoond.
+- **Consistentie**: De regels in de frontend (bijv. min. 6 tekens voor een wachtwoord) komen exact overeen met de backend regels.
+- **Datumlogica**: Bij het aanmaken van veilingen wordt gecontroleerd of de eindtijd na de starttijd ligt.
 
 ---
 

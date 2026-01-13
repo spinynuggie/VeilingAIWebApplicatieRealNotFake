@@ -22,6 +22,11 @@ export default function LocatieFormCard({ onSuccess }: Props) {
       toast.error("Vul alle velden in");
       return;
     }
+    if (formData.locatieNaam.length > 60) {
+      setError("Naam mag maximaal 60 tekens bevatten");
+      toast.error("Naam is te lang");
+      return;
+    }
 
     setSubmitting(true);
     setError(null);
@@ -39,9 +44,9 @@ export default function LocatieFormCard({ onSuccess }: Props) {
   };
 
   return (
-    <Stack 
-      spacing={3} 
-      sx={{ 
+    <Stack
+      spacing={3}
+      sx={{
         width: "100%",           // Ensures it doesn't exceed parent
         maxWidth: "400px",      // Caps the width
         margin: "0 auto",        // Centers it if the parent is wider
@@ -56,48 +61,50 @@ export default function LocatieFormCard({ onSuccess }: Props) {
       </BoxMui>
 
       {/* Main Form Container */}
-      <BoxMui sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
+      <BoxMui sx={{
+        display: 'flex',
+        flexDirection: 'column',
         gap: 2,
-        width: '100%' 
+        width: '100%'
       }}>
         {error && <Alert severity="error">{error}</Alert>}
-        
-        <TextField 
-          label="Locatie Naam" 
+
+        <TextField
+          label="Locatie Naam"
           fullWidth
           value={formData.locatieNaam}
           onChange={(e) => setFormData({ ...formData, locatieNaam: e.target.value })}
+          error={!!error && error.includes("Naam")} // Simple heuristic for now
         />
-        <TextField 
-          label="Foto URL" 
+        <TextField
+          label="Foto URL"
           fullWidth
           placeholder="https://..."
           value={formData.foto}
           onChange={(e) => setFormData({ ...formData, foto: e.target.value })}
+        // No specific error binding for URL yet, generic alert handles it
         />
 
         {formData.foto && (
-          <BoxMui sx={{ 
-            width: '100%', 
-            height: 180, 
-            borderRadius: 2, 
-            overflow: 'hidden', 
-            border: '1px solid #ccc' 
+          <BoxMui sx={{
+            width: '100%',
+            height: 180,
+            borderRadius: 2,
+            overflow: 'hidden',
+            border: '1px solid #ccc'
           }}>
-            <img 
-              src={formData.foto} 
-              alt="Preview" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            <img
+              src={formData.foto}
+              alt="Preview"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </BoxMui>
         )}
       </BoxMui>
 
       <BoxMui sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button 
-          onClick={handleSubmit} 
+        <Button
+          onClick={handleSubmit}
           disabled={submitting}
           sx={{ width: { xs: '100%', sm: 'auto' } }} // Full width button on mobile
         >

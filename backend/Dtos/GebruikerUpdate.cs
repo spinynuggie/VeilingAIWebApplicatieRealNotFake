@@ -8,9 +8,12 @@ namespace backend.Dtos
     public class GebruikerUpdateDto
     {
         /// <summary>De bijgewerkte naam van de gebruiker.</summary>
+        [StringLength(100, ErrorMessage = "Naam mag maximaal 100 tekens bevatten.")]
         public string? Naam { get; set; }
         
         /// <summary>Het e-mailadres (kan gebruikt worden voor verificatie van de update).</summary>
+        [Required(ErrorMessage = "E-mailadres is verplicht.")]
+        [EmailAddress(ErrorMessage = "Ongeldig e-mailadres.")]
         public required string Emailadres { get; set; }
 
         /// <summary>De nieuwe straatnaam.</summary>

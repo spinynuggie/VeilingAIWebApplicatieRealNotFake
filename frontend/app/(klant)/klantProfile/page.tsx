@@ -66,6 +66,9 @@ export default function KlantProfile() {
   const [businessFeedback, setBusinessFeedback] = useState<string | null>(null);
   const [businessError, setBusinessError] = useState<string | null>(null);
 
+  // Validation States
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
   // States voor Dialog/Rollen
   const [sellerDialogOpen, setSellerDialogOpen] = useState(false);
   const [roleChanging, setRoleChanging] = useState(false);
@@ -132,7 +135,29 @@ export default function KlantProfile() {
 
   // Handler: Profiel opslaan
   const handleSave = async () => {
+    // Validation
+    const newErrors: Record<string, string> = {};
+    if (!formValues.naam.trim()) newErrors.naam = "Naam is verplicht";
+    if (!formValues.emailadres.trim()) newErrors.emailadres = "Email is verplicht";
+    if (formValues.naam.length > 100) newErrors.naam = "Naam te lang (>100)";
+
+    // Address checks (if partially filled, enforce all)
+    const hasAnyAddress = formValues.woonplaats || formValues.straat || formValues.postcode || formValues.huisnummer;
+    if (hasAnyAddress) {
+      if (!formValues.woonplaats) newErrors.woonplaats = "Plaats verplicht";
+      if (!formValues.straat) newErrors.straat = "Straat verplicht";
+      if (!formValues.postcode) newErrors.postcode = "Postcode verplicht";
+      if (!formValues.huisnummer) newErrors.huisnummer = "Huisnr verplicht";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
+      setError("Corrigeer de gemarkeerde velden.");
+      return;
+    }
+
     setSaving(true);
+    setFieldErrors({});
     setFeedback(null);
     setError(null);
     try {
@@ -152,9 +177,20 @@ export default function KlantProfile() {
     setBusinessSaving(true);
     setBusinessFeedback(null);
     setBusinessError(null);
+    const newErrors: Record<string, string> = {};
 
-    if (!businessValues.kvkNummer || !businessValues.bedrijfsnaam) {
-      setBusinessError("Kvk-nummer en bedrijfsnaam zijn verplicht.");
+    if (!businessValues.kvkNummer) newErrors.kvk = "KvK is verplicht";
+    if (!businessValues.bedrijfsnaam) newErrors.bedrijfsnaam = "Naam is verplicht";
+    if (businessValues.bedrijfsnaam.length > 100) newErrors.bedrijfsnaam = "Te lang";
+
+    // Address checks
+    if (!businessValues.woonplaats) newErrors.busWoonplaats = "Plaats verplicht";
+    if (!businessValues.straat) newErrors.busStraat = "Straat verplicht";
+    if (!businessValues.postcode) newErrors.busPostcode = "Postcode verplicht";
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
+      setBusinessError("Vul alle verplichte velden in.");
       setBusinessSaving(false);
       return;
     }
@@ -236,22 +272,22 @@ export default function KlantProfile() {
 
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField label="Naam" value={formValues.naam} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, naam: e.target.value })} />
+                <TextField label="Naam" value={formValues.naam} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, naam: e.target.value })} error={!!fieldErrors.naam} helperText={fieldErrors.naam} />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField label="E-mail" value={formValues.emailadres} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, emailadres: e.target.value })} />
+                <TextField label="E-mail" value={formValues.emailadres} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, emailadres: e.target.value })} error={!!fieldErrors.emailadres} helperText={fieldErrors.emailadres} />
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
-                <TextField label="Woonplaats" value={formValues.woonplaats} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, woonplaats: e.target.value })} />
+                <TextField label="Woonplaats" value={formValues.woonplaats} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, woonplaats: e.target.value })} error={!!fieldErrors.woonplaats} helperText={fieldErrors.woonplaats} />
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
-                <TextField label="Straat" value={formValues.straat} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, straat: e.target.value })} />
+                <TextField label="Straat" value={formValues.straat} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, straat: e.target.value })} error={!!fieldErrors.straat} helperText={fieldErrors.straat} />
               </Grid>
               <Grid size={{ xs: 12, md: 2 }}>
-                <TextField label="Postcode" value={formValues.postcode} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, postcode: e.target.value })} />
+                <TextField label="Postcode" value={formValues.postcode} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, postcode: e.target.value })} error={!!fieldErrors.postcode} helperText={fieldErrors.postcode} />
               </Grid>
               <Grid size={{ xs: 12, md: 2 }}>
-                <TextField label="Huisnr" value={formValues.huisnummer} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, huisnummer: e.target.value })} />
+                <TextField label="Huisnr" value={formValues.huisnummer} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, huisnummer: e.target.value })} error={!!fieldErrors.huisnummer} helperText={fieldErrors.huisnummer} />
               </Grid>
             </Grid>
             {feedback && <Alert severity="success" sx={{ mt: 2, borderRadius: "10px" }}>{feedback}</Alert>}
@@ -280,19 +316,19 @@ export default function KlantProfile() {
 
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField label="Bedrijfsnaam" value={businessValues.bedrijfsnaam} onChange={(e) => setBusinessValues({ ...businessValues, bedrijfsnaam: e.target.value })} />
+                    <TextField label="Bedrijfsnaam" value={businessValues.bedrijfsnaam} onChange={(e) => setBusinessValues({ ...businessValues, bedrijfsnaam: e.target.value })} error={!!fieldErrors.bedrijfsnaam} helperText={fieldErrors.bedrijfsnaam} />
                   </Grid>
                   <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField label="KvK-nummer" value={businessValues.kvkNummer} onChange={(e) => setBusinessValues({ ...businessValues, kvkNummer: e.target.value })} />
+                    <TextField label="KvK-nummer" value={businessValues.kvkNummer} onChange={(e) => setBusinessValues({ ...businessValues, kvkNummer: e.target.value })} error={!!fieldErrors.kvk} helperText={fieldErrors.kvk} />
                   </Grid>
                   <Grid size={{ xs: 12, md: 4 }}>
-                    <TextField label="Stad" value={businessValues.woonplaats} onChange={(e) => setBusinessValues({ ...businessValues, woonplaats: e.target.value })} />
+                    <TextField label="Stad" value={businessValues.woonplaats} onChange={(e) => setBusinessValues({ ...businessValues, woonplaats: e.target.value })} error={!!fieldErrors.busWoonplaats} helperText={fieldErrors.busWoonplaats} />
                   </Grid>
                   <Grid size={{ xs: 12, md: 4 }}>
-                    <TextField label="Straat" value={businessValues.straat} onChange={(e) => setBusinessValues({ ...businessValues, straat: e.target.value })} />
+                    <TextField label="Straat" value={businessValues.straat} onChange={(e) => setBusinessValues({ ...businessValues, straat: e.target.value })} error={!!fieldErrors.busStraat} helperText={fieldErrors.busStraat} />
                   </Grid>
                   <Grid size={{ xs: 12, md: 4 }}>
-                    <TextField label="Postcode" value={businessValues.postcode} onChange={(e) => setBusinessValues({ ...businessValues, postcode: e.target.value })} />
+                    <TextField label="Postcode" value={businessValues.postcode} onChange={(e) => setBusinessValues({ ...businessValues, postcode: e.target.value })} error={!!fieldErrors.busPostcode} helperText={fieldErrors.busPostcode} />
                   </Grid>
                 </Grid>
                 {businessFeedback && <Alert severity="success" sx={{ mt: 2, borderRadius: "10px" }}>{businessFeedback}</Alert>}

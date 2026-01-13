@@ -17,12 +17,58 @@ interface CreateFormProps {
 }
 
 export default function CreateForm({ auctionData, setAuctionData, onNext, locations }: CreateFormProps) {
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+
   // Ensure we have a default location if none is selected
   React.useEffect(() => {
     if (locations.length > 0 && !auctionData.locationId) {
       setAuctionData({ ...auctionData, locationId: locations[0].locatieId });
     }
   }, [locations]);
+
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    let isValid = true;
+
+    if (!auctionData.title?.trim()) {
+      newErrors.title = "Naam is verplicht";
+      isValid = false;
+    } else if (auctionData.title.length > 100) {
+      newErrors.title = "Naam mag maximaal 100 tekens bevatten";
+      isValid = false;
+    }
+
+    if (!auctionData.startTime) {
+      newErrors.startTime = "Starttijd is verplicht";
+      isValid = false;
+    }
+
+    if (!auctionData.endTime) {
+      newErrors.endTime = "Eindtijd is verplicht";
+      isValid = false;
+    }
+
+    if (auctionData.startTime && auctionData.endTime) {
+      if (new Date(auctionData.endTime) <= new Date(auctionData.startTime)) {
+        newErrors.endTime = "Eindtijd moet na starttijd liggen";
+        isValid = false;
+      }
+    }
+
+    if (auctionData.description && auctionData.description.length > 2000) {
+      newErrors.description = "Beschrijving mag maximaal 2000 tekens bevatten";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleNext = () => {
+    if (validate()) {
+      onNext();
+    }
+  };
 
   return (
     <BoxMui sx={{ display: 'flex', justifyContent: 'center', mt: 5, mb: 5 }}>
@@ -39,6 +85,8 @@ export default function CreateForm({ auctionData, setAuctionData, onNext, locati
           onChange={(e: any) => setAuctionData({ ...auctionData, title: e.target.value })}
           InputLabelProps={{ shrink: true }}
           placeholder="Bijv. Antiek Veiling 2026"
+          error={!!errors.title}
+          helperText={errors.title}
         />
 
         <BoxMui sx={{ display: 'flex', gap: 2 }}>
@@ -50,6 +98,8 @@ export default function CreateForm({ auctionData, setAuctionData, onNext, locati
             value={auctionData.startTime || ""}
             onChange={(e: any) => setAuctionData({ ...auctionData, startTime: e.target.value })}
             InputLabelProps={{ shrink: true }}
+            error={!!errors.startTime}
+            helperText={errors.startTime}
           />
           <TextField
             fullWidth
@@ -59,6 +109,8 @@ export default function CreateForm({ auctionData, setAuctionData, onNext, locati
             value={auctionData.endTime || ""}
             onChange={(e: any) => setAuctionData({ ...auctionData, endTime: e.target.value })}
             InputLabelProps={{ shrink: true }}
+            error={!!errors.endTime}
+            helperText={errors.endTime}
           />
         </BoxMui>
 
@@ -91,6 +143,8 @@ export default function CreateForm({ auctionData, setAuctionData, onNext, locati
           value={auctionData.description || ""}
           onChange={(e: any) => setAuctionData({ ...auctionData, description: e.target.value })}
           InputLabelProps={{ shrink: true }}
+          error={!!errors.description}
+          helperText={errors.description}
         />
 
         <Button
@@ -98,7 +152,7 @@ export default function CreateForm({ auctionData, setAuctionData, onNext, locati
           variant="contained"
           fullWidth
           sx={{ mt: 3, py: 1.5, fontWeight: 'bold' }}
-          onClick={onNext}
+          onClick={handleNext}
         >
           Veiling Aanmaken & Producten Kiezen
         </Button>
