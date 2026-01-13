@@ -98,10 +98,22 @@ namespace backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVeilingMeester(int id)
         {
-            var veilingMeester = await _context.VeilingMeesters.FindAsync(id);
+            var veilingMeester = await _context.VeilingMeesters
+                .FirstOrDefaultAsync(v => v.MeesterId == id);
+
             if (veilingMeester == null)
             {
-                return NotFound();
+                return NotFound("Veilingmeester niet gevonden.");
+            }
+
+            // LOGISCHE VALIDATIE:
+            // Controleer of deze veilingmeester nog gekoppeld is aan actieve of geplande veilingen.
+            var heeftActieveVeilingen = await _context.Veiling
+                .AnyAsync(v => v.VeilingMeesterId == id && v.Eindtijd > DateTime.UtcNow);
+
+            if (heeftActieveVeilingen)
+            {
+                return BadRequest("Kan veilingmeester niet verwijderen: deze persoon is nog gekoppeld aan actieve of toekomstige veilingen.");
             }
 
             _context.VeilingMeesters.Remove(veilingMeester);
