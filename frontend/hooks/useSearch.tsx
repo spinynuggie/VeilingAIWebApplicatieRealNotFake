@@ -7,8 +7,15 @@ export function useSearch<T>(searchFn: (query: string, signal: AbortSignal) => P
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    // 1. Als het veld leeg is, wis de opties en doe niets
     if (inputValue.length === 0) {
       setOptions([]);
+      return;
+    }
+
+    // 2. NIEUW: Als de tekst korter is dan 2 tekens, doe nog geen API-call
+    // Dit voorkomt de 400 Bad Request error van je nieuwe validator
+    if (inputValue.length < 2) {
       return;
     }
 
@@ -26,10 +33,10 @@ export function useSearch<T>(searchFn: (query: string, signal: AbortSignal) => P
       } finally {
         setLoading(false);
       }
-    }, 200);
+    }, 300); 
 
     return () => clearTimeout(timer);
-  }, [inputValue, searchFn]); // searchFn is nu een dependency
+  }, [inputValue, searchFn]);
 
   return { options, loading, inputValue, setInputValue };
 }
