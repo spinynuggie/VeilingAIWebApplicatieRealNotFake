@@ -1,0 +1,25 @@
+import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import BoxExample from './BoxExample';
+
+const md = `# Box
+
+Simple layout wrapper with padding and shadow used in forms and cards.
+`;
+
+export default function Page() {
+  return (
+    <div style={{ padding: 24 }}>
+      <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', gap: 24 }}>
+        <div style={{ flex: 1 }}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{md}</ReactMarkdown>
+        </div>
+        <div style={{ width: 420 }}>
+          <h3>Live preview</h3>
+          <BoxExample />
+        </div>
+      </div>
+    </div>
+  );
+}
