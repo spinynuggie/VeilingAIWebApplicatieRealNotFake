@@ -40,7 +40,12 @@ Gebruiker zegt: {request.Message}";
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Er is een fout opgetreden: {ex.Message}");
+                // Detailed error for debugging
+                return StatusCode(500, new { 
+                    error = "Chat server error", 
+                    message = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
             }
         }
     }

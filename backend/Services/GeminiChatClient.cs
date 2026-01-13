@@ -38,14 +38,20 @@ namespace backend.Services
 
             var responseJson = await response.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(responseJson);
-            var text = doc.RootElement
-                .GetProperty("candidates")[0]
+            
+            if (!doc.RootElement.TryGetProperty("candidates", out var candidates) || candidates.GetArrayLength() == 0)
+            {
+                // Most likely blocked by safety filters or no response
+                return new ChatCompletion(new ChatMessage(ChatRole.Assistant, "Mijn excuses, maar ik kan deze vraag niet beantwoorden vanwege mijn veiligheidsrichtlijnen."));
+            }
+
+            var text = candidates[0]
                 .GetProperty("content")
                 .GetProperty("parts")[0]
                 .GetProperty("text")
                 .GetString();
 
-            return new ChatCompletion(new ChatMessage(ChatRole.Assistant, text ?? ""));
+            return new ChatCompletion(new ChatMessage(ChatRole.Assistant, text ?? "Sorry, ik kon geen antwoord vinden."));
         }
 
         public IAsyncEnumerable<StreamingChatCompletionUpdate> CompleteStreamingAsync(IList<ChatMessage> chatMessages, ChatOptions? options = null, CancellationToken cancellationToken = default)
