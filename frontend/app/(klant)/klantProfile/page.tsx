@@ -23,7 +23,7 @@ import { Button } from "@/components/Buttons/Button";
 import { TextField } from "@/components/TextField";
 import { Background } from "@/components/Background";
 import { FloraLogo } from "@/components/FloraLogo";
-import  AppNavBar from "@/features/(NavBar)/AppNavBar";
+import AppNavBar from "@/features/(NavBar)/AppNavBar";
 
 import RequireAuth from "@/components/(oud)/RequireAuth";
 import { useAuth } from "@/components/AuthProvider";
@@ -50,7 +50,7 @@ type BusinessForm = {
 
 export default function KlantProfile() {
   const { user, refreshUser } = useAuth();
-  
+
   // States voor Profiel
   const [formValues, setFormValues] = useState<ProfileForm>({ naam: "", emailadres: "", woonplaats: "", straat: "", postcode: "", huisnummer: "" });
   const [isEditing, setIsEditing] = useState(false);
@@ -200,14 +200,14 @@ export default function KlantProfile() {
   return (
     <RequireAuth>
       <Background>
-        <AppNavBar/>
+        <AppNavBar />
         {/* Decoratieve achtergrondlaag */}
         <BoxMui sx={{ position: "fixed", inset: 0, zIndex: -1, opacity: 0.15 }}>
           <Image src={backgroundImage} alt="Background" fill style={{ objectFit: "cover" }} priority />
         </BoxMui>
 
         <BoxMui sx={{ maxWidth: 1200, mx: "auto", px: 3, py: 6 }}>
-          
+
           {/* Header met Logo en Rol */}
           <BoxMui sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4, flexWrap: "wrap", gap: 2 }}>
             <BoxMui sx={{ display: "flex", alignItems: "center", gap: 3 }}>
@@ -235,23 +235,23 @@ export default function KlantProfile() {
             </BoxMui>
 
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField label="Naam" value={formValues.naam} disabled={!isEditing} onChange={(e) => setFormValues({...formValues, naam: e.target.value})} />
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField label="Naam" value={formValues.naam} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, naam: e.target.value })} />
               </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField label="E-mail" value={formValues.emailadres} disabled={!isEditing} onChange={(e) => setFormValues({...formValues, emailadres: e.target.value})} />
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField label="E-mail" value={formValues.emailadres} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, emailadres: e.target.value })} />
               </Grid>
-              <Grid item xs={12} md={4}>
-                <TextField label="Woonplaats" value={formValues.woonplaats} disabled={!isEditing} onChange={(e) => setFormValues({...formValues, woonplaats: e.target.value})} />
+              <Grid size={{ xs: 12, md: 4 }}>
+                <TextField label="Woonplaats" value={formValues.woonplaats} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, woonplaats: e.target.value })} />
               </Grid>
-              <Grid item xs={12} md={4}>
-                <TextField label="Straat" value={formValues.straat} disabled={!isEditing} onChange={(e) => setFormValues({...formValues, straat: e.target.value})} />
+              <Grid size={{ xs: 12, md: 4 }}>
+                <TextField label="Straat" value={formValues.straat} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, straat: e.target.value })} />
               </Grid>
-              <Grid item xs={12} md={2}>
-                <TextField label="Postcode" value={formValues.postcode} disabled={!isEditing} onChange={(e) => setFormValues({...formValues, postcode: e.target.value})} />
+              <Grid size={{ xs: 12, md: 2 }}>
+                <TextField label="Postcode" value={formValues.postcode} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, postcode: e.target.value })} />
               </Grid>
-              <Grid item xs={12} md={2}>
-                <TextField label="Huisnr" value={formValues.huisnummer} disabled={!isEditing} onChange={(e) => setFormValues({...formValues, huisnummer: e.target.value})} />
+              <Grid size={{ xs: 12, md: 2 }}>
+                <TextField label="Huisnr" value={formValues.huisnummer} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, huisnummer: e.target.value })} />
               </Grid>
             </Grid>
             {feedback && <Alert severity="success" sx={{ mt: 2, borderRadius: "10px" }}>{feedback}</Alert>}
@@ -277,22 +277,22 @@ export default function KlantProfile() {
                     </Button>
                   </BoxMui>
                 </BoxMui>
-                
+
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
-                    <TextField label="Bedrijfsnaam" value={businessValues.bedrijfsnaam} onChange={(e) => setBusinessValues({...businessValues, bedrijfsnaam: e.target.value})} />
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField label="Bedrijfsnaam" value={businessValues.bedrijfsnaam} onChange={(e) => setBusinessValues({ ...businessValues, bedrijfsnaam: e.target.value })} />
                   </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField label="KvK-nummer" value={businessValues.kvkNummer} onChange={(e) => setBusinessValues({...businessValues, kvkNummer: e.target.value})} />
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField label="KvK-nummer" value={businessValues.kvkNummer} onChange={(e) => setBusinessValues({ ...businessValues, kvkNummer: e.target.value })} />
                   </Grid>
-                  <Grid item xs={12} md={4}>
-                    <TextField label="Stad" value={businessValues.woonplaats} onChange={(e) => setBusinessValues({...businessValues, woonplaats: e.target.value})} />
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <TextField label="Stad" value={businessValues.woonplaats} onChange={(e) => setBusinessValues({ ...businessValues, woonplaats: e.target.value })} />
                   </Grid>
-                  <Grid item xs={12} md={4}>
-                    <TextField label="Straat" value={businessValues.straat} onChange={(e) => setBusinessValues({...businessValues, straat: e.target.value})} />
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <TextField label="Straat" value={businessValues.straat} onChange={(e) => setBusinessValues({ ...businessValues, straat: e.target.value })} />
                   </Grid>
-                  <Grid item xs={12} md={4}>
-                    <TextField label="Postcode" value={businessValues.postcode} onChange={(e) => setBusinessValues({...businessValues, postcode: e.target.value})} />
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <TextField label="Postcode" value={businessValues.postcode} onChange={(e) => setBusinessValues({ ...businessValues, postcode: e.target.value })} />
                   </Grid>
                 </Grid>
                 {businessFeedback && <Alert severity="success" sx={{ mt: 2, borderRadius: "10px" }}>{businessFeedback}</Alert>}

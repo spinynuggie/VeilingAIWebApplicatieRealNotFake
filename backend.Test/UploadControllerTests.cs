@@ -54,12 +54,22 @@ namespace backend.Test
                 ContentType = "text/plain"
             };
 
-            var result = await _controller.Upload(file);
+            var result = await _controller.Upload(file, "testfolder");
             Assert.IsInstanceOfType(result, typeof(OkObjectResult));
-
-            // cleanup created file if any
-            var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", fileName);
-            if (File.Exists(uploadPath)) File.Delete(uploadPath);
+            
+            var okResult = result as OkObjectResult;
+            dynamic val = okResult.Value;
+            // The url property should contain /uploads/testfolder/
+            // Note: In unit tests with dynamic/anonymous types it's tricky to access properties directly without reflection or 'dynamic'.
+            // For simplicity we check if result is OK. 
+            // Ideally check file existence on disk:
+            
+            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "testfolder");
+            // Check if directory was created
+            Assert.IsTrue(Directory.Exists(uploadsPath));
+            
+            // Cleanup
+            if (Directory.Exists(uploadsPath)) Directory.Delete(uploadsPath, true);
         }
     }
 }

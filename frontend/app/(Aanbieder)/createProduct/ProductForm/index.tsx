@@ -1,4 +1,5 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent, KeyboardEvent } from "react";
+import { CreateProductInput } from "@/types/product";
 import { useAuth } from "@/components/AuthProvider";
 import { createProduct } from "@/services/productService";
 import { Alert, Snackbar, CircularProgress, TextField } from "@mui/material";
@@ -104,56 +105,89 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
   };
 
   const handleSubmit = async (e: FormEvent) => {
-  e.preventDefault();
-  setError(null);
-  setSuccess(null);
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
 
-  if (!validateForm()) return;
-  if (!user) {
-    setError("Je moet ingelogd zijn.");
-    return;
-  }
+    if (!validateForm()) return;
+    if (!user) {
+      setError("Je moet ingelogd zijn.");
+      return;
+    }
 
-  try {
-    setIsSubmitting(true);
+    try {
+      setIsSubmitting(true);
 
-    // ✅ Explicitly cast to match Backend DTO types
-    const productPayload: CreateProductInput = {
-      productNaam: formData.name,
-      productBeschrijving: formData.description || "Geen beschrijving",
-      fotos: formData.image,
-      hoeveelheid: Number(formData.quantity),
-      startPrijs: parseFloat(formData.price), 
-      eindPrijs: parseFloat(formData.price), // This goes to DTO.Eindprijs
-      specificatieIds: formData.specificationIds, // Array of numbers
-      verkoperId: user.gebruikerId, 
-      locatieId: Number(formData.locationId), // Ensure it's not a string
-    };
+      // ✅ Explicitly cast to match Backend DTO types
+      const productPayload: CreateProductInput = {
+        productNaam: formData.name,
+        productBeschrijving: formData.description || "Geen beschrijving",
+        fotos: formData.image,
+        hoeveelheid: Number(formData.quantity),
+        startPrijs: parseFloat(formData.price),
+        eindPrijs: parseFloat(formData.price), // This goes to DTO.Eindprijs
+        specificatieIds: formData.specificationIds, // Array of numbers
+        verkoperId: user.gebruikerId,
+        locatieId: Number(formData.locationId), // Ensure it's not a string
+      };
 
-    // This calls the coupled service
-    await createProduct(productPayload);
-    
-    setSuccess("Product succesvol aangemaakt!");
+      // This calls the coupled service
+      await createProduct(productPayload);
 
-    // Reset the form state
-    setFormData({
-      name: "",
-      description: "",
-      quantity: "",
-      price: "",
-      specifications: [],
-      specificationIds: [],
-      image: "",
-      locationId: locations.length > 0 ? (locations[0].locatieId || "") : "",
-    });
+      setSuccess("Product succesvol aangemaakt!");
 
-  } catch (err: any) {
-    console.error("Submit error:", err);
-    setError(err.message || "Er is iets misgegaan");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      // Reset the form state
+      setFormData({
+        name: "",
+        description: "",
+        quantity: "",
+        price: "",
+        specifications: [],
+        specificationIds: [],
+        image: "",
+        locationId: locations.length > 0 ? (locations[0].locatieId || "") : "",
+      });
+
+    } catch (err: any) {
+      console.error("Submit error:", err);
+      setError(err.message || "Er is iets misgegaan");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_LINK}/api/Upload?folder=products`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error("Upload mislukt");
+      }
+
+      const data = await res.json();
+      // data.url contains the relative path like "/uploads/..."
+      // We prepend the backend link if we want full URL, or just keep relative if frontend handles it. 
+      // Based on existing code using strings, full URL is safer for <img> src usually, 
+      // but let's check how existing images are handled. The preview uses <img src={formData.image}>.
+      // If backend serves static files, full URL is needed.
+      const fullUrl = `${process.env.NEXT_PUBLIC_BACKEND_LINK}${data.url}`;
+      setFormData(prev => ({ ...prev, image: fullUrl }));
+
+    } catch (err) {
+      console.error("Upload error", err);
+      setError("Kon afbeelding niet uploaden.");
+    }
+  };
+
   const showAlert = (message: string, severity: "error" | "success") => (
     <Snackbar
       open={true}
@@ -192,6 +226,20 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
               onChange={handleChange}
               placeholder="https://..."
             />
+
+            <Button
+              variant="outlined"
+              component="label"
+              fullWidth
+            >
+              Of Upload Afbeelding
+              <input
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={handleImageUpload}
+              />
+            </Button>
 
             {/* Preview Box */}
             <BoxMui sx={{ height: 200, border: '1px dashed grey', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

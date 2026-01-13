@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { 
-  Typography, 
-  Grid, 
-  CircularProgress, 
-  Container, 
-  Stack, 
-  Alert, 
-  Box as BoxMui 
+import {
+  Typography,
+  Grid,
+  CircularProgress,
+  Container,
+  Stack,
+  Alert,
+  Box as BoxMui
 } from "@mui/material";
 
 // Eigen componenten
@@ -19,7 +19,7 @@ import { useAuth } from "@/components/AuthProvider";
 
 // Mock of Import van je fetch helper
 // Zorg dat deze import klopt met jouw projectstructuur
-import { authFetch } from "@/services/authService"; 
+import { authFetch } from "@/services/authService";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -75,8 +75,8 @@ export default function Landing() {
       <Container maxWidth="lg" sx={{ py: 8 }}>
         {/* Header met MUI Stack */}
         <Stack spacing={1} sx={{ mb: 6, alignItems: "center", textAlign: "center" }}>
-          <Typography 
-            variant="h3" 
+          <Typography
+            variant="h3"
             sx={{ fontWeight: 900, color: "primary.main", letterSpacing: -1 }}
           >
             Mijn Producten
@@ -106,7 +106,7 @@ export default function Landing() {
             {myProducts.length > 0 ? (
               <Grid container spacing={4}>
                 {myProducts.map((product) => (
-                  <Grid item key={product.productId} xs={12} sm={6} md={4}>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={product.productId}>
                     <ProductCard
                       product={product}
                       mode="display" // Gebruikt de 'display' mode uit je ProductCard component
@@ -116,11 +116,11 @@ export default function Landing() {
                 ))}
               </Grid>
             ) : (
-              <BoxMui 
-                sx={{ 
-                  p: 6, 
-                  textAlign: "center", 
-                  bgcolor: "background.paper", 
+              <BoxMui
+                sx={{
+                  p: 6,
+                  textAlign: "center",
+                  bgcolor: "background.paper",
                   borderRadius: 4,
                   boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
                   border: "1px solid",

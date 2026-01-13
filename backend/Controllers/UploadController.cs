@@ -22,13 +22,17 @@ namespace backend.Controllers
         /// <response code="400">Bestand ontbreekt of is leeg.</response>
         /// <response code="500">Fout bij het wegschrijven van het bestand naar de servermap.</response>
         [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<IActionResult> Upload(IFormFile file, [FromQuery] string folder = "misc")
         {
             if (file == null || file.Length == 0)
                 return BadRequest("Geen bestand geupload.");
 
+            // Sanitize folder name to prevent traversal
+            var safeFolder = new string(folder.Where(c => char.IsLetterOrDigit(c) || c == '-' || c == '_').ToArray());
+            if (string.IsNullOrEmpty(safeFolder)) safeFolder = "misc";
+
             // Create uploads directory if it doesn't exist
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", safeFolder);
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
 
@@ -42,7 +46,7 @@ namespace backend.Controllers
             }
 
             // Return the relative URL
-            var url = $"/uploads/{uniqueFileName}";
+            var url = $"/uploads/{safeFolder}/{uniqueFileName}";
             return Ok(new { url });
         }
     }
