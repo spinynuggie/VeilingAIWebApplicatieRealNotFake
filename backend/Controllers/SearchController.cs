@@ -56,17 +56,16 @@ namespace backend.Controllers
         /// <returns>Een gecombineerde lijst van SearchResultDto's met vermelding van het type (Product/Veiling).</returns>
         /// <response code="200">Gecombineerde resultaten succesvol opgehaald.</response>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SearchResultDto>>> Search([FromQuery] string query)
+        public async Task<ActionResult<IEnumerable<SearchResultDto>>> Search([FromQuery] SearchQueryDto searchDto)
         {
-            if (string.IsNullOrWhiteSpace(query))
+            // Gebruik de DTO property i.p.v. een losse parameter
+            if (string.IsNullOrWhiteSpace(searchDto.Query))
             {
                 return Ok(new List<SearchResultDto>());
             }
 
-            // 1. Clean the input: Lowercase and Trim spaces
-            var searchTerm = query.ToLower().Trim();
+            var searchTerm = searchDto.Query.ToLower().Trim();
 
-            // 2. Search Products
             var products = await _context.ProductGegevens
                 .Where(p => p.ProductNaam.ToLower().Contains(searchTerm)) 
                 .Select(p => new SearchResultDto
@@ -78,7 +77,6 @@ namespace backend.Controllers
                 })
                 .ToListAsync();
 
-            // 3. Search Auctions
             var auctions = await _context.Veiling
                 .Where(v => v.Naam.ToLower().Contains(searchTerm))
                 .Select(v => new SearchResultDto
@@ -90,11 +88,7 @@ namespace backend.Controllers
                 })
                 .ToListAsync();
 
-            // 4. Combine results
-            var results = new List<SearchResultDto>();
-            results.AddRange(products);
-            results.AddRange(auctions);
-
+            var results = products.Concat(auctions).ToList();
             return Ok(results);
         }
     }

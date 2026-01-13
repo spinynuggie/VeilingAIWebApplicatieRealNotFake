@@ -3,6 +3,9 @@
 /// </summary>
 public class LocatieResponseDto
 {
+    /// <summary>unieke id van de locatie</summary>
+    public int LocatieId { get; set; }
+    
     /// <summary>De naam van de locatie.</summary>
     public string LocatieNaam { get; set; } = string.Empty;
         
