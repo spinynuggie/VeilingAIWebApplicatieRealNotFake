@@ -12,6 +12,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace backend.Test
 {
+    /// <summary>
+    /// Tests for <see cref="backend.Controllers.ProductGegevensController"/> covering CRUD and related behaviours.
+    /// </summary>
     [TestClass]
     public class ProductGegevensControllerTests
     {
@@ -76,8 +79,11 @@ namespace backend.Test
             _context!.Dispose();
         }
 
-        [TestMethod]
-        public async Task GetProductGegevens_ReturnsAll()
+    /// <summary>
+    /// Verifies getting all product records returns the expected list.
+    /// </summary>
+    [TestMethod]
+    public async Task GetProductGegevens_ReturnsAll()
         {
             var result = await _controller!.GetProductGegevens();
 
@@ -88,8 +94,11 @@ namespace backend.Test
             Assert.IsTrue(list.Any(p => p.ProductNaam == "Banana"));
         }
 
-        [TestMethod]
-        public async Task GetProductGegevens_ById_Found()
+    /// <summary>
+    /// Verifies retrieving a product by id returns the expected DTO when found.
+    /// </summary>
+    [TestMethod]
+    public async Task GetProductGegevens_ById_Found()
         {
             var result = await _controller!.GetProductGegevens(1);
 
@@ -103,16 +112,22 @@ namespace backend.Test
             Assert.AreEqual("Apple", dto.ProductNaam);
         }
 
-        [TestMethod]
-        public async Task GetProductGegevens_ById_NotFound()
+    /// <summary>
+    /// Verifies retrieving a non-existent product id yields NotFound.
+    /// </summary>
+    [TestMethod]
+    public async Task GetProductGegevens_ById_NotFound()
         {
             var result = await _controller!.GetProductGegevens(999);
 
             Assert.IsInstanceOfType(result.Result, typeof(NotFoundResult));
         }
 
-        [TestMethod]
-        public async Task PostProductGegevens_CreatesAndReturnsCreatedAt()
+    /// <summary>
+    /// Verifies creating a new product returns CreatedAtAction and persists the entity.
+    /// </summary>
+    [TestMethod]
+    public async Task PostProductGegevens_CreatesAndReturnsCreatedAt()
         {
             var newProductDto = new ProductCreateDto
             {
@@ -150,8 +165,11 @@ namespace backend.Test
             Assert.AreEqual("Cherry", inDb.ProductNaam);
         }
 
-        [TestMethod]
-        public async Task PutProductGegevens_MismatchedId_ReturnsBadRequest()
+    /// <summary>
+    /// Verifies PutProductGegevens returns BadRequest when route id and DTO id mismatch.
+    /// </summary>
+    [TestMethod]
+    public async Task PutProductGegevens_MismatchedId_ReturnsBadRequest()
         {
             var dto = new ProductUpdateDto
             {
@@ -173,8 +191,11 @@ namespace backend.Test
             Assert.IsNotNull(badRequest);
         }
 
-        [TestMethod]
-        public async Task PutProductGegevens_NotFound_ReturnsNotFound()
+    /// <summary>
+    /// Verifies PutProductGegevens returns NotFound when product does not exist.
+    /// </summary>
+    [TestMethod]
+    public async Task PutProductGegevens_NotFound_ReturnsNotFound()
         {
             var dto = new ProductUpdateDto
             {
@@ -194,8 +215,11 @@ namespace backend.Test
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
-        [TestMethod]
-        public async Task PutProductGegevens_Updates_ReturnsNoContent()
+    /// <summary>
+    /// Verifies successful update of product returns NoContent and persists changes.
+    /// </summary>
+    [TestMethod]
+    public async Task PutProductGegevens_Updates_ReturnsNoContent()
         {
             var dto = new ProductUpdateDto
             {
@@ -220,8 +244,11 @@ namespace backend.Test
             Assert.AreEqual(19.99m, updated!.EindPrijs);
         }
 
-        [TestMethod]
-        public async Task DeleteProductGegevens_Existing_ReturnsNoContent_AndRemoves()
+    /// <summary>
+    /// Verifies deleting an existing product returns NoContent and removes it from the DB.
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteProductGegevens_Existing_ReturnsNoContent_AndRemoves()
         {
             var result = await _controller!.DeleteProductGegevens(1);
 
@@ -231,8 +258,11 @@ namespace backend.Test
             Assert.IsNull(deleted);
         }
 
-        [TestMethod]
-        public async Task DeleteProductGegevens_NotFound_ReturnsNotFound()
+    /// <summary>
+    /// Verifies deleting a non-existent product id yields NotFound.
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteProductGegevens_NotFound_ReturnsNotFound()
         {
             var result = await _controller!.DeleteProductGegevens(999);
 

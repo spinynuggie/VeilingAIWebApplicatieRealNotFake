@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Test
 {
+    /// <summary>
+    /// Tests for <see cref="backend.Controllers.UploadController"/> validating file upload endpoints.
+    /// </summary>
     [TestClass]
     public class UploadControllerTests
     {
@@ -19,16 +22,22 @@ namespace backend.Test
             _controller = new UploadController();
         }
 
-        [TestMethod]
-        public async Task Upload_NullFile_ReturnsBadRequest()
+    /// <summary>
+    /// Ensures uploading a null file returns BadRequest.
+    /// </summary>
+    [TestMethod]
+    public async Task Upload_NullFile_ReturnsBadRequest()
         {
             IFormFile file = null;
             var result = await _controller.Upload(file);
             Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
         }
 
-        [TestMethod]
-        public async Task Upload_ValidFile_ReturnsOk()
+    /// <summary>
+    /// Ensures uploading a valid IFormFile returns Ok and stores the file.
+    /// </summary>
+    [TestMethod]
+    public async Task Upload_ValidFile_ReturnsOk()
         {
             var content = "Hello world from tests";
             var fileName = "testfile.txt";

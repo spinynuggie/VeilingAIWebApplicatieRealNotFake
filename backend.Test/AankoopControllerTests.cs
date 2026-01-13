@@ -15,6 +15,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace backend.Test
 {
+    /// <summary>
+    /// Unit tests for <see cref="backend.Controllers.AankoopController"/>.
+    /// Covers retrieval, creation, update and deletion of purchases and authorization scenarios.
+    /// </summary>
     [TestClass]
     public sealed class AankoopControllerTests
     {
@@ -74,8 +78,11 @@ namespace backend.Test
             _context!.Dispose();
         }
 
-        [TestMethod]
-        public async Task GetMijnAankopen_WithValidUser_ReturnsUserAankopen()
+    /// <summary>
+    /// Ensures GetMijnAankopen returns the purchases belonging to the authenticated user.
+    /// </summary>
+    [TestMethod]
+    public async Task GetMijnAankopen_WithValidUser_ReturnsUserAankopen()
         {
             var result = await _controller!.GetMijnAankopen();
             Assert.IsInstanceOfType(result.Result, typeof(OkObjectResult));
@@ -89,8 +96,11 @@ namespace backend.Test
             Assert.AreEqual(2, aankopen.Count);
         }
 
-        [TestMethod]
-        public async Task GetMijnAankopen_WithoutUserId_ReturnsUnauthorized()
+    /// <summary>
+    /// Ensures GetMijnAankopen returns Unauthorized when no user id claim is present.
+    /// </summary>
+    [TestMethod]
+    public async Task GetMijnAankopen_WithoutUserId_ReturnsUnauthorized()
         {
             // remove claims
             _controller!.ControllerContext.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
@@ -98,8 +108,11 @@ namespace backend.Test
             Assert.IsInstanceOfType(result.Result, typeof(UnauthorizedObjectResult));
         }
 
-        [TestMethod]
-        public async Task GetAankoop_WithValidIdAndOwnership_ReturnsAankoop()
+    /// <summary>
+    /// Ensures GetAankoop returns the expected purchase when id exists and belongs to user.
+    /// </summary>
+    [TestMethod]
+    public async Task GetAankoop_WithValidIdAndOwnership_ReturnsAankoop()
         {
             var result = await _controller!.GetAankoop(1);
             Assert.IsInstanceOfType(result.Value, typeof(AankoopResponseDto));
@@ -107,15 +120,21 @@ namespace backend.Test
             Assert.AreEqual(1, aankoop.AankoopId);
         }
 
-        [TestMethod]
-        public async Task GetAankoop_WithInvalidId_ReturnsNotFound()
+    /// <summary>
+    /// Ensures GetAankoop returns NotFound for a non-existent purchase id.
+    /// </summary>
+    [TestMethod]
+    public async Task GetAankoop_WithInvalidId_ReturnsNotFound()
         {
             var result = await _controller!.GetAankoop(999);
             Assert.IsInstanceOfType(result.Result, typeof(NotFoundResult));
         }
 
-        [TestMethod]
-        public async Task PutAankoop_WithValidId_ReturnsNoContent()
+    /// <summary>
+    /// Ensures PutAankoop updates the entity and returns NoContent on success.
+    /// </summary>
+    [TestMethod]
+    public async Task PutAankoop_WithValidId_ReturnsNoContent()
         {
             var updateDto = new AankoopUpdateDto { AanKoopHoeveelheid = 5 };
             var result = await _controller!.PutAankoop(1, updateDto);
@@ -125,24 +144,33 @@ namespace backend.Test
             Assert.AreEqual(5, updated!.AanKoopHoeveelheid);
         }
 
-        [TestMethod]
-        public async Task PutAankoop_WithNonExistentId_ReturnsNotFound()
+    /// <summary>
+    /// Ensures PutAankoop returns NotFound when the target purchase does not exist.
+    /// </summary>
+    [TestMethod]
+    public async Task PutAankoop_WithNonExistentId_ReturnsNotFound()
         {
             var updateDto = new AankoopUpdateDto { AanKoopHoeveelheid = 10 };
             var result = await _controller!.PutAankoop(999, updateDto);
             Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
         }
 
-        [TestMethod]
-        public async Task PostAankoop_WithValidData_ReturnsCreated()
+    /// <summary>
+    /// Ensures PostAankoop creates a new purchase and returns CreatedAtAction.
+    /// </summary>
+    [TestMethod]
+    public async Task PostAankoop_WithValidData_ReturnsCreated()
         {
             var createDto = new AankoopCreateDto { ProductId = 201, Prijs = 45.99m, AanKoopHoeveelheid = 1 };
             var res = await _controller!.PostAankoop(createDto);
             Assert.IsInstanceOfType(res.Result, typeof(CreatedAtActionResult));
         }
 
-        [TestMethod]
-        public async Task DeleteAankoop_Existing_ReturnsNoContent()
+    /// <summary>
+    /// Ensures DeleteAankoop removes an existing purchase and returns NoContent.
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteAankoop_Existing_ReturnsNoContent()
         {
             var res = await _controller!.DeleteAankoop(1);
             Assert.IsInstanceOfType(res, typeof(NoContentResult));

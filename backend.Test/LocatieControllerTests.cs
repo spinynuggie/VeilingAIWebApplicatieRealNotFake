@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Test
 {
+    /// <summary>
+    /// Tests for <see cref="backend.Controllers.LocatieController"/> covering retrieval and creation of locations.
+    /// </summary>
     [TestClass]
     public class LocatieControllerTests
     {
@@ -37,23 +40,32 @@ namespace backend.Test
             _context.Dispose();
         }
 
-        [TestMethod]
-        public async System.Threading.Tasks.Task GetLocaties_ReturnsOk()
+    /// <summary>
+    /// Ensures GetLocaties returns Ok with the available locations.
+    /// </summary>
+    [TestMethod]
+    public async System.Threading.Tasks.Task GetLocaties_ReturnsOk()
         {
             var result = await _controller.GetLocaties();
             Assert.IsInstanceOfType(result, typeof(OkObjectResult));
         }
 
-        [TestMethod]
-        public async System.Threading.Tasks.Task CreateLocatie_WithValidDto_ReturnsCreated()
+    /// <summary>
+    /// Ensures creating a valid Locatie returns CreatedAtAction.
+    /// </summary>
+    [TestMethod]
+    public async System.Threading.Tasks.Task CreateLocatie_WithValidDto_ReturnsCreated()
         {
             var dto = new LocatieCreateDto { LocatieNaam = "Naaldwijk", Foto = "n.jpg" };
             var result = await _controller.CreateLocatie(dto);
             Assert.IsInstanceOfType(result, typeof(CreatedAtActionResult));
         }
 
-        [TestMethod]
-        public async System.Threading.Tasks.Task CreateLocatie_WithNull_ReturnsBadRequest()
+    /// <summary>
+    /// Ensures creating a location with a null DTO returns BadRequest.
+    /// </summary>
+    [TestMethod]
+    public async System.Threading.Tasks.Task CreateLocatie_WithNull_ReturnsBadRequest()
         {
             var result = await _controller.CreateLocatie(null);
             Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));

@@ -14,6 +14,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace backend.Test
 {
+    /// <summary>
+    /// Tests for <see cref="backend.Controllers.VerkoperController"/> including seller lifecycle and owner-specific endpoints.
+    /// </summary>
     [TestClass]
     public class VerkoperControllerTests
     {
@@ -82,47 +85,65 @@ namespace backend.Test
             _context.Dispose();
         }
 
-        [TestMethod]
-        public async Task GetVerkopers_ReturnsAll()
+    /// <summary>
+    /// Ensures GetVerkopers returns all sellers.
+    /// </summary>
+    [TestMethod]
+    public async Task GetVerkopers_ReturnsAll()
         {
             var result = await _controller.GetVerkopers();
             var list = result.Value as List<Verkoper> ?? result.Value.ToList();
             Assert.AreEqual(2, list.Count);
         }
 
-        [TestMethod]
-        public async Task GetVerkoper_ById_Found()
+    /// <summary>
+    /// Ensures GetVerkoper(id) returns the seller when found.
+    /// </summary>
+    [TestMethod]
+    public async Task GetVerkoper_ById_Found()
         {
             var result = await _controller.GetVerkoper(1);
             Assert.IsNotNull(result.Value);
             Assert.AreEqual("KVK-1", result.Value.KvkNummer);
         }
 
-        [TestMethod]
-        public async Task GetVerkoper_ById_NotFound()
+    /// <summary>
+    /// Ensures GetVerkoper returns NotFound for unknown ids.
+    /// </summary>
+    [TestMethod]
+    public async Task GetVerkoper_ById_NotFound()
         {
             var result = await _controller.GetVerkoper(999);
             Assert.IsInstanceOfType(result.Result, typeof(NotFoundResult));
         }
 
-        [TestMethod]
-        public async Task GetMyVerkoper_Unauthorized_WhenNoUser()
+    /// <summary>
+    /// Ensures GetMyVerkoper returns Unauthorized when no authenticated user.
+    /// </summary>
+    [TestMethod]
+    public async Task GetMyVerkoper_Unauthorized_WhenNoUser()
         {
             SetUser(null);
             var result = await _controller.GetMyVerkoper();
             Assert.IsInstanceOfType(result.Result, typeof(UnauthorizedResult));
         }
 
-        [TestMethod]
-        public async Task GetMyVerkoper_NotFound_WhenNoRecord()
+    /// <summary>
+    /// Ensures GetMyVerkoper returns NotFound when the authenticated user has no seller record.
+    /// </summary>
+    [TestMethod]
+    public async Task GetMyVerkoper_NotFound_WhenNoRecord()
         {
             SetUser(999);
             var result = await _controller.GetMyVerkoper();
             Assert.IsInstanceOfType(result.Result, typeof(NotFoundResult));
         }
 
-        [TestMethod]
-        public async Task GetMyVerkoper_Found_ReturnsEntity()
+    /// <summary>
+    /// Ensures GetMyVerkoper returns the seller entity when present for the authenticated user.
+    /// </summary>
+    [TestMethod]
+    public async Task GetMyVerkoper_Found_ReturnsEntity()
         {
             // Seed a verkoper for user 42
             _context.Verkopers.Add(new Verkoper
@@ -141,8 +162,11 @@ namespace backend.Test
             Assert.AreEqual("KVK-42", result.Value.KvkNummer);
         }
 
-        [TestMethod]
-        public async Task UpsertMyVerkoper_Unauthorized_WhenNoUser()
+    /// <summary>
+    /// Ensures UpsertMyVerkoper returns Unauthorized when no authenticated user is present.
+    /// </summary>
+    [TestMethod]
+    public async Task UpsertMyVerkoper_Unauthorized_WhenNoUser()
         {
             SetUser(null);
             var dto = new VerkoperDto { KvkNummer = "K1", Bedrijfsgegevens = "B", Adresgegevens = "A", FinancieleGegevens = "F" };
@@ -150,8 +174,11 @@ namespace backend.Test
             Assert.IsInstanceOfType(result.Result, typeof(UnauthorizedResult));
         }
 
-        [TestMethod]
-        public async Task UpsertMyVerkoper_Creates_WhenAbsent()
+    /// <summary>
+    /// Ensures UpsertMyVerkoper creates a seller record when absent for the user.
+    /// </summary>
+    [TestMethod]
+    public async Task UpsertMyVerkoper_Creates_WhenAbsent()
         {
             SetUser(77);
             var dto = new VerkoperDto { KvkNummer = "K77", Bedrijfsgegevens = "B77", Adresgegevens = "A77", FinancieleGegevens = "F77" };
@@ -168,8 +195,11 @@ namespace backend.Test
             Assert.AreEqual("K77", inDb.KvkNummer);
         }
 
-        [TestMethod]
-        public async Task UpsertMyVerkoper_Updates_WhenExists()
+    /// <summary>
+    /// Ensures UpsertMyVerkoper updates an existing seller for the user.
+    /// </summary>
+    [TestMethod]
+    public async Task UpsertMyVerkoper_Updates_WhenExists()
         {
             // existing for user 10 from seed
             SetUser(10);
@@ -185,8 +215,11 @@ namespace backend.Test
             Assert.AreEqual("K10U", inDb.KvkNummer);
         }
 
-        [TestMethod]
-        public async Task UpdateMyVerkoper_Unauthorized_WhenNoUser()
+    /// <summary>
+    /// Ensures UpdateMyVerkoper returns Unauthorized when the request is unauthenticated.
+    /// </summary>
+    [TestMethod]
+    public async Task UpdateMyVerkoper_Unauthorized_WhenNoUser()
         {
             SetUser(null);
             var dto = new VerkoperDto { KvkNummer = "K1" };
@@ -194,8 +227,11 @@ namespace backend.Test
             Assert.IsInstanceOfType(result, typeof(UnauthorizedResult));
         }
 
-        [TestMethod]
-        public async Task UpdateMyVerkoper_NotFound_WhenAbsent()
+    /// <summary>
+    /// Ensures UpdateMyVerkoper returns NotFound when the seller record for the user is absent.
+    /// </summary>
+    [TestMethod]
+    public async Task UpdateMyVerkoper_NotFound_WhenAbsent()
         {
             SetUser(555);
             var dto = new VerkoperDto { KvkNummer = "K555" };
@@ -203,8 +239,11 @@ namespace backend.Test
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
-        [TestMethod]
-        public async Task UpdateMyVerkoper_Success_ReturnsNoContent()
+    /// <summary>
+    /// Ensures UpdateMyVerkoper persists changes and returns NoContent on success.
+    /// </summary>
+    [TestMethod]
+    public async Task UpdateMyVerkoper_Success_ReturnsNoContent()
         {
             _context.Verkopers.Add(new Verkoper
             {
@@ -225,8 +264,11 @@ namespace backend.Test
             Assert.AreEqual("KVK-X2", inDb.KvkNummer);
         }
 
-        [TestMethod]
-        public async Task PostVerkoper_Creates_ReturnsCreatedAt()
+    /// <summary>
+    /// Ensures posting a new Verkoper returns CreatedAtAction.
+    /// </summary>
+    [TestMethod]
+    public async Task PostVerkoper_Creates_ReturnsCreatedAt()
         {
             var dto = new VerkoperDto { KvkNummer = "KNEW", Bedrijfsgegevens = "B", Adresgegevens = "A", FinancieleGegevens = "F" };
             var result = await _controller.PostVerkoper(dto);
@@ -235,16 +277,22 @@ namespace backend.Test
             Assert.IsInstanceOfType(created.Value, typeof(Verkoper));
         }
 
-        [TestMethod]
-        public async Task PutVerkoper_NotFound_ReturnsNotFound()
+    /// <summary>
+    /// Ensures PutVerkoper returns NotFound for a missing seller id.
+    /// </summary>
+    [TestMethod]
+    public async Task PutVerkoper_NotFound_ReturnsNotFound()
         {
             var dto = new VerkoperDto { KvkNummer = "K", Bedrijfsgegevens = "B", Adresgegevens = "A", FinancieleGegevens = "F" };
             var result = await _controller.PutVerkoper(999, dto);
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
-        [TestMethod]
-        public async Task PutVerkoper_Updates_ReturnsNoContent()
+    /// <summary>
+    /// Ensures PutVerkoper updates the seller entity and returns NoContent.
+    /// </summary>
+    [TestMethod]
+    public async Task PutVerkoper_Updates_ReturnsNoContent()
         {
             var dto = new VerkoperDto { KvkNummer = "KVK-1U", Bedrijfsgegevens = "B1U", Adresgegevens = "A1U", FinancieleGegevens = "F1U" };
             var result = await _controller.PutVerkoper(1, dto);
@@ -257,16 +305,22 @@ namespace backend.Test
             Assert.AreEqual("F1U", updated.FinancieleGegevens);
         }
 
-        [TestMethod]
-        public async Task DeleteVerkoper_Existing_ReturnsNoContent()
+    /// <summary>
+    /// Ensures deleting an existing seller returns NoContent and removes the record.
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteVerkoper_Existing_ReturnsNoContent()
         {
             var result = await _controller.DeleteVerkoper(1);
             Assert.IsInstanceOfType(result, typeof(NoContentResult));
             Assert.IsNull(await _context.Verkopers.FindAsync(1));
         }
 
-        [TestMethod]
-        public async Task DeleteVerkoper_NotFound_ReturnsNotFound()
+    /// <summary>
+    /// Ensures deleting a non-existent seller returns NotFound.
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteVerkoper_NotFound_ReturnsNotFound()
         {
             var result = await _controller.DeleteVerkoper(999);
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));

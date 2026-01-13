@@ -12,6 +12,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace backend.Test
 {
+    /// <summary>
+    /// Tests for <see cref="backend.Controllers.VeilingMeesterController"/> verifying create/update/delete behaviours.
+    /// </summary>
     [TestClass]
     public class VeilingMeesterControllerTests
     {
@@ -48,8 +51,11 @@ namespace backend.Test
             _context.Dispose();
         }
 
-        [TestMethod]
-        public async Task PostVeilingMeester_Creates_ReturnsCreatedAt()
+    /// <summary>
+    /// Verifies creating a VeilingMeester returns CreatedAtAction and persists the entity.
+    /// </summary>
+    [TestMethod]
+    public async Task PostVeilingMeester_Creates_ReturnsCreatedAt()
         {
             var dto = new VeilingMeesterDto { GebruikerId = 99 };
 
@@ -66,16 +72,22 @@ namespace backend.Test
             Assert.AreEqual(99, inDb.GebruikerId);
         }
 
-        [TestMethod]
-        public async Task PutVeilingMeester_NotFound_ReturnsNotFound()
+    /// <summary>
+    /// Ensures updating a non-existent VeilingMeester yields NotFound.
+    /// </summary>
+    [TestMethod]
+    public async Task PutVeilingMeester_NotFound_ReturnsNotFound()
         {
             var dto = new VeilingMeesterDto { GebruikerId = 7 };
             var result = await _controller.PutVeilingMeester(999, dto);
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
-        [TestMethod]
-        public async Task PutVeilingMeester_Updates_ReturnsNoContent()
+    /// <summary>
+    /// Ensures updating an existing VeilingMeester persists changes and returns NoContent.
+    /// </summary>
+    [TestMethod]
+    public async Task PutVeilingMeester_Updates_ReturnsNoContent()
         {
             var dto = new VeilingMeesterDto { GebruikerId = 42 };
             var result = await _controller.PutVeilingMeester(1, dto);
@@ -85,8 +97,11 @@ namespace backend.Test
             Assert.AreEqual(42, updated.GebruikerId);
         }
 
-        [TestMethod]
-        public async Task DeleteVeilingMeester_Existing_ReturnsNoContent()
+    /// <summary>
+    /// Ensures deleting an existing VeilingMeester returns NoContent and removes it.
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteVeilingMeester_Existing_ReturnsNoContent()
         {
             var result = await _controller.DeleteVeilingMeester(1);
             Assert.IsInstanceOfType(result, typeof(NoContentResult));
@@ -94,8 +109,11 @@ namespace backend.Test
             Assert.IsNull(deleted);
         }
 
-        [TestMethod]
-        public async Task DeleteVeilingMeester_NotFound_ReturnsNotFound()
+    /// <summary>
+    /// Ensures deleting a non-existent VeilingMeester returns NotFound.
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteVeilingMeester_NotFound_ReturnsNotFound()
         {
             var result = await _controller.DeleteVeilingMeester(999);
             Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));

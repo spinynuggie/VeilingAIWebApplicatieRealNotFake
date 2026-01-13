@@ -10,11 +10,19 @@ using System.Threading.Tasks;
 
 namespace backend.Test
 {
+    /// <summary>
+    /// Tests for <see cref="backend.Controllers.PrijsHistorieController"/>.
+    /// Only exercises safe early-return paths to avoid external DB/network dependencies.
+    /// </summary>
     [TestClass]
     public class PrijsHistorieControllerTests
     {
-        [TestMethod]
-        public async Task GetHistory_ProductNaamNull_ReturnsBadRequest()
+    /// <summary>
+    /// Verifies GetHistory returns BadRequest when the product name parameter is empty.
+    /// This avoids instantiating the full PrijsHistorieService with a real DB connection.
+    /// </summary>
+    [TestMethod]
+    public async Task GetHistory_ProductNaamNull_ReturnsBadRequest()
         {
             // create a minimal IConfiguration so PrijsHistorieService can be constructed
             var inMemorySettings = new Dictionary<string, string?> {

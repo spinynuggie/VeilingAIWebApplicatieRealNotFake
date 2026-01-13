@@ -17,6 +17,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace backend.Test
 {
+    /// <summary>
+    /// Unit tests for <see cref="backend.Controllers.GebruikerController"/> covering registration, login, token refresh and user operations.
+    /// </summary>
     [TestClass]
     public class GebruikerControllerTests
     {
@@ -85,8 +88,11 @@ namespace backend.Test
             _controller.ControllerContext.HttpContext = http;
         }
 
-        [TestMethod]
-        public async Task PostGebruiker_Creates_ReturnsCreatedAt()
+    /// <summary>
+    /// Verifies creating a new gebruiker returns CreatedAtAction and persists the user.
+    /// </summary>
+    [TestMethod]
+    public async Task PostGebruiker_Creates_ReturnsCreatedAt()
         {
             var dto = new GebruikerCreateDto { Emailadres = "new@example.com", Wachtwoord = "pw" };
             var result = await _controller.PostGebruiker(dto);
@@ -98,8 +104,11 @@ namespace backend.Test
             Assert.IsNotNull(inDb);
         }
 
-        [TestMethod]
-        public async Task Register_CreatesAndReturnsAuth()
+    /// <summary>
+    /// Verifies Register creates a user and returns an AuthResponseDto wrapped in CreatedAtAction.
+    /// </summary>
+    [TestMethod]
+    public async Task Register_CreatesAndReturnsAuth()
         {
             var req = new RegisterRequestDto { Emailadres = "reg@example.com", Wachtwoord = "pw" };
             var result = await _controller.Register(req);
@@ -110,8 +119,11 @@ namespace backend.Test
             Assert.IsInstanceOfType(created.Value, typeof(Dtos.AuthResponseDto));
         }
 
-        [TestMethod]
-        public async Task Login_Success_ReturnsOk()
+    /// <summary>
+    /// Verifies Login returns Ok and an authentication value on success.
+    /// </summary>
+    [TestMethod]
+    public async Task Login_Success_ReturnsOk()
         {
             var dto = new LoginRequestDto { Emailadres = "existing@example.com", Wachtwoord = "password123" };
             var result = await _controller.Login(dto);
@@ -121,8 +133,11 @@ namespace backend.Test
             Assert.IsNotNull(ok?.Value);
         }
 
-        [TestMethod]
-        public async Task Login_WrongPassword_ReturnsUnauthorized()
+    /// <summary>
+    /// Verifies Login returns Unauthorized when the password is incorrect.
+    /// </summary>
+    [TestMethod]
+    public async Task Login_WrongPassword_ReturnsUnauthorized()
         {
             var dto = new LoginRequestDto { Emailadres = "existing@example.com", Wachtwoord = "wrong" };
             var result = await _controller.Login(dto);
@@ -130,16 +145,22 @@ namespace backend.Test
             Assert.IsInstanceOfType(result.Result, typeof(UnauthorizedObjectResult));
         }
 
-        [TestMethod]
-        public async Task GetCurrentUser_Unauthorized_WhenNoClaim()
+    /// <summary>
+    /// Verifies GetCurrentUser returns Unauthorized when the request has no user claim.
+    /// </summary>
+    [TestMethod]
+    public async Task GetCurrentUser_Unauthorized_WhenNoClaim()
         {
             SetUser(null);
             var result = await _controller.GetCurrentUser();
             Assert.IsInstanceOfType(result.Result, typeof(UnauthorizedResult));
         }
 
-        [TestMethod]
-        public async Task GetCurrentUser_Success_ReturnsDto()
+    /// <summary>
+    /// Verifies GetCurrentUser returns the expected user DTO when authenticated.
+    /// </summary>
+    [TestMethod]
+    public async Task GetCurrentUser_Success_ReturnsDto()
         {
             SetUser(1);
             var result = await _controller.GetCurrentUser();
@@ -147,8 +168,11 @@ namespace backend.Test
             Assert.AreEqual("existing@example.com", result.Value.Emailadres);
         }
 
-        [TestMethod]
-        public async Task UpdateRole_Unauthorized_WhenNoClaim()
+    /// <summary>
+    /// Verifies UpdateRole returns Unauthorized when there is no authenticated user claim.
+    /// </summary>
+    [TestMethod]
+    public async Task UpdateRole_Unauthorized_WhenNoClaim()
         {
             SetUser(null);
             var dto = new RoleUpdateDto { Role = "VERKOPER" };
@@ -156,8 +180,11 @@ namespace backend.Test
             Assert.IsInstanceOfType(result.Result, typeof(UnauthorizedResult));
         }
 
-        [TestMethod]
-        public async Task UpdateRole_Forbid_WhenDifferentUser()
+    /// <summary>
+    /// Verifies UpdateRole returns Forbid when a different user tries to update someone else's role.
+    /// </summary>
+    [TestMethod]
+    public async Task UpdateRole_Forbid_WhenDifferentUser()
         {
             SetUser(2);
             var dto = new RoleUpdateDto { Role = "VERKOPER" };
@@ -165,8 +192,11 @@ namespace backend.Test
             Assert.IsInstanceOfType(result.Result, typeof(ForbidResult));
         }
 
-        [TestMethod]
-        public async Task UpdateRole_BadRequest_WhenInvalidRole()
+    /// <summary>
+    /// Verifies UpdateRole returns BadRequest when an invalid role is provided.
+    /// </summary>
+    [TestMethod]
+    public async Task UpdateRole_BadRequest_WhenInvalidRole()
         {
             SetUser(1);
             var dto = new RoleUpdateDto { Role = "INVALID" };
@@ -174,8 +204,11 @@ namespace backend.Test
             Assert.IsInstanceOfType(result.Result, typeof(BadRequestObjectResult));
         }
 
-        [TestMethod]
-        public async Task UpdateRole_Success_UpdatesRole()
+    /// <summary>
+    /// Verifies UpdateRole successfully updates the user's role when valid.
+    /// </summary>
+    [TestMethod]
+    public async Task UpdateRole_Success_UpdatesRole()
         {
             SetUser(1);
             var dto = new RoleUpdateDto { Role = "VEILINGMEESTER" };
@@ -185,16 +218,22 @@ namespace backend.Test
             Assert.AreEqual("VEILINGMEESTER", result.Value.Role);
         }
 
-        [TestMethod]
-        public async Task DeleteGebruiker_Forbid_WhenDifferentUser()
+    /// <summary>
+    /// Verifies DeleteGebruiker returns Forbid when a different user attempts deletion.
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteGebruiker_Forbid_WhenDifferentUser()
         {
             SetUser(2);
             var result = await _controller.DeleteGebruiker(1);
             Assert.IsInstanceOfType(result, typeof(ForbidResult));
         }
 
-        [TestMethod]
-        public async Task DeleteGebruiker_Success_RemovesEntity()
+    /// <summary>
+    /// Verifies DeleteGebruiker removes the user when requested by the user themself.
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteGebruiker_Success_RemovesEntity()
         {
             SetUser(1);
             var result = await _controller.DeleteGebruiker(1);
@@ -203,15 +242,21 @@ namespace backend.Test
             Assert.IsNull(inDb);
         }
 
-        [TestMethod]
-        public async Task Refresh_Unauthorized_WhenNoCookie()
+    /// <summary>
+    /// Verifies Refresh returns Unauthorized when no refresh token cookie is present.
+    /// </summary>
+    [TestMethod]
+    public async Task Refresh_Unauthorized_WhenNoCookie()
         {
             var result = await _controller.Refresh();
             Assert.IsInstanceOfType(result.Result, typeof(UnauthorizedResult));
         }
 
-        [TestMethod]
-        public async Task Refresh_Success_ReturnsOk()
+    /// <summary>
+    /// Verifies Refresh returns Ok and a new token when a valid refresh token cookie exists.
+    /// </summary>
+    [TestMethod]
+    public async Task Refresh_Success_ReturnsOk()
         {
             // create refresh token entity for existing user
             var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());

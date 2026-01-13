@@ -12,6 +12,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace backend.Test
 {
+    /// <summary>
+    /// Tests for <see cref="backend.Controllers.VeilingController"/> covering CRUD operations for auctions.
+    /// </summary>
     [TestClass]
     public class VeilingControllerTests
     {
@@ -68,8 +71,11 @@ namespace backend.Test
             _context.Dispose();
         }
 
-        [TestMethod]
-        public async Task GetVeiling_ReturnsAll()
+    /// <summary>
+    /// Ensures GetVeiling returns all auctions in the database.
+    /// </summary>
+    [TestMethod]
+    public async Task GetVeiling_ReturnsAll()
         {
             var result = await _controller.GetVeiling();
 
@@ -80,8 +86,11 @@ namespace backend.Test
             Assert.IsTrue(list.Any(v => v.Naam == "Art"));
         }
 
-        [TestMethod]
-        public async Task GetVeiling_ById_Found()
+    /// <summary>
+    /// Ensures GetVeiling(id) returns the matching auction when found.
+    /// </summary>
+    [TestMethod]
+    public async Task GetVeiling_ById_Found()
         {
             var result = await _controller.GetVeiling(1);
 
@@ -90,16 +99,22 @@ namespace backend.Test
             Assert.AreEqual("Electronics", result.Value.Naam);
         }
 
-        [TestMethod]
-        public async Task GetVeiling_ById_NotFound()
+    /// <summary>
+    /// Ensures GetVeiling(id) returns NotFound for unknown ids.
+    /// </summary>
+    [TestMethod]
+    public async Task GetVeiling_ById_NotFound()
         {
             var result = await _controller.GetVeiling(999);
 
             Assert.IsInstanceOfType(result.Result, typeof(NotFoundResult));
         }
 
-        [TestMethod]
-        public async Task PostVeiling_Creates_ReturnsCreatedAt()
+    /// <summary>
+    /// Ensures creating a new auction returns CreatedAtAction and persists the entity.
+    /// </summary>
+    [TestMethod]
+    public async Task PostVeiling_Creates_ReturnsCreatedAt()
         {
             var dto = new VeilingDto
             {
@@ -126,8 +141,11 @@ namespace backend.Test
             Assert.AreEqual("Books", inDb.Naam);
         }
 
-        [TestMethod]
-        public async Task PutVeiling_NotFound_ReturnsNotFound()
+    /// <summary>
+    /// Ensures updating a non-existent auction returns NotFound.
+    /// </summary>
+    [TestMethod]
+    public async Task PutVeiling_NotFound_ReturnsNotFound()
         {
             var dto = new VeilingDto
             {
@@ -144,8 +162,11 @@ namespace backend.Test
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));
         }
 
-        [TestMethod]
-        public async Task PutVeiling_Updates_ReturnsNoContent()
+    /// <summary>
+    /// Ensures updating an existing auction persists changes and returns NoContent.
+    /// </summary>
+    [TestMethod]
+    public async Task PutVeiling_Updates_ReturnsNoContent()
         {
             var dto = new VeilingDto
             {
@@ -171,8 +192,11 @@ namespace backend.Test
             Assert.AreEqual(5, updated.VeilingMeesterId);
         }
 
-        [TestMethod]
-        public async Task DeleteVeiling_Existing_ReturnsNoContent()
+    /// <summary>
+    /// Ensures deleting an existing auction returns NoContent and removes it.
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteVeiling_Existing_ReturnsNoContent()
         {
             var result = await _controller.DeleteVeiling(1);
             Assert.IsInstanceOfType(result, typeof(NoContentResult));
@@ -181,8 +205,11 @@ namespace backend.Test
             Assert.IsNull(deleted);
         }
 
-        [TestMethod]
-        public async Task DeleteVeiling_NotFound_ReturnsNotFound()
+    /// <summary>
+    /// Ensures deleting a non-existent auction returns NotFound.
+    /// </summary>
+    [TestMethod]
+    public async Task DeleteVeiling_NotFound_ReturnsNotFound()
         {
             var result = await _controller.DeleteVeiling(999);
             Assert.IsInstanceOfType(result, typeof(NotFoundResult));

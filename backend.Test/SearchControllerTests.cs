@@ -12,6 +12,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace backend.Test
 {
+    /// <summary>
+    /// Tests for <see cref="backend.Controllers.SearchController"/> ensuring search queries return expected results.
+    /// </summary>
     [TestClass]
     public class SearchControllerTests
     {
@@ -104,8 +107,11 @@ namespace backend.Test
             _context.Dispose();
         }
 
-        [TestMethod]
-        public async Task Search_EmptyQuery_ReturnsEmptyList()
+    /// <summary>
+    /// Ensures an empty search query returns an empty list of results.
+    /// </summary>
+    [TestMethod]
+    public async Task Search_EmptyQuery_ReturnsEmptyList()
         {
             // Act
             var result = await _controller.Search(new SearchQueryDto { Query = "" });
@@ -117,8 +123,11 @@ namespace backend.Test
             Assert.AreEqual(0, results.Count);
         }
 
-        [TestMethod]
-        public async Task Search_ProductMatch_ReturnsMatchingProducts()
+    /// <summary>
+    /// Ensures a product search returns matching product results.
+    /// </summary>
+    [TestMethod]
+    public async Task Search_ProductMatch_ReturnsMatchingProducts()
         {
             // Act
             var result = await _controller.Search(new SearchQueryDto { Query = "Test Product" });
@@ -134,8 +143,11 @@ namespace backend.Test
             Assert.AreEqual("test1.jpg", results[0].Image);
         }
 
-        [TestMethod]
-        public async Task Search_AuctionMatch_ReturnsMatchingAuctions()
+    /// <summary>
+    /// Ensures an auction search returns matching auction results.
+    /// </summary>
+    [TestMethod]
+    public async Task Search_AuctionMatch_ReturnsMatchingAuctions()
         {
             // Act
             var result = await _controller.Search(new SearchQueryDto { Query = "Special Auction" });
@@ -151,8 +163,11 @@ namespace backend.Test
             Assert.AreEqual("auction2.jpg", results[0].Image);
         }
 
-        [TestMethod]
-        public async Task Search_MultipleMatches_ReturnsAllMatches()
+    /// <summary>
+    /// Ensures a query matching multiple entities returns all relevant results.
+    /// </summary>
+    [TestMethod]
+    public async Task Search_MultipleMatches_ReturnsAllMatches()
         {
             // Act
             var result = await _controller.Search(new SearchQueryDto { Query = "Test" });
@@ -167,8 +182,11 @@ namespace backend.Test
             Assert.IsTrue(results.Any(r => r.Naam == "Test Auction 1" && r.Type == "Veiling"));
         }
 
-        [TestMethod]
-        public async Task Search_NoMatches_ReturnsEmptyList()
+    /// <summary>
+    /// Ensures a query with no matches returns an empty list.
+    /// </summary>
+    [TestMethod]
+    public async Task Search_NoMatches_ReturnsEmptyList()
         {
             // Act
             var result = await _controller.Search(new SearchQueryDto { Query = "Nonexistent" });
