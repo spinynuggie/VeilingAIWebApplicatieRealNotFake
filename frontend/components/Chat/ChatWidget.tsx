@@ -21,6 +21,8 @@ import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
+import { authFetch } from '@/services/authService';
+
 interface Message {
     role: 'user' | 'assistant';
     content: string;
@@ -50,7 +52,8 @@ const ChatWidget: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/Chat`, {
+            const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
+            const response = await authFetch(`${apiBase}/api/Chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: userSnapshot })
