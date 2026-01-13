@@ -105,35 +105,26 @@ namespace backend.Controllers
         /// <response code="400">ID mismatch tussen URL en body.</response>
         /// <response code="404">Aankoop niet gevonden.</response>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAankoop(int id, Aankoop aankoop) 
+        public async Task<IActionResult> PutAankoop(int id, AankoopUpdateDto updateDto)
         {
-            // OPMERKING: Dit zou ideaal ook een DTO moeten gebruiken
-            // (bijv. AankoopAdminUpdateDto) en alleen voor Admins toegankelijk moeten zijn.
-            // Voor nu houden we de oude signature, maar het risico blijft!
-
-            if (id != aankoop.AankoopId)
+            var gebruikerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (gebruikerIdClaim == null || !int.TryParse(gebruikerIdClaim, out int huidigeGebruikerId))
             {
-                return BadRequest();
-            }
-            // ... (rest van de PUT logica) ...
-            _context.Entry(aankoop).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AankoopExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return Unauthorized();
             }
 
+            var aankoop = await _context.Aankoop
+                .FirstOrDefaultAsync(a => a.AankoopId == id && a.GebruikerId == huidigeGebruikerId);
+
+            if (aankoop == null)
+            {
+                return NotFound("Aankoop niet gevonden of niet van u.");
+            }
+
+            // Alleen toegestane velden bijwerken
+            aankoop.AanKoopHoeveelheid = updateDto.AanKoopHoeveelheid;
+
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
@@ -173,32 +164,34 @@ namespace backend.Controllers
             return CreatedAtAction("GetAankoop", new { id = aankoop.AankoopId }, MapToResponseDto(aankoop));
         }
 
+
         /// <summary>
-        /// Verwijdert een specifieke aankoop uit de database.
+        /// Verwijdert een specifieke aankoop, mits deze toebehoort aan de huidige gebruiker.
         /// </summary>
         /// <param name="id">Het ID van de te verwijderen aankoop.</param>
-        /// <returns>Geen inhoud bij succes.</returns>
         /// <response code="204">Succesvol verwijderd.</response>
-        /// <response code="404">Aankoop niet gevonden.</response>
+        /// <response code="401">Niet geautoriseerd (niet ingelogd).</response>
+        /// <response code="404">Aankoop niet gevonden of niet eigendom van de gebruiker.</response>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAankoop(int id)
         {
-            var aankoop = await _context.Aankoop.FindAsync(id);
-            // Je zou hier ook moeten controleren of de aankoop bij de huidige gebruiker hoort
+            var gebruikerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (gebruikerIdClaim == null || !int.TryParse(gebruikerIdClaim, out int huidigeGebruikerId))
+            {
+                return Unauthorized("Gebruiker ID niet gevonden in token.");
+            }
+            var aankoop = await _context.Aankoop
+                .FirstOrDefaultAsync(a => a.AankoopId == id && a.GebruikerId == huidigeGebruikerId);
+            
             if (aankoop == null)
             {
-                return NotFound();
+                return NotFound("Aankoop niet gevonden of u bent niet de eigenaar.");
             }
 
             _context.Aankoop.Remove(aankoop);
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool AankoopExists(int id)
-        {
-            return _context.Aankoop.Any(e => e.AankoopId == id);
         }
     }
 }
