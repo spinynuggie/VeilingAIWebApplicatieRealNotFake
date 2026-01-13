@@ -11,15 +11,20 @@ namespace backend.Dtos
         public string Fotos { get; set; } = string.Empty;
 
         /// <summary>De commerciële naam van het product.</summary>
+        [Required(ErrorMessage = "Productnaam is verplicht.")]
+        [StringLength(100, ErrorMessage = "Productnaam mag maximaal 100 tekens bevatten.")]
         public string ProductNaam { get; set; } = string.Empty;
 
         /// <summary>Uitgebreide omschrijving van het product (kenmerken, versheid, etc.).</summary>
+        [StringLength(1000, ErrorMessage = "Beschrijving mag maximaal 1000 tekens bevatten.")]
         public string ProductBeschrijving { get; set; } = string.Empty;
 
         /// <summary>Het totaal aantal eenheden (stuks/vaten) dat wordt aangeboden.</summary>
+        [Range(1, int.MaxValue, ErrorMessage = "Hoeveelheid moet minimaal 1 zijn.")]
         public int Hoeveelheid { get; set; }
 
         /// <summary>De minimale prijs waarvoor het product verkocht mag worden.</summary>
+        [Range(0.01, double.MaxValue, ErrorMessage = "Eindprijs moet groter zijn dan 0.")]
         public decimal Eindprijs { get; set; }
 
         /// <summary>De unieke identifier van de aanbiedende verkoper.</summary>

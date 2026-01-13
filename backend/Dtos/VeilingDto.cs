@@ -10,10 +10,13 @@ namespace backend.Dtos
     {
         /// <summary>De publieke naam van de veiling.</summary>
         [JsonPropertyName("naam")]
+        [Required(ErrorMessage = "Veilingnaam is verplicht.")]
+        [StringLength(100, ErrorMessage = "Naam mag maximaal 100 tekens bevatten.")]
         public string Naam { get; set; } = string.Empty;
         
         /// <summary>Beschrijving van de producten of het type veiling.</summary>
         [JsonPropertyName("beschrijving")]
+        [StringLength(2000, ErrorMessage = "Beschrijving mag maximaal 2000 tekens bevatten.")]
         public string Beschrijving { get; set; } = string.Empty;
         
         /// <summary>URL van de omslagafbeelding voor de veiling.</summary>
@@ -22,18 +25,22 @@ namespace backend.Dtos
         
         /// <summary>De ID van de fysieke locatie waar de veiling plaatsvindt.</summary>
         [JsonPropertyName("locatieId")]
+        [Required]
         public int LocatieId { get; set; }
         
         /// <summary>Het exacte moment waarop de veilingklok begint.</summary>
         [JsonPropertyName("starttijd")]
+        [Required]
         public DateTimeOffset Starttijd { get; set; }
         
         /// <summary>Het verwachte of uiterlijke eindmoment van de veiling.</summary>
         [JsonPropertyName("eindtijd")]
+        [Required]
         public DateTimeOffset Eindtijd { get; set; }
         
         /// <summary>Het ID van de gebruiker die de rol van veilingmeester vervult.</summary>
         [JsonPropertyName("veilingMeesterId")]
+        [Required]
         public int VeilingMeesterId { get; set; }
     }
 }
