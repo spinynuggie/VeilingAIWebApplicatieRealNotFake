@@ -72,6 +72,9 @@ export default function KlantProfile() {
   // States voor Dialog/Rollen
   const [sellerDialogOpen, setSellerDialogOpen] = useState(false);
   const [roleChanging, setRoleChanging] = useState(false);
+  
+  // State to show business form for non-verkoper
+  const [showBusinessForm, setShowBusinessForm] = useState(false);
 
   const roleLabel = user?.role ?? "Onbekend";
 
@@ -199,7 +202,15 @@ export default function KlantProfile() {
       const payload = verkoperPayloadFromBusiness(businessValues);
       const result = await verkoperService.upsertMyVerkoper(payload);
       setVerkoperId(result.verkoperId);
+      
+      // If this is a new verkoper (not yet VERKOPER role), upgrade the role now
+      if (user?.role !== "VERKOPER") {
+        await gebruikerService.updateRole("VERKOPER", user ?? undefined);
+        await refreshUser();
+      }
+      
       setBusinessFeedback("Bedrijfsgegevens opgeslagen.");
+      setShowBusinessForm(false); // Hide the form after successful save
     } catch (err: any) {
       setBusinessError(err?.message ?? "Opslaan bedrijfsgegevens mislukt.");
     } finally {
@@ -209,16 +220,26 @@ export default function KlantProfile() {
 
   // Handlers: Rollen beheren
   const confirmBecomeSeller = async () => {
-    setRoleChanging(true);
-    try {
-      await gebruikerService.updateRole("VERKOPER", user ?? undefined);
-      await refreshUser();
-      setSellerDialogOpen(false);
-    } catch (err: any) {
-      setBusinessError(err.message);
-    } finally {
-      setRoleChanging(false);
-    }
+    // Instead of immediately changing role, show the business form
+    setSellerDialogOpen(false);
+    setShowBusinessForm(true);
+    setFieldErrors({}); // Clear any previous errors
+    setBusinessError(null); // Clear any previous error messages
+  };
+
+  const handleCancelBusinessForm = () => {
+    setShowBusinessForm(false);
+    setFieldErrors({}); // Clear errors
+    setBusinessError(null); // Clear error messages
+    // Reset business values to empty
+    setBusinessValues({ 
+      bedrijfsnaam: "", 
+      kvkNummer: "", 
+      woonplaats: "", 
+      straat: "", 
+      postcode: "", 
+      huisnummer: "" 
+    });
   };
 
   const handleDisableSeller = async () => {
@@ -296,11 +317,44 @@ export default function KlantProfile() {
 
           {/* Sectie 2: Zakelijke Gegevens of Promo (Gebruikt jouw Box component) */}
           <Box sx={{ width: "100%" }}>
-            {!isVerkoper ? (
+            {!isVerkoper && !showBusinessForm ? (
               <BoxMui sx={{ textAlign: "center", py: 2 }}>
                 <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>Wilt u ook verkopen op de veiling?</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>Zet uw account gratis om naar een verkopersaccount om producten aan te bieden.</Typography>
                 <Button variant="contained" onClick={() => setSellerDialogOpen(true)}>Word nu Verkoper</Button>
+              </BoxMui>
+            ) : (!isVerkoper && showBusinessForm) ? (
+              // Show business form for non-verkoper users who clicked "Word nu Verkoper"
+              <BoxMui sx={{ width: "100%" }}>
+                <BoxMui sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>Bedrijfsgegevens - Vul in om verkoper te worden</Typography>
+                  <BoxMui sx={{ display: "flex", gap: 1 }}>
+                    <Button variant="outlined" onClick={handleCancelBusinessForm}>Annuleren</Button>
+                    <Button variant="contained" onClick={handleBusinessSave} disabled={businessSaving}>
+                      {businessSaving ? "Laden..." : "Opslaan en Verkoper worden"}
+                    </Button>
+                  </BoxMui>
+                </BoxMui>
+
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField label="Bedrijfsnaam" value={businessValues.bedrijfsnaam} onChange={(e) => setBusinessValues({ ...businessValues, bedrijfsnaam: e.target.value })} error={!!fieldErrors.bedrijfsnaam} helperText={fieldErrors.bedrijfsnaam} />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField label="KvK-nummer" value={businessValues.kvkNummer} onChange={(e) => setBusinessValues({ ...businessValues, kvkNummer: e.target.value })} error={!!fieldErrors.kvk} helperText={fieldErrors.kvk} />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <TextField label="Stad" value={businessValues.woonplaats} onChange={(e) => setBusinessValues({ ...businessValues, woonplaats: e.target.value })} error={!!fieldErrors.busWoonplaats} helperText={fieldErrors.busWoonplaats} />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <TextField label="Straat" value={businessValues.straat} onChange={(e) => setBusinessValues({ ...businessValues, straat: e.target.value })} error={!!fieldErrors.busStraat} helperText={fieldErrors.busStraat} />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <TextField label="Postcode" value={businessValues.postcode} onChange={(e) => setBusinessValues({ ...businessValues, postcode: e.target.value })} error={!!fieldErrors.busPostcode} helperText={fieldErrors.busPostcode} />
+                  </Grid>
+                </Grid>
+                {businessFeedback && <Alert severity="success" sx={{ mt: 2, borderRadius: "10px" }}>{businessFeedback}</Alert>}
+                {businessError && <Alert severity="error" sx={{ mt: 2, borderRadius: "10px" }}>{businessError}</Alert>}
               </BoxMui>
             ) : (
               <BoxMui sx={{ width: "100%" }}>
@@ -342,13 +396,16 @@ export default function KlantProfile() {
 
         {/* Dialog voor Rolbevestiging */}
         <Dialog open={sellerDialogOpen} onClose={() => setSellerDialogOpen(false)} PaperProps={{ sx: { borderRadius: "15px", p: 1 } }}>
-          <DialogTitle sx={{ fontWeight: 800 }}>Bevestig Verkopersrol</DialogTitle>
+          <DialogTitle sx={{ fontWeight: 800 }}>Word Verkoper</DialogTitle>
           <DialogContent>
-            <DialogContentText>Weet u zeker dat u uw rol wilt wijzigen naar verkoper? U kunt hierna direct producten aanmaken voor de veiling.</DialogContentText>
+            <DialogContentText>
+              Om verkoper te worden, moet u eerst uw bedrijfsgegevens invullen. 
+              Na het succesvol opslaan van uw bedrijfsgegevens wordt uw account automatisch geüpgraded naar een verkopersaccount.
+            </DialogContentText>
           </DialogContent>
           <DialogActions sx={{ p: 2 }}>
             <Button variant="text" onClick={() => setSellerDialogOpen(false)}>Annuleren</Button>
-            <Button variant="contained" onClick={confirmBecomeSeller} disabled={roleChanging}>Bevestigen</Button>
+            <Button variant="contained" onClick={confirmBecomeSeller}>Doorgaan</Button>
           </DialogActions>
         </Dialog>
 
