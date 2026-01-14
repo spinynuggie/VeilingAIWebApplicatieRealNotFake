@@ -16,28 +16,28 @@ export default function AppNavbar() {
   }, []);
 
   if (!isClient) {
-    return <div style={{ height: '64px', width: '100%' }} />; 
+    return <div style={{ height: '64px', width: '100%' }} />;
   }
 
   // LOGIC: Map Database Roles to UI Modes
   const determineMode = (): NavMode => {
     if (!user) return 'visitor';
-    
+
     if (user.role === "ADMIN") return 'auctioneer';
     if (user.role === "VERKOPER") return 'seller';
-    
+
     return 'customer'; // Default for normal logged-in users
   };
 
   const handleLogout = async () => {
     await logout();
-    router.push("/landing");
+    router.push("/");
   };
 
   return (
-    <NavBar 
-      mode={determineMode()} 
-      onLogout={handleLogout} 
+    <NavBar
+      mode={determineMode()}
+      onLogout={handleLogout}
     />
   );
 }

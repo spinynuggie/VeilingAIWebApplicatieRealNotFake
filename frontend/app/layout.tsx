@@ -2,6 +2,7 @@
 "use client";
 
 import { CssBaseline, ThemeProvider } from "@mui/material";
+import Footer from "@/components/Footer";
 import { AuthProvider } from "@/components/AuthProvider";
 import { appTheme } from "@/styles/theme";
 import "./globals.css";
@@ -23,7 +24,10 @@ export default function RootLayout({
           <CssBaseline />
           <AuthProvider>
             <Toaster position="top-right" />
-            {children}
+            <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+              {children}
+              <Footer />
+            </div>
           </AuthProvider>
         </ThemeProvider>
       </body>
