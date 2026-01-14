@@ -13,43 +13,29 @@ namespace backend.Controllers
     [Route("api/[controller]")]
     public class UploadController : ControllerBase
     {
-        /// <summary>
-        /// Uploadt een bestand naar de server en retourneert de publiek toegankelijke URL.
-        /// </summary>
-        /// <param name="file">Het bestand dat via een multipart/form-data request wordt verstuurd.</param>
-        /// <returns>Een JSON-object met de relatieve URL naar het opgeslagen bestand.</returns>
-        /// <response code="200">Bestand succesvol geüpload en opgeslagen.</response>
-        /// <response code="400">Bestand ontbreekt of is leeg.</response>
-        /// <response code="500">Fout bij het wegschrijven van het bestand naar de servermap.</response>
+        private readonly IFileService _fileService;
+
+        public UploadController(IFileService fileService)
+        {
+            _fileService = fileService;
+        }
+
         [HttpPost]
         public async Task<IActionResult> Upload(IFormFile file, [FromQuery] string folder = "misc")
         {
-            if (file == null || file.Length == 0)
-                return BadRequest("Geen bestand geupload.");
-
-            // Sanitize folder name to prevent traversal
-            var safeFolder = new string(folder.Where(c => char.IsLetterOrDigit(c) || c == '-' || c == '_').ToArray());
-            if (string.IsNullOrEmpty(safeFolder)) safeFolder = "misc";
-
-            // Create uploads directory if it doesn't exist
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", safeFolder);
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-
-            // Generate unique filename to prevent overwrites
-            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                await file.CopyToAsync(stream);
+                var url = await _fileService.SaveFileAsync(file, folder);
+                return Ok(new { url });
             }
-
-            // Return the relative URL
-            // Return the absolute URL
-            var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var url = $"{baseUrl}/uploads/{safeFolder}/{uniqueFileName}";
-            return Ok(new { url });
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Fout bij het wegschrijven van het bestand naar de server.");
+            }
         }
     }
 }

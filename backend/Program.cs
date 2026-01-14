@@ -78,6 +78,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddSingleton<AuctionRealtimeService>();
 builder.Services.AddScoped<PrijsHistorieService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IFileService, LocalFileService>();
 builder.Services.AddSignalR();
 builder.Services.AddResponseCompression(options =>
 {

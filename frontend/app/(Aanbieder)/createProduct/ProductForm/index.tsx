@@ -160,13 +160,18 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
     if (!e.target.files || e.target.files.length === 0) return;
 
     const file = e.target.files[0];
-    const formData = new FormData();
-    formData.append("file", file);
+
+    // Show immediate preview locally
+    const localPreviewUrl = URL.createObjectURL(file);
+    setFormData(prev => ({ ...prev, image: localPreviewUrl }));
+
+    const uploadData = new FormData();
+    uploadData.append("file", file);
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_LINK}/api/Upload?folder=products`, {
         method: "POST",
-        body: formData,
+        body: uploadData,
       });
 
       if (!res.ok) {
@@ -174,17 +179,17 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
       }
 
       const data = await res.json();
-      // data.url contains the relative path like "/uploads/..."
-      // We prepend the backend link if we want full URL, or just keep relative if frontend handles it. 
-      // Based on existing code using strings, full URL is safer for <img> src usually, 
-      // but let's check how existing images are handled. The preview uses <img src={formData.image}>.
-      // If backend serves static files, full URL is needed.
-      const fullUrl = `${process.env.NEXT_PUBLIC_BACKEND_LINK}${data.url}`;
-      setFormData(prev => ({ ...prev, image: fullUrl }));
+
+      // If backend returns absolute URL, use it directly. Otherwise, prepend backend link.
+      const finalUrl = data.url.startsWith("http")
+        ? data.url
+        : `${process.env.NEXT_PUBLIC_BACKEND_LINK}${data.url}`;
+
+      setFormData(prev => ({ ...prev, image: finalUrl }));
 
     } catch (err) {
       console.error("Upload error", err);
-      setError("Kon afbeelding niet uploaden.");
+      setError("Kon afbeelding niet uploaden naar de server.");
     }
   };
 
@@ -218,14 +223,7 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
               required
             />
 
-            <TextField
-              label="Afbeelding URL"
-              fullWidth
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              placeholder="https://..."
-            />
+
 
             <Button
               variant="outlined"
