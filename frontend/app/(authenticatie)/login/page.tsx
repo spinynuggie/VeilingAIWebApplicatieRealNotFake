@@ -68,8 +68,8 @@ function LoginForm() {
         if (!password) {
             setPasswordError('Wachtwoord is vereist.');
             isValid = false;
-        } else if (password.length < 6) {
-            setPasswordError('Wachtwoord moet minimaal 6 tekens bevatten.');
+        } else if (password.length < 12) {
+            setPasswordError('Wachtwoord moet minimaal 12 tekens bevatten.');
             isValid = false;
         }
 
@@ -191,7 +191,7 @@ function LoginForm() {
             <Button type="submit" variant="contained" size="large" fullWidth disabled={loading}>
                 {loading ? 'Bezig...' : 'Inloggen'}
             </Button>
-        
+
         </AuthSplitLayout>
     );
 }

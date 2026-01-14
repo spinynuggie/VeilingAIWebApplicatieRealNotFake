@@ -64,8 +64,8 @@ export default function RegisterPage() {
         if (!form.wachtwoord) {
             setPasswordError('Wachtwoord is vereist.');
             isValid = false;
-        } else if (form.wachtwoord.length < 6) {
-            setPasswordError('Wachtwoord moet minimaal 6 tekens bevatten.');
+        } else if (form.wachtwoord.length < 12) {
+            setPasswordError('Wachtwoord moet minimaal 12 tekens bevatten.');
             isValid = false;
         }
 

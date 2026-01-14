@@ -81,6 +81,30 @@ export async function getCurrentUser(): Promise<User | null> {
   return res.json();
 }
 
+
+export async function handleResponse(res: Response, defaultMessage: string): Promise<void> {
+  if (!res.ok) {
+    const text = await res.text();
+    try {
+      const data = JSON.parse(text);
+      if (data.errors) {
+        const messages = Object.values(data.errors).flat();
+        if (messages.length > 0) {
+          throw new Error(String(messages[0]));
+        }
+      }
+      if (data.title || data.detail) {
+        throw new Error(data.detail || data.title);
+      }
+    } catch (e: any) {
+      if (e.message && e.message !== "Unexpected token" && !e.message.startsWith("Unexpected token") && !e.message.includes("JSON")) {
+        throw e;
+      }
+    }
+    throw new Error(text || defaultMessage);
+  }
+}
+
 export async function register(emailadres: string, wachtwoord: string, naam?: string): Promise<void> {
   const res = await authFetch(`${apiBase}/api/Gebruiker/register`, {
     method: "POST",
@@ -90,10 +114,7 @@ export async function register(emailadres: string, wachtwoord: string, naam?: st
     body: JSON.stringify({ emailadres, wachtwoord, naam }),
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || "Registreren mislukt.");
-  }
+  await handleResponse(res, "Registreren mislukt.");
 }
 
 export async function login(emailadres: string, wachtwoord: string): Promise<void> {
@@ -105,10 +126,7 @@ export async function login(emailadres: string, wachtwoord: string): Promise<voi
     body: JSON.stringify({ emailadres, wachtwoord }),
   });
 
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || "Inloggen mislukt.");
-  }
+  await handleResponse(res, "Inloggen mislukt.");
 }
 
 export async function logout(): Promise<void> {
@@ -118,8 +136,8 @@ export async function logout(): Promise<void> {
 
   currentXsrfToken = null; // Clear token on logout
 
+  // Logout failure is usually ignored or handled gracefully, but we can verify
   if (!res.ok && res.status !== 401) {
-    const text = await res.text();
-    throw new Error(text || "Uitloggen mislukt.");
+    await handleResponse(res, "Uitloggen mislukt.");
   }
 }

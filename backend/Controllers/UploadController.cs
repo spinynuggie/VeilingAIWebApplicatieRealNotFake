@@ -46,7 +46,9 @@ namespace backend.Controllers
             }
 
             // Return the relative URL
-            var url = $"/uploads/{safeFolder}/{uniqueFileName}";
+            // Return the absolute URL
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var url = $"{baseUrl}/uploads/{safeFolder}/{uniqueFileName}";
             return Ok(new { url });
         }
     }

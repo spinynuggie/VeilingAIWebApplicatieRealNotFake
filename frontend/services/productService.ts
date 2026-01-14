@@ -1,5 +1,5 @@
 import { Product, CreateProductInput, UpdateProductAuctionInput } from '@/types/product';
-import { authFetch } from "./authService";
+import { authFetch, handleResponse } from "./authService";
 
 const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
 
@@ -8,9 +8,7 @@ export async function getProductById(id: number): Promise<Product> {
     cache: "no-store"
   });
 
-  if (!res.ok) {
-    throw new Error("Kon product details niet ophalen");
-  }
+  await handleResponse(res, "Kon product details niet ophalen");
 
   return res.json();
 }
@@ -20,9 +18,7 @@ export async function getProducts(): Promise<Product[]> {
     cache: "no-store"
   });
 
-  if (!res.ok) {
-    throw new Error("Kon producten niet ophalen");
-  }
+  await handleResponse(res, "Kon producten niet ophalen");
 
   return res.json();
 }
@@ -43,10 +39,7 @@ export async function createProduct(payload: CreateProductInput): Promise<any> {
     }),
   });
 
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(errorText || "Fout bij aanmaken product");
-  }
+  await handleResponse(res, "Fout bij aanmaken product");
 
   return res.json();
 }
@@ -63,11 +56,7 @@ export async function updateProductAuctionData(payload: UpdateProductAuctionInpu
     }),
   });
 
-  if (!res.ok) {
-    const errorData = await res.json();
-    console.error("Validatie fouten:", errorData.errors);
-    throw new Error("Bijwerken veilinggegevens mislukt");
-  }
+  await handleResponse(res, "Bijwerken veilinggegevens mislukt");
 }
 export async function getProductsByVerkoper(verkoperId: number): Promise<Product[]> {
   const res = await authFetch(`${apiBase}/api/ProductGegevens/verkoper/${verkoperId}`, {
