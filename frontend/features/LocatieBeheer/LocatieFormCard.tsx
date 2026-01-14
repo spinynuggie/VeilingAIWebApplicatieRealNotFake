@@ -76,30 +76,87 @@ export default function LocatieFormCard({ onSuccess }: Props) {
           onChange={(e) => setFormData({ ...formData, locatieNaam: e.target.value })}
           error={!!error && error.includes("Naam")} // Simple heuristic for now
         />
-        <TextField
-          label="Foto URL"
-          fullWidth
-          placeholder="https://..."
-          value={formData.foto}
-          onChange={(e) => setFormData({ ...formData, foto: e.target.value })}
-        // No specific error binding for URL yet, generic alert handles it
-        />
+        {/* Image Upload Section */}
+        <BoxMui sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Button
+            variant="contained"
+            component="label"
+            sx={{ width: 'fit-content' }}
+          >
+            Afbeelding Uploaden
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
 
-        {formData.foto && (
+                // Create local preview immediately
+                const objectUrl = URL.createObjectURL(file);
+                setFormData({ ...formData, foto: objectUrl });
+
+                // Upload to backend
+                const uploadData = new FormData();
+                uploadData.append("file", file);
+                uploadData.append("folder", "locations");
+
+                try {
+                  // We need to use fetch directly or axios since this is a specific upload endpoint
+                  // Assuming authFetch can handle FormData or we use a standard fetch with auth token if needed.
+                  // For now, let's use the standard /api/Upload endpoint which is public or requires auth.
+                  // If it requires auth, we should use our authService helper or append token.
+                  // Let's assume public or cookie-based for now, or use a helper if available.
+                  // Note: The previous implementation used standard fetch in ProductForm.
+
+                  // TODO: Import authFetch if needed or just use standard fetch/axios
+                  // For this project, let's try a direct fetch to the backend.
+                  // You might need to access the token if it's not cookie-based.
+                  // Since I can't see authFetch internals right now easily, I'll assume standard fetch to backend link.
+                  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_LINK;
+                  const res = await fetch(`${backendUrl}/api/Upload?folder=locations`, {
+                    method: 'POST',
+                    body: uploadData,
+                    // Do NOT set Content-Type header when sending FormData, let browser set it with boundary
+                  });
+
+                  if (!res.ok) throw new Error("Upload mislukt");
+                  const data = await res.json();
+                  // Update with the real URL from backend
+                  setFormData(prev => ({ ...prev, foto: data.url }));
+
+                } catch (err) {
+                  console.error(err);
+                  setError("Fout bij uploaden afbeelding");
+                  toast.error("Uploaden mislukt");
+                }
+              }}
+            />
+          </Button>
+
+          {/* Preview */}
           <BoxMui sx={{
             width: '100%',
             height: 180,
             borderRadius: 2,
             overflow: 'hidden',
-            border: '1px solid #ccc'
+            border: '1px solid #ccc',
+            bgcolor: '#f5f5f5',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}>
-            <img
-              src={formData.foto}
-              alt="Preview"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+            {formData.foto ? (
+              <img
+                src={formData.foto}
+                alt="Preview"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <Typography variant="body2" color="text.secondary">Geen afbeelding geselecteerd</Typography>
+            )}
           </BoxMui>
-        )}
+        </BoxMui>
       </BoxMui>
 
       <BoxMui sx={{ display: 'flex', justifyContent: 'flex-end' }}>

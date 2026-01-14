@@ -4,267 +4,44 @@ import Image from "next/image";
 import backgroundImage from "@/public/loginAssets/FloraHollandGebouw.svg";
 import {
   Typography,
-  Grid,
-  Alert,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Divider,
-  Box as BoxMui, // MUI Box hernoemd om conflict met jouw component te voorkomen
+  Box as BoxMui,
 } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-// Jouw custom components
-import { Box } from "@/components/Box";
-import { Button } from "@/components/Buttons/Button";
-import { TextField } from "@/components/TextField";
-import { Background } from "@/components/Background";
+// Components
 import { FloraLogo } from "@/components/FloraLogo";
 import AppNavBar from "@/features/(NavBar)/AppNavBar";
-
 import RequireAuth from "@/components/(oud)/RequireAuth";
 import { useAuth } from "@/components/AuthProvider";
-import * as gebruikerService from "@/services/gebruikerService";
-import * as verkoperService from "@/services/verkoperService";
+import { Background } from "@/components/Background"; // Important: ensure this is used if needed, or BoxMui background.
 
-type ProfileForm = {
-  naam: string;
-  emailadres: string;
-  woonplaats: string;
-  straat: string;
-  postcode: string;
-  huisnummer: string;
-};
-
-type BusinessForm = {
-  bedrijfsnaam: string;
-  kvkNummer: string;
-  woonplaats: string;
-  straat: string;
-  postcode: string;
-  huisnummer: string;
-};
+import PersonalDataForm from "./PersonalDataForm";
+import BusinessDataForm from "./BusinessDataForm";
 
 export default function KlantProfile() {
   const { user, refreshUser } = useAuth();
-
-  // States voor Profiel
-  const [formValues, setFormValues] = useState<ProfileForm>({ naam: "", emailadres: "", woonplaats: "", straat: "", postcode: "", huisnummer: "" });
-  const [isEditing, setIsEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  // States voor Verkoper/Bedrijf
   const [isVerkoper, setIsVerkoper] = useState(false);
-  const [businessValues, setBusinessValues] = useState<BusinessForm>({ bedrijfsnaam: "", kvkNummer: "", woonplaats: "", straat: "", postcode: "", huisnummer: "" });
-  const [verkoperId, setVerkoperId] = useState<number | null>(null);
-  const [businessSaving, setBusinessSaving] = useState(false);
-  const [businessFeedback, setBusinessFeedback] = useState<string | null>(null);
-  const [businessError, setBusinessError] = useState<string | null>(null);
 
-  // Validation States
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
-  // States voor Dialog/Rollen
-  const [sellerDialogOpen, setSellerDialogOpen] = useState(false);
-  const [roleChanging, setRoleChanging] = useState(false);
-  
-  // State to show business form for non-verkoper
-  const [showBusinessForm, setShowBusinessForm] = useState(false);
-
-  const roleLabel = user?.role ?? "Onbekend";
-
-  // Helpers voor dataconversie
-  const verkoperPayloadFromBusiness = (business: BusinessForm) => ({
-    kvkNummer: business.kvkNummer,
-    bedrijfsgegevens: JSON.stringify({ bedrijfsnaam: business.bedrijfsnaam }),
-    adresgegevens: JSON.stringify({
-      woonplaats: business.woonplaats,
-      straat: business.straat,
-      postcode: business.postcode,
-      huisnummer: business.huisnummer,
-    }),
-    financieleGegevens: "",
-  });
-
-  // Effect: Laad profielgegevens
   useEffect(() => {
     if (user) {
-      setFormValues({
-        naam: user.naam ?? "",
-        emailadres: user.emailadres ?? "",
-        woonplaats: user.woonplaats ?? "",
-        straat: user.straat ?? "",
-        postcode: user.postcode ?? "",
-        huisnummer: user.huisnummer ?? "",
-      });
       setIsVerkoper(user.role === "VERKOPER");
     }
   }, [user]);
 
-  // Effect: Laad verkopergegevens als gebruiker verkoper is
-  useEffect(() => {
-    const loadVerkoper = async () => {
-      if (!user || user.role !== "VERKOPER") {
-        setVerkoperId(null);
-        return;
-      }
-      try {
-        const verkoper = await verkoperService.getMyVerkoper();
-        if (verkoper) {
-          setVerkoperId(verkoper.verkoperId);
-          // Parsing logica uit je oude bestand
-          const parsedBus = JSON.parse(verkoper.bedrijfsgegevens ?? "{}");
-          const parsedAdr = JSON.parse(verkoper.adresgegevens ?? "{}");
-          setBusinessValues({
-            bedrijfsnaam: parsedBus.bedrijfsnaam ?? "",
-            kvkNummer: verkoper.kvkNummer ?? "",
-            woonplaats: parsedAdr.woonplaats ?? "",
-            straat: parsedAdr.straat ?? "",
-            postcode: parsedAdr.postcode ?? "",
-            huisnummer: parsedAdr.huisnummer ?? "",
-          });
-        }
-      } catch (err: any) {
-        setBusinessError("Kon verkopergegevens niet ophalen.");
-      }
-    };
-    loadVerkoper();
-  }, [user]);
-
-  // Handler: Profiel opslaan
-  const handleSave = async () => {
-    // Validation
-    const newErrors: Record<string, string> = {};
-    if (!formValues.naam.trim()) newErrors.naam = "Naam is verplicht";
-    if (!formValues.emailadres.trim()) newErrors.emailadres = "Email is verplicht";
-    if (formValues.naam.length > 100) newErrors.naam = "Naam te lang (>100)";
-
-    // Address checks (if partially filled, enforce all)
-    const hasAnyAddress = formValues.woonplaats || formValues.straat || formValues.postcode || formValues.huisnummer;
-    if (hasAnyAddress) {
-      if (!formValues.woonplaats) newErrors.woonplaats = "Plaats verplicht";
-      if (!formValues.straat) newErrors.straat = "Straat verplicht";
-      if (!formValues.postcode) newErrors.postcode = "Postcode verplicht";
-      if (!formValues.huisnummer) newErrors.huisnummer = "Huisnr verplicht";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setFieldErrors(newErrors);
-      setError("Corrigeer de gemarkeerde velden.");
-      return;
-    }
-
-    setSaving(true);
-    setFieldErrors({});
-    setFeedback(null);
-    setError(null);
-    try {
-      await gebruikerService.updateGebruikerFields(formValues, user);
-      await refreshUser();
-      setFeedback("Gegevens opgeslagen.");
-      setIsEditing(false);
-    } catch (err: any) {
-      setError(err?.message ?? "Opslaan mislukt.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Handler: Bedrijfsgegevens opslaan
-  const handleBusinessSave = async () => {
-    setBusinessSaving(true);
-    setBusinessFeedback(null);
-    setBusinessError(null);
-    const newErrors: Record<string, string> = {};
-
-    if (!businessValues.kvkNummer) newErrors.kvk = "KvK is verplicht";
-    if (!businessValues.bedrijfsnaam) newErrors.bedrijfsnaam = "Naam is verplicht";
-    if (businessValues.bedrijfsnaam.length > 100) newErrors.bedrijfsnaam = "Te lang";
-
-    // Address checks
-    if (!businessValues.woonplaats) newErrors.busWoonplaats = "Plaats verplicht";
-    if (!businessValues.straat) newErrors.busStraat = "Straat verplicht";
-    if (!businessValues.postcode) newErrors.busPostcode = "Postcode verplicht";
-
-    if (Object.keys(newErrors).length > 0) {
-      setFieldErrors(newErrors);
-      setBusinessError("Vul alle verplichte velden in.");
-      setBusinessSaving(false);
-      return;
-    }
-
-    try {
-      const payload = verkoperPayloadFromBusiness(businessValues);
-      const result = await verkoperService.upsertMyVerkoper(payload);
-      setVerkoperId(result.verkoperId);
-      
-      // If this is a new verkoper (not yet VERKOPER role), upgrade the role now
-      if (user?.role !== "VERKOPER") {
-        await gebruikerService.updateRole("VERKOPER", user ?? undefined);
-        await refreshUser();
-      }
-      
-      setBusinessFeedback("Bedrijfsgegevens opgeslagen.");
-      setShowBusinessForm(false); // Hide the form after successful save
-    } catch (err: any) {
-      setBusinessError(err?.message ?? "Opslaan bedrijfsgegevens mislukt.");
-    } finally {
-      setBusinessSaving(false);
-    }
-  };
-
-  // Handlers: Rollen beheren
-  const confirmBecomeSeller = async () => {
-    // Instead of immediately changing role, show the business form
-    setSellerDialogOpen(false);
-    setShowBusinessForm(true);
-    setFieldErrors({}); // Clear any previous errors
-    setBusinessError(null); // Clear any previous error messages
-  };
-
-  const handleCancelBusinessForm = () => {
-    setShowBusinessForm(false);
-    setFieldErrors({}); // Clear errors
-    setBusinessError(null); // Clear error messages
-    // Reset business values to empty
-    setBusinessValues({ 
-      bedrijfsnaam: "", 
-      kvkNummer: "", 
-      woonplaats: "", 
-      straat: "", 
-      postcode: "", 
-      huisnummer: "" 
-    });
-  };
-
-  const handleDisableSeller = async () => {
-    setRoleChanging(true);
-    try {
-      await gebruikerService.updateRole("KOPER", user ?? undefined);
-      await refreshUser();
-    } catch (err: any) {
-      setBusinessError(err.message);
-    } finally {
-      setRoleChanging(false);
-    }
-  };
+  const roleLabel = user?.role ?? "Onbekend";
 
   return (
     <RequireAuth>
       <Background>
         <AppNavBar />
+
         {/* Decoratieve achtergrondlaag */}
         <BoxMui sx={{ position: "fixed", inset: 0, zIndex: -1, opacity: 0.15 }}>
           <Image src={backgroundImage} alt="Background" fill style={{ objectFit: "cover" }} priority />
         </BoxMui>
 
         <BoxMui sx={{ maxWidth: 1200, mx: "auto", px: 3, py: 6 }}>
-
           {/* Header met Logo en Rol */}
           <BoxMui sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4, flexWrap: "wrap", gap: 2 }}>
             <BoxMui sx={{ display: "flex", alignItems: "center", gap: 3 }}>
@@ -274,141 +51,20 @@ export default function KlantProfile() {
                 <Typography variant="body2" color="text.secondary">Beheer hier uw persoonlijke en zakelijke instellingen</Typography>
               </BoxMui>
             </BoxMui>
-            <Chip label={`Huidige rol: ${roleLabel}`} color={isVerkoper ? "success" : "primary"} sx={{ fontWeight: 700, borderRadius: "8px" }} />
+            <Chip
+              label={`Huidige rol: ${roleLabel}`}
+              color={isVerkoper ? "success" : "primary"}
+              sx={{ fontWeight: 700, borderRadius: "8px" }}
+            />
           </BoxMui>
 
-          {/* Sectie 1: Persoonlijke Gegevens (Gebruikt jouw Box component) */}
-          <Box sx={{ width: "100%", mb: 5 }}>
-            <BoxMui sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, width: "100%" }}>
-              <Typography variant="h6" sx={{ fontWeight: 800 }}>Persoonlijke Informatie</Typography>
-              {!isEditing ? (
-                <Button variant="contained" onClick={() => setIsEditing(true)}>Gegevens Bewerken</Button>
-              ) : (
-                <BoxMui sx={{ display: "flex", gap: 1 }}>
-                  <Button variant="text" onClick={() => setIsEditing(false)}>Annuleren</Button>
-                  <Button variant="contained" onClick={handleSave} disabled={saving}>{saving ? "Laden..." : "Opslaan"}</Button>
-                </BoxMui>
-              )}
-            </BoxMui>
+          {/* Persoonlijke Gegevens */}
+          <PersonalDataForm user={user} refreshUser={refreshUser} />
 
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField label="Naam" value={formValues.naam} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, naam: e.target.value })} error={!!fieldErrors.naam} helperText={fieldErrors.naam} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField label="E-mail" value={formValues.emailadres} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, emailadres: e.target.value })} error={!!fieldErrors.emailadres} helperText={fieldErrors.emailadres} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField label="Woonplaats" value={formValues.woonplaats} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, woonplaats: e.target.value })} error={!!fieldErrors.woonplaats} helperText={fieldErrors.woonplaats} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField label="Straat" value={formValues.straat} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, straat: e.target.value })} error={!!fieldErrors.straat} helperText={fieldErrors.straat} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 2 }}>
-                <TextField label="Postcode" value={formValues.postcode} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, postcode: e.target.value })} error={!!fieldErrors.postcode} helperText={fieldErrors.postcode} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 2 }}>
-                <TextField label="Huisnr" value={formValues.huisnummer} disabled={!isEditing} onChange={(e) => setFormValues({ ...formValues, huisnummer: e.target.value })} error={!!fieldErrors.huisnummer} helperText={fieldErrors.huisnummer} />
-              </Grid>
-            </Grid>
-            {feedback && <Alert severity="success" sx={{ mt: 2, borderRadius: "10px" }}>{feedback}</Alert>}
-            {error && <Alert severity="error" sx={{ mt: 2, borderRadius: "10px" }}>{error}</Alert>}
-          </Box>
+          {/* Zakelijke Gegevens - Always visible but disabled/enabled by flow inside component */}
+          <BusinessDataForm user={user} refreshUser={refreshUser} isVerkoper={isVerkoper} />
 
-          {/* Sectie 2: Zakelijke Gegevens of Promo (Gebruikt jouw Box component) */}
-          <Box sx={{ width: "100%" }}>
-            {!isVerkoper && !showBusinessForm ? (
-              <BoxMui sx={{ textAlign: "center", py: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>Wilt u ook verkopen op de veiling?</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>Zet uw account gratis om naar een verkopersaccount om producten aan te bieden.</Typography>
-                <Button variant="contained" onClick={() => setSellerDialogOpen(true)}>Word nu Verkoper</Button>
-              </BoxMui>
-            ) : (!isVerkoper && showBusinessForm) ? (
-              // Show business form for non-verkoper users who clicked "Word nu Verkoper"
-              <BoxMui sx={{ width: "100%" }}>
-                <BoxMui sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800 }}>Bedrijfsgegevens - Vul in om verkoper te worden</Typography>
-                  <BoxMui sx={{ display: "flex", gap: 1 }}>
-                    <Button variant="outlined" onClick={handleCancelBusinessForm}>Annuleren</Button>
-                    <Button variant="contained" onClick={handleBusinessSave} disabled={businessSaving}>
-                      {businessSaving ? "Laden..." : "Opslaan en Verkoper worden"}
-                    </Button>
-                  </BoxMui>
-                </BoxMui>
-
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField label="Bedrijfsnaam" value={businessValues.bedrijfsnaam} onChange={(e) => setBusinessValues({ ...businessValues, bedrijfsnaam: e.target.value })} error={!!fieldErrors.bedrijfsnaam} helperText={fieldErrors.bedrijfsnaam} />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField label="KvK-nummer" value={businessValues.kvkNummer} onChange={(e) => setBusinessValues({ ...businessValues, kvkNummer: e.target.value })} error={!!fieldErrors.kvk} helperText={fieldErrors.kvk} />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <TextField label="Stad" value={businessValues.woonplaats} onChange={(e) => setBusinessValues({ ...businessValues, woonplaats: e.target.value })} error={!!fieldErrors.busWoonplaats} helperText={fieldErrors.busWoonplaats} />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <TextField label="Straat" value={businessValues.straat} onChange={(e) => setBusinessValues({ ...businessValues, straat: e.target.value })} error={!!fieldErrors.busStraat} helperText={fieldErrors.busStraat} />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <TextField label="Postcode" value={businessValues.postcode} onChange={(e) => setBusinessValues({ ...businessValues, postcode: e.target.value })} error={!!fieldErrors.busPostcode} helperText={fieldErrors.busPostcode} />
-                  </Grid>
-                </Grid>
-                {businessFeedback && <Alert severity="success" sx={{ mt: 2, borderRadius: "10px" }}>{businessFeedback}</Alert>}
-                {businessError && <Alert severity="error" sx={{ mt: 2, borderRadius: "10px" }}>{businessError}</Alert>}
-              </BoxMui>
-            ) : (
-              <BoxMui sx={{ width: "100%" }}>
-                <BoxMui sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800 }}>Bedrijfsgegevens</Typography>
-                  <BoxMui sx={{ display: "flex", gap: 1 }}>
-                    <Button variant="outlined" color="error" onClick={handleDisableSeller} disabled={roleChanging}>Stopzetten</Button>
-                    <Button variant="contained" onClick={handleBusinessSave} disabled={businessSaving}>
-                      {businessSaving ? "Laden..." : "Update Bedrijf"}
-                    </Button>
-                  </BoxMui>
-                </BoxMui>
-
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField label="Bedrijfsnaam" value={businessValues.bedrijfsnaam} onChange={(e) => setBusinessValues({ ...businessValues, bedrijfsnaam: e.target.value })} error={!!fieldErrors.bedrijfsnaam} helperText={fieldErrors.bedrijfsnaam} />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField label="KvK-nummer" value={businessValues.kvkNummer} onChange={(e) => setBusinessValues({ ...businessValues, kvkNummer: e.target.value })} error={!!fieldErrors.kvk} helperText={fieldErrors.kvk} />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <TextField label="Stad" value={businessValues.woonplaats} onChange={(e) => setBusinessValues({ ...businessValues, woonplaats: e.target.value })} error={!!fieldErrors.busWoonplaats} helperText={fieldErrors.busWoonplaats} />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <TextField label="Straat" value={businessValues.straat} onChange={(e) => setBusinessValues({ ...businessValues, straat: e.target.value })} error={!!fieldErrors.busStraat} helperText={fieldErrors.busStraat} />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <TextField label="Postcode" value={businessValues.postcode} onChange={(e) => setBusinessValues({ ...businessValues, postcode: e.target.value })} error={!!fieldErrors.busPostcode} helperText={fieldErrors.busPostcode} />
-                  </Grid>
-                </Grid>
-                {businessFeedback && <Alert severity="success" sx={{ mt: 2, borderRadius: "10px" }}>{businessFeedback}</Alert>}
-                {businessError && <Alert severity="error" sx={{ mt: 2, borderRadius: "10px" }}>{businessError}</Alert>}
-                <Divider sx={{ my: 3 }} />
-                <Typography variant="caption" color="text.secondary">Bedrijfsgegevens worden gekoppeld aan uw unieke Verkoper ID: {verkoperId ?? 'Laden...'}</Typography>
-              </BoxMui>
-            )}
-          </Box>
         </BoxMui>
-
-        {/* Dialog voor Rolbevestiging */}
-        <Dialog open={sellerDialogOpen} onClose={() => setSellerDialogOpen(false)} PaperProps={{ sx: { borderRadius: "15px", p: 1 } }}>
-          <DialogTitle sx={{ fontWeight: 800 }}>Word Verkoper</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Om verkoper te worden, moet u eerst uw bedrijfsgegevens invullen. 
-              Na het succesvol opslaan van uw bedrijfsgegevens wordt uw account automatisch geüpgraded naar een verkopersaccount.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions sx={{ p: 2 }}>
-            <Button variant="text" onClick={() => setSellerDialogOpen(false)}>Annuleren</Button>
-            <Button variant="contained" onClick={confirmBecomeSeller}>Doorgaan</Button>
-          </DialogActions>
-        </Dialog>
-
       </Background>
     </RequireAuth>
   );

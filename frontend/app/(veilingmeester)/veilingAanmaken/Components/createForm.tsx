@@ -124,15 +124,76 @@ export default function CreateForm({ auctionData, setAuctionData, onNext, locati
           }}
         />
 
-        <TextField
-          fullWidth
-          label="Afbeelding URL"
-          margin="normal"
-          value={auctionData.imageUrl || ""}
-          onChange={(e: any) => setAuctionData({ ...auctionData, imageUrl: e.target.value })}
-          InputLabelProps={{ shrink: true }}
-          placeholder="https://link-naar-foto.jpg"
-        />
+        {/* Image Upload Section */}
+        <BoxMui sx={{ mt: 2, mb: 1 }}>
+          <Typography variant="subtitle2" gutterBottom>Veiling Afbeelding</Typography>
+          <Button
+            variant="contained"
+            component="label"
+            sx={{ width: 'fit-content', mb: 1 }}
+          >
+            Afbeelding Uploaden
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+
+                // Create local preview immediately
+                const objectUrl = URL.createObjectURL(file);
+                setAuctionData({ ...auctionData, imageUrl: objectUrl });
+
+                // Upload to backend
+                const uploadData = new FormData();
+                uploadData.append("file", file);
+                uploadData.append("folder", "auctions");
+
+                try {
+                  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_LINK;
+                  const res = await fetch(`${backendUrl}/api/Upload?folder=auctions`, {
+                    method: 'POST',
+                    body: uploadData,
+                  });
+
+                  if (!res.ok) throw new Error("Upload mislukt");
+                  const data = await res.json();
+                  // Update with the real URL from backend
+                  setAuctionData((prev: any) => ({ ...prev, imageUrl: data.url }));
+
+                } catch (err) {
+                  console.error(err);
+                  // Optionally set an error state here, assuming setErrors is available or use a toast
+                  alert("Uploaden mislukt");
+                }
+              }}
+            />
+          </Button>
+
+          {/* Preview */}
+          <BoxMui sx={{
+            width: '100%',
+            height: 200,
+            borderRadius: 2,
+            overflow: 'hidden',
+            border: '1px solid #ccc',
+            bgcolor: '#f5f5f5',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {auctionData.imageUrl ? (
+              <img
+                src={auctionData.imageUrl}
+                alt="Preview"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <Typography variant="body2" color="text.secondary">Geen afbeelding geselecteerd</Typography>
+            )}
+          </BoxMui>
+        </BoxMui>
 
         <TextField
           fullWidth
