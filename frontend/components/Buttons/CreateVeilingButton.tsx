@@ -8,7 +8,7 @@ export function CreateVeilingButton() {
   const { navigateToCreate, isLoading } = useVeilingAanmaken();
 
   return (
-    <IconButton onClick={navigateToCreate} disabled={isLoading}>
+    <IconButton color="primary" onClick={navigateToCreate} disabled={isLoading}>
       <AddIcon/>
     </IconButton>
   );
