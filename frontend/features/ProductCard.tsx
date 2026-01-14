@@ -3,19 +3,19 @@
 import React, { useState, useEffect } from "react";
 import { ProductCardProps } from "../types/types";
 import { Box } from "@/components/Box";
-import { 
-  Typography, 
-  Box as BoxMui, 
-  List, 
-  CardMedia, 
-  TextField, 
-  Button, 
-  CardContent, 
-  Divider, 
-  ListItem, 
-  ListItemText, 
-  Stack, 
-  Paper 
+import {
+  Typography,
+  Box as BoxMui,
+  List,
+  CardMedia,
+  TextField,
+  Button,
+  CardContent,
+  Divider,
+  ListItem,
+  ListItemText,
+  Stack,
+  Paper
 } from "@mui/material";
 
 export default function ProductCard({ product, mode, onAction }: ProductCardProps) {
@@ -52,12 +52,12 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
   const displayTitle = product.name || product.productNaam || "Product Naam";
   const displayDesc = product.description || product.productBeschrijving || "Geen beschrijving beschikbaar.";
   const rawSpecs = product.specifications || (product as any).specificaties || [];
-  
-  const displayPrice = 
-    product.eindPrijs !== undefined ? product.eindPrijs : 
-    product.startPrijs !== undefined ? product.startPrijs :
-    product.price !== undefined ? product.price :
-    product.huidigeprijs !== undefined ? product.huidigeprijs : 0;
+
+  const displayPrice =
+    product.eindPrijs !== undefined ? product.eindPrijs :
+      product.startPrijs !== undefined ? product.startPrijs :
+        product.price !== undefined ? product.price :
+          product.huidigeprijs !== undefined ? product.huidigeprijs : 0;
 
   const rawImage = product.image || product.fotos;
   const getImageUrl = (img: string | File | null | undefined) => {
@@ -69,22 +69,24 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
   const imageUrl = getImageUrl(rawImage);
 
   return (
-    <Box sx={{ 
-      width: '100%', 
-      display: 'flex', 
+    <Box sx={{
+      width: '100%',
+      display: 'flex',
       flexDirection: 'column',
       height: '100%', // Allows the card to grow vertically
       bgcolor: 'background.paper',
       borderRadius: 2,
       boxShadow: 1,
-      overflow: 'hidden' 
+      overflow: 'hidden',
+      maxWidth: 400, // Constrain width so it doesn't fill the page on detail/wide views
+      mx: 'auto'     // Center if it's the only item
     }}>
       {/* HEADER */}
       <CardContent sx={{ pb: 0 }}>
-        <Typography 
-          variant="h6" 
-          component="h2" 
-          sx={{ 
+        <Typography
+          variant="h6"
+          component="h2"
+          sx={{
             fontWeight: 'bold',
             overflowWrap: 'anywhere' // Prevents title from stretching width
           }}
@@ -98,19 +100,19 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
         {imageUrl ? (
           <CardMedia
             component="img"
-            height="180"
+            height="220" // Increased slightly for better aspect ratio
             image={imageUrl}
             alt="Product"
-            sx={{ borderRadius: 1, objectFit: 'cover' }}
+            sx={{ borderRadius: 1, objectFit: 'cover', width: '100%' }}
           />
         ) : (
-          <BoxMui sx={{ 
-            height: 180, 
-            bgcolor: 'grey.300', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            borderRadius: 1 
+          <BoxMui sx={{
+            height: 180,
+            bgcolor: 'grey.300',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 1
           }}>
             <Typography color="text.secondary">Geen afbeelding</Typography>
           </BoxMui>
@@ -120,10 +122,10 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
       {/* Main Content Area */}
       <CardContent sx={{ pt: 0, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         {/* DESCRIPTION - Fixed wrapping here */}
-        <Typography 
-          variant="body2" 
-          color="text.secondary" 
-          sx={{ 
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
             mb: 2,
             whiteSpace: 'pre-wrap',    // Respects manual line breaks
             overflowWrap: 'anywhere',  // Forces wrap on long strings/URLs
@@ -144,12 +146,12 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
                 const displayName = typeof spec === 'string' ? spec : (spec.naam || spec.Naam);
                 return (
                   <ListItem key={index} disableGutters sx={{ py: 0 }}>
-                    <ListItemText 
-                      primary={`• ${displayName || "Onbekend"}`} 
-                      primaryTypographyProps={{ 
+                    <ListItemText
+                      primary={`• ${displayName || "Onbekend"}`}
+                      primaryTypographyProps={{
                         variant: 'caption',
-                        sx: { overflowWrap: 'anywhere' } 
-                      }} 
+                        sx: { overflowWrap: 'anywhere' }
+                      }}
                     />
                   </ListItem>
                 );
@@ -200,9 +202,9 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
                 onChange={(e) => setInputValue(e.target.value)}
                 sx={{ flex: 1 }}
               />
-              <Button 
-                variant="contained" 
-                color="primary" 
+              <Button
+                variant="contained"
+                color="primary"
                 onClick={handleActionClick}
                 sx={{ textTransform: 'none' }}
               >

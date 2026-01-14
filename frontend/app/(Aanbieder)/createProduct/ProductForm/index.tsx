@@ -239,9 +239,8 @@ export default function ProductForm({ formData, setFormData }: ProductFormProps)
               />
             </Button>
 
-            {/* Preview Box */}
-            <BoxMui sx={{ height: 200, border: '1px dashed grey', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {formData.image ? <img src={formData.image} style={{ maxHeight: '100%' }} /> : "Preview"}
+            <BoxMui sx={{ height: 250, width: '100%', border: '1px dashed grey', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: 1, bgcolor: '#f9f9f9' }}>
+              {formData.image ? <img src={formData.image} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} /> : "Preview"}
             </BoxMui>
 
             <Stack direction="row" spacing={2} alignItems="center">
