@@ -402,6 +402,43 @@ namespace backend.Controllers
         }
         
         /// <summary>
+        /// Haalt alle aankopen op van de momenteel ingelogde gebruiker, inclusief productnaam.
+        /// Resultaten worden gesorteerd op datum (nieuwste eerst).
+        /// </summary>
+        /// <response code="200">Lijst van aankopen succesvol opgehaald.</response>
+        /// <response code="401">Gebruiker is niet geautoriseerd.</response>
+        [HttpGet("mijn-aankopen")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<GebruikerAankoopDto>>> GetMijnAankopen()
+        {
+            var gebruikerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (gebruikerIdClaim == null || !int.TryParse(gebruikerIdClaim, out int huidigeGebruikerId))
+            {
+                return Unauthorized("Gebruiker ID niet gevonden in token.");
+            }
+
+            var aankopen = await _context.Aankoop
+                .Where(a => a.GebruikerId == huidigeGebruikerId)
+                .Join(_context.ProductGegevens,
+                    aankoop => aankoop.ProductId,
+                    product => product.ProductId,
+                    (aankoop, product) => new GebruikerAankoopDto
+                    {
+                        AankoopId = aankoop.AankoopId,
+                        ProductId = aankoop.ProductId,
+                        ProductNaam = product.ProductNaam,
+                        Datum = aankoop.Datum,
+                        IsBetaald = aankoop.IsBetaald,
+                        AankoopHoeveelheid = aankoop.AanKoopHoeveelheid,
+                        Prijs = aankoop.Prijs
+                    })
+                .OrderByDescending(a => a.Datum)
+                .ToListAsync();
+
+            return Ok(aankopen);
+        }
+
+        /// <summary>
         /// Haalt de gegevens van de huidige ingelogde gebruiker op en ververst de CSRF-tokens.
         /// </summary>
         /// <response code="200">Gebruikergegevens geretourneerd.</response>
