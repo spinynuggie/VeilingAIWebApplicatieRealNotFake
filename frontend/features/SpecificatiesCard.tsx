@@ -33,19 +33,21 @@ export default function SpecifcatiesCard() {
       </BoxMui>
 
       <BoxMui sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {error && <Alert severity="error">{error}</Alert>}
-        
         <TextField 
           required 
           label="Naam" 
           value={formData.naam}
           onChange={handleChange("naam")}
+          error={!!error} // Highlight the field in red if there's an error
+          helperText={error} // Display the error message below the field
         />
         <TextField 
           required 
           label="Beschrijving" 
           value={formData.beschrijving}
           onChange={handleChange("beschrijving")}
+          error={!!error} // Highlight the field in red if there's an error
+          helperText={error} // Display the error message below the field
         />
       </BoxMui>
 
