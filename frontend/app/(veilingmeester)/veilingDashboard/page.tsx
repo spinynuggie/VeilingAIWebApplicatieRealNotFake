@@ -41,7 +41,7 @@ export default function Landing() {
   });
 
   return (
-    <RequireAuth roles={["ADMIN", "VERKOPER"]}>
+    <RequireAuth roles={["ADMIN", "VEILINGMEESTER"]}>
       <div style={{ backgroundColor: "white", minHeight: "100vh" }}>
         <Navbar />
 
