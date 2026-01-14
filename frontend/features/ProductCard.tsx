@@ -1,10 +1,22 @@
-// src/components/ProductCard/index.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { ProductCardProps } from "../types/types";
 import { Box } from "@/components/Box";
-import { Typography, Box as BoxMui, List, CardMedia, Card, TextField, Button, CardContent, Divider, ListItem, ListItemText, Stack, Paper,  } from "@mui/material";
+import { 
+  Typography, 
+  Box as BoxMui, 
+  List, 
+  CardMedia, 
+  TextField, 
+  Button, 
+  CardContent, 
+  Divider, 
+  ListItem, 
+  ListItemText, 
+  Stack, 
+  Paper 
+} from "@mui/material";
 
 export default function ProductCard({ product, mode, onAction }: ProductCardProps) {
   const [inputValue, setInputValue] = useState<string>("");
@@ -18,12 +30,10 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
   const handleActionClick = () => {
     if (onAction) {
       if (mode === 'create') {
-        // Mode 1: Create - Use price from prop (form)
         const priceFromForm = product.price || product.huidigeprijs || 0;
         const val = typeof priceFromForm === 'string' ? parseFloat(priceFromForm) : Number(priceFromForm);
         onAction(isNaN(val) ? 0 : val);
       } else {
-        // Mode 2: Auction - Use local input (bid)
         const val = parseFloat(inputValue);
         if (isNaN(val)) {
           alert("Vul een geldig bedrag in");
@@ -43,14 +53,12 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
   const displayDesc = product.description || product.productBeschrijving || "Geen beschrijving beschikbaar.";
   const rawSpecs = product.specifications || (product as any).specificaties || [];
   
-  // Get the price from the most appropriate field - prioritize eindPrijs as minimum price
   const displayPrice = 
     product.eindPrijs !== undefined ? product.eindPrijs : 
     product.startPrijs !== undefined ? product.startPrijs :
     product.price !== undefined ? product.price :
     product.huidigeprijs !== undefined ? product.huidigeprijs : 0;
 
-  // Handle Image (String URL or File object)
   const rawImage = product.image || product.fotos;
   const getImageUrl = (img: string | File | null | undefined) => {
     if (!img) return null;
@@ -61,10 +69,26 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
   const imageUrl = getImageUrl(rawImage);
 
   return (
-    <Box>
+    <Box sx={{ 
+      width: '100%', 
+      display: 'flex', 
+      flexDirection: 'column',
+      height: '100%', // Allows the card to grow vertically
+      bgcolor: 'background.paper',
+      borderRadius: 2,
+      boxShadow: 1,
+      overflow: 'hidden' 
+    }}>
       {/* HEADER */}
       <CardContent sx={{ pb: 0 }}>
-        <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
+        <Typography 
+          variant="h6" 
+          component="h2" 
+          sx={{ 
+            fontWeight: 'bold',
+            overflowWrap: 'anywhere' // Prevents title from stretching width
+          }}
+        >
           {displayTitle}
         </Typography>
       </CardContent>
@@ -93,73 +117,83 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
         )}
       </BoxMui>
 
-      <CardContent sx={{ pt: 0 }}>
-        {/* DESCRIPTION */}
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      {/* Main Content Area */}
+      <CardContent sx={{ pt: 0, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* DESCRIPTION - Fixed wrapping here */}
+        <Typography 
+          variant="body2" 
+          color="text.secondary" 
+          sx={{ 
+            mb: 2,
+            whiteSpace: 'pre-wrap',    // Respects manual line breaks
+            overflowWrap: 'anywhere',  // Forces wrap on long strings/URLs
+            wordBreak: 'break-word',   // Standard wrapping logic
+            width: '100%'              // Constrain to container
+          }}
+        >
           {displayDesc}
         </Typography>
 
         <Divider sx={{ my: 2 }} />
 
         {/* SPECIFICATIONS */}
-<List dense sx={{ p: 0, mb: 2 }}>
-  {rawSpecs.length > 0 ? (
-    rawSpecs.map((spec: any, index: number) => {
-      // Als spec een string is (Preview), gebruik die. 
-      // Als het een object is (API), pak de .naam of .Naam
-      const displayName = typeof spec === 'string' ? spec : (spec.naam || spec.Naam);
-      
-      return (
-        <ListItem key={index} disableGutters sx={{ py: 0 }}>
-          <ListItemText 
-            primary={`• ${displayName || "Onbekend"}`} 
-            primaryTypographyProps={{ variant: 'caption' }} 
-          />
-        </ListItem>
-      );
-    })
-  ) : (
-    <Typography variant="caption" color="text.secondary">Geen Specificaties</Typography>
-  )}
-</List>
-
-        {/* PRICE DISPLAY */}
-        {mounted && (
-          <BoxMui sx={{ mb: 2 }}>
-            {mode === 'display' ? (
-              <Stack direction="row" spacing={1}>
-                {/* Start Price */}
-                <Paper variant="outlined" sx={{ flex: 1, p: 1, textAlign: 'center', bgcolor: 'custom.color6' }}>
-                  <Typography variant="caption" display="block" color="text.secondary">startprijs</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                    {product.startPrijs ? `€${Number(product.startPrijs).toFixed(2)}` : 'price not assigned'}
-                  </Typography>
-                </Paper>
-                {/* End Price */}
-                <Paper variant="outlined" sx={{ flex: 1, p: 1, textAlign: 'center', bgcolor: 'custom.color6' }}>
-                  <Typography variant="caption" display="block" color="text.secondary">eindprijs</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                    {product.eindPrijs ? `€${Number(product.eindPrijs).toFixed(2)}` : 'price not assigned'}
-                  </Typography>
-                </Paper>
-              </Stack>
+        <BoxMui sx={{ flexGrow: 1 }}> {/* Keeps specs pushing content if short */}
+          <List dense sx={{ p: 0, mb: 2 }}>
+            {rawSpecs.length > 0 ? (
+              rawSpecs.map((spec: any, index: number) => {
+                const displayName = typeof spec === 'string' ? spec : (spec.naam || spec.Naam);
+                return (
+                  <ListItem key={index} disableGutters sx={{ py: 0 }}>
+                    <ListItemText 
+                      primary={`• ${displayName || "Onbekend"}`} 
+                      primaryTypographyProps={{ 
+                        variant: 'caption',
+                        sx: { overflowWrap: 'anywhere' } 
+                      }} 
+                    />
+                  </ListItem>
+                );
+              })
             ) : (
-              <Paper variant="outlined" sx={{ p: 1, textAlign: 'center', bgcolor: 'primary.main', color: 'custom.color7' }}>
-                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                  Min prijs: € {typeof displayPrice === 'number' ? displayPrice.toFixed(2) : displayPrice || "0.00"}
-                </Typography>
-              </Paper>
+              <Typography variant="caption" color="text.secondary">Geen Specificaties</Typography>
             )}
-          </BoxMui>
-        )}
+          </List>
+        </BoxMui>
 
-        {/* ACTIONS */}
+        {/* PRICE DISPLAY & ACTIONS - Pushed to bottom */}
         <BoxMui sx={{ mt: 'auto' }}>
+          {mounted && (
+            <BoxMui sx={{ mb: 2 }}>
+              {mode === 'display' ? (
+                <Stack direction="row" spacing={1}>
+                  <Paper variant="outlined" sx={{ flex: 1, p: 1, textAlign: 'center', bgcolor: 'custom.color6' }}>
+                    <Typography variant="caption" display="block" color="text.secondary">startprijs</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                      {product.startPrijs ? `€${Number(product.startPrijs).toFixed(2)}` : 'n.v.t.'}
+                    </Typography>
+                  </Paper>
+                  <Paper variant="outlined" sx={{ flex: 1, p: 1, textAlign: 'center', bgcolor: 'custom.color6' }}>
+                    <Typography variant="caption" display="block" color="text.secondary">eindprijs</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                      {product.eindPrijs ? `€${Number(product.eindPrijs).toFixed(2)}` : 'n.v.t.'}
+                    </Typography>
+                  </Paper>
+                </Stack>
+              ) : (
+                <Paper variant="outlined" sx={{ p: 1, textAlign: 'center', bgcolor: 'primary.main', color: 'primary.contrastText' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                    Min prijs: € {typeof displayPrice === 'number' ? displayPrice.toFixed(2) : displayPrice || "0.00"}
+                  </Typography>
+                </Paper>
+              )}
+            </BoxMui>
+          )}
+
           {mode === 'auction' && (
             <Stack direction="row" spacing={1}>
               <TextField
                 size="small"
-                label="Startprijs"
+                label="Bedrag"
                 type="number"
                 variant="outlined"
                 value={inputValue}
