@@ -26,7 +26,7 @@ const VeilingAanmakenPage = () => {
     startTime: "",
     endTime: "",
     description: "",
-    locationId: "1",
+    locationId: "",
     imageUrl: ""
   });
 
