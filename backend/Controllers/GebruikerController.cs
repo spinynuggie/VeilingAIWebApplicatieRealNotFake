@@ -290,6 +290,15 @@ namespace backend.Controllers
             // Nieuwe tokens uitgeven zodat de Role-claim direct meekomt
             await IssueTokensAsync(gebruiker);
 
+            if (normalizedRole == "VERKOPER")
+            {
+                var verkoper = await _context.Verkopers.FirstOrDefaultAsync(v => v.GebruikerId == id);
+                if (verkoper == null)
+                {
+                    return BadRequest("Gebruiker moet eerst bedrijfsgegevens invullen voordat hij verkoper kan worden.");
+                }
+            }
+
             return MapToResponseDto(gebruiker);
         }
         /// <summary>
@@ -535,4 +544,4 @@ namespace backend.Controllers
             public string Wachtwoord { get; set; } = string.Empty;
         }
     }
-} 
+}
