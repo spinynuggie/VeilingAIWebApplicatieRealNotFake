@@ -141,7 +141,7 @@ Locatie: `frontend/app/`
 | `(Algemeen)`         | landing, privacy, voorwaarden, toegankelijkheid       |
 | `(admin)`            | admin dashboard                                       |
 | `(authenticatie)`    | login, register                                       |
-| `(klant)`            | klantProfile, mijn-biedingen, watchlist               |
+| `(klant)`            | klantProfile, mijn-biedingen                        |
 | `(veilingmeester)`   | veilingAanmaken, veilingDashboard, dashboard          |
 | `veiling/[veiling]`  | Dynamische veilingpagina met real-time klok           |
 | `product/[product]`  | Dynamische productpagina                              |

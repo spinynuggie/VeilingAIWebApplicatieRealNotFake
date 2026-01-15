@@ -15,7 +15,6 @@ import {
 import {
     Inventory as InventoryIcon,
     Gavel as GavelIcon,
-    Visibility as VisibilityIcon,
     Person as PersonIcon,
     Dashboard as DashboardIcon,
     Add as AddIcon,
@@ -53,12 +52,6 @@ export default function SideMenu({ open, onClose, mode }: SideMenuProps) {
                 <ListItemButton component={Link} href="/veilingDisplay" onClick={onClose}>
                     <ListItemIcon><GavelIcon /></ListItemIcon>
                     <ListItemText primary="Veilingen" />
-                </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-                <ListItemButton component={Link} href="/watchlist" onClick={onClose}>
-                    <ListItemIcon><VisibilityIcon /></ListItemIcon>
-                    <ListItemText primary="Watchlist" />
                 </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
