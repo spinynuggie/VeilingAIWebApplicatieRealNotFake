@@ -78,18 +78,6 @@ export default function SideMenu({ open, onClose, mode }: SideMenuProps) {
                     <ListItemText primary="Product Toevoegen" />
                 </ListItemButton>
             </ListItem>
-            <ListItem disablePadding>
-                <ListItemButton component={Link} href="/myProducts" onClick={onClose}>
-                    <ListItemIcon><LocalFloristIcon /></ListItemIcon>
-                    <ListItemText primary="Mijn Producten" />
-                </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-                <ListItemButton component={Link} href="/sales" onClick={onClose}>
-                    <ListItemIcon><ReceiptIcon /></ListItemIcon>
-                    <ListItemText primary="Verkoopoverzicht" />
-                </ListItemButton>
-            </ListItem>
             {includeProfile && (
                 <ListItem disablePadding>
                     <ListItemButton component={Link} href="/klantProfile" onClick={onClose}>
