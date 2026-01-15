@@ -4,24 +4,33 @@ const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
 
 export type VerkoperPayload = {
   kvkNummer: string;
-  bedrijfsgegevens: string;
-  adresgegevens?: string;
+  bedrijfsnaam: string;
+  straat: string;
+  huisnummer: string;
+  postcode: string;
+  woonplaats: string;
   financieleGegevens?: string;
 };
 
 export type VerkoperResponse = {
   verkoperId: number;
   kvkNummer: string;
-  bedrijfsgegevens: string;
-  adresgegevens: string;
+  bedrijfsnaam: string;
+  straat: string;
+  huisnummer: string;
+  postcode: string;
+  woonplaats: string;
   financieleGegevens: string;
   gebruikerId?: number;
 };
 
 const toDto = (payload: VerkoperPayload) => ({
   kvkNummer: payload.kvkNummer,
-  bedrijfsgegevens: payload.bedrijfsgegevens,
-  adresgegevens: payload.adresgegevens ?? "",
+  bedrijfsnaam: payload.bedrijfsnaam,
+  straat: payload.straat,
+  huisnummer: payload.huisnummer,
+  postcode: payload.postcode,
+  woonplaats: payload.woonplaats,
   financieleGegevens: payload.financieleGegevens ?? "",
 });
 

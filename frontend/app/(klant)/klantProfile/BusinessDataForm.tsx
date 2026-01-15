@@ -54,15 +54,13 @@ export default function BusinessDataForm({ user, refreshUser, isVerkoper }: Busi
                 const verkoper = await verkoperService.getMyVerkoper();
                 if (verkoper) {
                     setVerkoperId(verkoper.verkoperId);
-                    const parsedBus = JSON.parse(verkoper.bedrijfsgegevens ?? "{}");
-                    const parsedAdr = JSON.parse(verkoper.adresgegevens ?? "{}");
                     setBusinessValues({
-                        bedrijfsnaam: parsedBus.bedrijfsnaam ?? "",
+                        bedrijfsnaam: verkoper.bedrijfsnaam ?? "",
                         kvkNummer: verkoper.kvkNummer ?? "",
-                        woonplaats: parsedAdr.woonplaats ?? "",
-                        straat: parsedAdr.straat ?? "",
-                        postcode: parsedAdr.postcode ?? "",
-                        huisnummer: parsedAdr.huisnummer ?? "",
+                        woonplaats: verkoper.woonplaats ?? "",
+                        straat: verkoper.straat ?? "",
+                        postcode: verkoper.postcode ?? "",
+                        huisnummer: verkoper.huisnummer ?? "",
                     });
                 }
             } catch (err: any) {
@@ -95,13 +93,11 @@ export default function BusinessDataForm({ user, refreshUser, isVerkoper }: Busi
 
     const verkoperPayloadFromBusiness = (business: BusinessForm) => ({
         kvkNummer: business.kvkNummer,
-        bedrijfsgegevens: JSON.stringify({ bedrijfsnaam: business.bedrijfsnaam }),
-        adresgegevens: JSON.stringify({
-            woonplaats: business.woonplaats,
-            straat: business.straat,
-            postcode: business.postcode,
-            huisnummer: business.huisnummer,
-        }),
+        bedrijfsnaam: business.bedrijfsnaam,
+        straat: business.straat,
+        huisnummer: business.huisnummer,
+        postcode: business.postcode,
+        woonplaats: business.woonplaats,
         financieleGegevens: "",
     });
 
