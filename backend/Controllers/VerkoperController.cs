@@ -101,8 +101,12 @@ namespace backend.Controllers
 
             // 2. Map de DTO velden naar het bestaande domeinmodel
             verkoper.KvkNummer = verkoperDto.KvkNummer;
-            verkoper.Bedrijfsgegevens = verkoperDto.Bedrijfsgegevens;
-            verkoper.Adresgegevens = verkoperDto.Adresgegevens;
+            verkoper.KvkNummer = verkoperDto.KvkNummer;
+            verkoper.Bedrijfsnaam = verkoperDto.Bedrijfsnaam;
+            verkoper.Straat = verkoperDto.Straat;
+            verkoper.Huisnummer = verkoperDto.Huisnummer;
+            verkoper.Postcode = verkoperDto.Postcode;
+            verkoper.Woonplaats = verkoperDto.Woonplaats;
             verkoper.FinancieleGegevens = verkoperDto.FinancieleGegevens;
             
             _context.Entry(verkoper).State = EntityState.Modified;
@@ -142,8 +146,11 @@ namespace backend.Controllers
             if (existing != null)
             {
                 existing.KvkNummer = verkoperDto.KvkNummer;
-                existing.Bedrijfsgegevens = verkoperDto.Bedrijfsgegevens;
-                existing.Adresgegevens = verkoperDto.Adresgegevens;
+                existing.Bedrijfsnaam = verkoperDto.Bedrijfsnaam;
+                existing.Straat = verkoperDto.Straat;
+                existing.Huisnummer = verkoperDto.Huisnummer;
+                existing.Postcode = verkoperDto.Postcode;
+                existing.Woonplaats = verkoperDto.Woonplaats;
                 existing.FinancieleGegevens = verkoperDto.FinancieleGegevens;
                 _context.Entry(existing).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
@@ -153,8 +160,11 @@ namespace backend.Controllers
             var verkoper = new Verkoper
             {
                 KvkNummer = verkoperDto.KvkNummer,
-                Bedrijfsgegevens = verkoperDto.Bedrijfsgegevens,
-                Adresgegevens = verkoperDto.Adresgegevens,
+                Bedrijfsnaam = verkoperDto.Bedrijfsnaam,
+                Straat = verkoperDto.Straat,
+                Huisnummer = verkoperDto.Huisnummer,
+                Postcode = verkoperDto.Postcode,
+                Woonplaats = verkoperDto.Woonplaats,
                 FinancieleGegevens = verkoperDto.FinancieleGegevens,
                 GebruikerId = gebruikerId.Value
             };
@@ -180,8 +190,11 @@ namespace backend.Controllers
             if (existing == null) return NotFound();
 
             existing.KvkNummer = verkoperDto.KvkNummer;
-            existing.Bedrijfsgegevens = verkoperDto.Bedrijfsgegevens;
-            existing.Adresgegevens = verkoperDto.Adresgegevens;
+            existing.Bedrijfsnaam = verkoperDto.Bedrijfsnaam;
+            existing.Straat = verkoperDto.Straat;
+            existing.Huisnummer = verkoperDto.Huisnummer;
+            existing.Postcode = verkoperDto.Postcode;
+            existing.Woonplaats = verkoperDto.Woonplaats;
             existing.FinancieleGegevens = verkoperDto.FinancieleGegevens;
 
             _context.Entry(existing).State = EntityState.Modified;
@@ -201,8 +214,11 @@ namespace backend.Controllers
             var verkoper = new Verkoper
             {
                 KvkNummer = verkoperDto.KvkNummer,
-                Bedrijfsgegevens = verkoperDto.Bedrijfsgegevens,
-                Adresgegevens = verkoperDto.Adresgegevens,
+                Bedrijfsnaam = verkoperDto.Bedrijfsnaam,
+                Straat = verkoperDto.Straat,
+                Huisnummer = verkoperDto.Huisnummer,
+                Postcode = verkoperDto.Postcode,
+                Woonplaats = verkoperDto.Woonplaats,
                 FinancieleGegevens = verkoperDto.FinancieleGegevens
                 // VerkoperId wordt automatisch door de database ingesteld
             };

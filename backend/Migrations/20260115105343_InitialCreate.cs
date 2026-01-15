@@ -22,7 +22,8 @@ namespace backend.Migrations
                     GebruikerId = table.Column<int>(type: "integer", nullable: false),
                     Prijs = table.Column<decimal>(type: "numeric", nullable: false),
                     AanKoopHoeveelheid = table.Column<int>(type: "integer", nullable: false),
-                    IsBetaald = table.Column<bool>(type: "boolean", nullable: false)
+                    IsBetaald = table.Column<bool>(type: "boolean", nullable: false),
+                    Datum = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -50,6 +51,20 @@ namespace backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "locatie",
+                columns: table => new
+                {
+                    LocatieId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    LocatieNaam = table.Column<string>(type: "text", nullable: false),
+                    Foto = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_locatie", x => x.LocatieId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "product_gegevens",
                 columns: table => new
                 {
@@ -63,7 +78,8 @@ namespace backend.Migrations
                     EindPrijs = table.Column<decimal>(type: "numeric", nullable: false),
                     Huidigeprijs = table.Column<decimal>(type: "numeric", nullable: false),
                     VeilingId = table.Column<int>(type: "integer", nullable: false),
-                    VerkoperId = table.Column<int>(type: "integer", nullable: false)
+                    VerkoperId = table.Column<int>(type: "integer", nullable: false),
+                    LocatieId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -113,7 +129,8 @@ namespace backend.Migrations
                     Image = table.Column<string>(type: "text", nullable: false),
                     Starttijd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Eindtijd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    VeilingMeesterId = table.Column<int>(type: "integer", nullable: false)
+                    VeilingMeesterId = table.Column<int>(type: "integer", nullable: false),
+                    LocatieId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -140,8 +157,11 @@ namespace backend.Migrations
                     VerkoperId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     KvkNummer = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Bedrijfsgegevens = table.Column<string>(type: "text", nullable: false),
-                    Adresgegevens = table.Column<string>(type: "text", nullable: false),
+                    Bedrijfsnaam = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Straat = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Huisnummer = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    Postcode = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    Woonplaats = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     FinancieleGegevens = table.Column<string>(type: "text", nullable: false),
                     GebruikerId = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -157,23 +177,34 @@ namespace backend.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ProductId = table.Column<int>(type: "integer", nullable: false),
-                    SpecificatieId = table.Column<int>(type: "integer", nullable: false),
-                    ProductGegevensProductId = table.Column<int>(type: "integer", nullable: true)
+                    SpecificatieId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_product_specificaties", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_product_specificaties_product_gegevens_ProductGegevensProdu~",
-                        column: x => x.ProductGegevensProductId,
+                        name: "FK_product_specificaties_product_gegevens_ProductId",
+                        column: x => x.ProductId,
                         principalTable: "product_gegevens",
-                        principalColumn: "ProductId");
+                        principalColumn: "ProductId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_product_specificaties_specificaties_SpecificatieId",
+                        column: x => x.SpecificatieId,
+                        principalTable: "specificaties",
+                        principalColumn: "SpecificatieId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_product_specificaties_ProductGegevensProductId",
+                name: "IX_product_specificaties_ProductId",
                 table: "product_specificaties",
-                column: "ProductGegevensProductId");
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_product_specificaties_SpecificatieId",
+                table: "product_specificaties",
+                column: "SpecificatieId");
         }
 
         /// <inheritdoc />
@@ -186,13 +217,13 @@ namespace backend.Migrations
                 name: "gebruiker");
 
             migrationBuilder.DropTable(
+                name: "locatie");
+
+            migrationBuilder.DropTable(
                 name: "product_specificaties");
 
             migrationBuilder.DropTable(
                 name: "refresh_tokens");
-
-            migrationBuilder.DropTable(
-                name: "specificaties");
 
             migrationBuilder.DropTable(
                 name: "veiling");
@@ -205,6 +236,9 @@ namespace backend.Migrations
 
             migrationBuilder.DropTable(
                 name: "product_gegevens");
+
+            migrationBuilder.DropTable(
+                name: "specificaties");
         }
     }
 }

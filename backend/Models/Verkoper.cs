@@ -16,9 +16,20 @@ namespace backend.Models
         [MaxLength(50)]
         public string KvkNummer { get; set; } = string.Empty;
 
-        public string Bedrijfsgegevens { get; set; } = string.Empty;
+        [MaxLength(100)]
+        public string Bedrijfsnaam { get; set; } = string.Empty;
 
-        public string Adresgegevens { get; set; } = string.Empty;
+        [MaxLength(100)]
+        public string Straat { get; set; } = string.Empty;
+
+        [MaxLength(10)]
+        public string Huisnummer { get; set; } = string.Empty;
+
+        [MaxLength(10)]
+        public string Postcode { get; set; } = string.Empty;
+
+        [MaxLength(100)]
+        public string Woonplaats { get; set; } = string.Empty;
 
         public string FinancieleGegevens { get; set; } = string.Empty;
 

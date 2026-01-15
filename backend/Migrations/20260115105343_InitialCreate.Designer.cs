@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260107194039_AddDatumToAankoop")]
-    partial class AddDatumToAankoop
+    [Migration("20260115105343_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,7 @@ namespace backend.Migrations
                     b.Property<int>("AanKoopHoeveelheid")
                         .HasColumnType("integer");
 
-                    b.Property<DateTimeOffset>("Datum")
+                    b.Property<DateTime>("Datum")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("GebruikerId")
@@ -173,9 +173,6 @@ namespace backend.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ProductGegevensProductId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
@@ -184,7 +181,9 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductGegevensProductId");
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SpecificatieId");
 
                     b.ToTable("product_specificaties");
                 });
@@ -304,13 +303,10 @@ namespace backend.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("VerkoperId"));
 
-                    b.Property<string>("Adresgegevens")
+                    b.Property<string>("Bedrijfsnaam")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Bedrijfsgegevens")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("FinancieleGegevens")
                         .IsRequired()
@@ -319,10 +315,30 @@ namespace backend.Migrations
                     b.Property<int?>("GebruikerId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Huisnummer")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
                     b.Property<string>("KvkNummer")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Postcode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Straat")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Woonplaats")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("VerkoperId");
 
@@ -331,9 +347,21 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.ProductSpecificatie", b =>
                 {
-                    b.HasOne("backend.Models.ProductGegevens", null)
+                    b.HasOne("backend.Models.ProductGegevens", "Product")
                         .WithMany("ProductSpecificaties")
-                        .HasForeignKey("ProductGegevensProductId");
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("backend.Models.Specificaties", "Specificatie")
+                        .WithMany()
+                        .HasForeignKey("SpecificatieId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Specificatie");
                 });
 
             modelBuilder.Entity("backend.Models.ProductGegevens", b =>

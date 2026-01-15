@@ -50,7 +50,7 @@ namespace backend.Migrations
 
                     b.HasKey("AankoopId");
 
-                    b.ToTable("aankoop", (string)null);
+                    b.ToTable("aankoop");
                 });
 
             modelBuilder.Entity("backend.Models.Gebruiker", b =>
@@ -92,7 +92,7 @@ namespace backend.Migrations
 
                     b.HasKey("GebruikerId");
 
-                    b.ToTable("gebruiker", (string)null);
+                    b.ToTable("gebruiker");
                 });
 
             modelBuilder.Entity("backend.Models.Locatie", b =>
@@ -113,7 +113,7 @@ namespace backend.Migrations
 
                     b.HasKey("LocatieId");
 
-                    b.ToTable("locatie", (string)null);
+                    b.ToTable("locatie");
                 });
 
             modelBuilder.Entity("backend.Models.ProductGegevens", b =>
@@ -159,7 +159,7 @@ namespace backend.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.ToTable("product_gegevens", (string)null);
+                    b.ToTable("product_gegevens");
                 });
 
             modelBuilder.Entity("backend.Models.ProductSpecificatie", b =>
@@ -182,7 +182,7 @@ namespace backend.Migrations
 
                     b.HasIndex("SpecificatieId");
 
-                    b.ToTable("product_specificaties", (string)null);
+                    b.ToTable("product_specificaties");
                 });
 
             modelBuilder.Entity("backend.Models.RefreshToken", b =>
@@ -215,7 +215,7 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("refresh_tokens", (string)null);
+                    b.ToTable("refresh_tokens");
                 });
 
             modelBuilder.Entity("backend.Models.Specificaties", b =>
@@ -236,7 +236,7 @@ namespace backend.Migrations
 
                     b.HasKey("SpecificatieId");
 
-                    b.ToTable("specificaties", (string)null);
+                    b.ToTable("specificaties");
                 });
 
             modelBuilder.Entity("backend.Models.Veiling", b =>
@@ -273,7 +273,7 @@ namespace backend.Migrations
 
                     b.HasKey("VeilingId");
 
-                    b.ToTable("veiling", (string)null);
+                    b.ToTable("veiling");
                 });
 
             modelBuilder.Entity("backend.Models.VeilingMeester", b =>
@@ -289,7 +289,7 @@ namespace backend.Migrations
 
                     b.HasKey("MeesterId");
 
-                    b.ToTable("veiling_meester", (string)null);
+                    b.ToTable("veiling_meester");
                 });
 
             modelBuilder.Entity("backend.Models.Verkoper", b =>
@@ -300,13 +300,10 @@ namespace backend.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("VerkoperId"));
 
-                    b.Property<string>("Adresgegevens")
+                    b.Property<string>("Bedrijfsnaam")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Bedrijfsgegevens")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("FinancieleGegevens")
                         .IsRequired()
@@ -315,14 +312,34 @@ namespace backend.Migrations
                     b.Property<int?>("GebruikerId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Huisnummer")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
                     b.Property<string>("KvkNummer")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<string>("Postcode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Straat")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Woonplaats")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.HasKey("VerkoperId");
 
-                    b.ToTable("verkoper", (string)null);
+                    b.ToTable("verkoper");
                 });
 
             modelBuilder.Entity("backend.Models.ProductSpecificatie", b =>
