@@ -9,6 +9,7 @@ export interface Veiling {
   starttijd: string;
   eindtijd: string;
   locatieId: number;
+  veilingMeesterId: number;
   producten?: Product[];
 }
 
