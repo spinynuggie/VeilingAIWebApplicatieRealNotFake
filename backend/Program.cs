@@ -221,72 +221,7 @@ using (var scope = app.Services.CreateScope())
         context.SaveChanges();
     }
 
-    // Seed Locaties
-    if (!context.Locaties.Any())
-    {
-        context.Locaties.AddRange(new List<backend.Models.Locatie>
-        {
-            new backend.Models.Locatie { LocatieNaam = "Aalsmeer", Foto = "https://images.unsplash.com/photo-1591880911020-f3a197c416c7?q=80&w=400" },
-            new backend.Models.Locatie { LocatieNaam = "Naaldwijk", Foto = "https://images.unsplash.com/photo-1582794541440-3497a9211639?q=80&w=400" },
-            new backend.Models.Locatie { LocatieNaam = "Rijnsburg", Foto = "https://images.unsplash.com/photo-1596438459194-f275f413d6ff?q=80&w=400" },
-            new backend.Models.Locatie { LocatieNaam = "Eelde", Foto = "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=400" },
-            new backend.Models.Locatie { LocatieNaam = "Venlo", Foto = "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=400" },
-            new backend.Models.Locatie { LocatieNaam = "Ede (Plantion)", Foto = "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=400" },
-            new backend.Models.Locatie { LocatieNaam = "Straelen-Herongen", Foto = "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=400" }
-        });
-        context.SaveChanges();
-    }
 
-    // Seed Products
-    if (!context.ProductGegevens.Any())
-    {
-        context.ProductGegevens.AddRange(new List<backend.Models.ProductGegevens>
-        {
-            new backend.Models.ProductGegevens 
-            { 
-                ProductNaam = "Moederdag Rozen", 
-                ProductBeschrijving = "Een prachtige bos rode rozen, perfect voor Moederdag.",
-                Fotos = "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=300",
-                Hoeveelheid = 100,
-                StartPrijs = 12.50m,
-                EindPrijs = 5.0m,
-                Huidigeprijs = 12.50m,
-                VerkoperId = 1,
-                LocatieId = 1, // Aalsmeer
-                VeilingId = 1
-            },
-            new backend.Models.ProductGegevens 
-            { 
-                ProductNaam = "Lentestruik Mix", 
-                ProductBeschrijving = "Mix van tulpen en narcissen.",
-                Fotos = "https://images.unsplash.com/photo-1588691512224-ca87d46c825a?q=80&w=300",
-                Hoeveelheid = 50,
-                StartPrijs = 15.00m,
-                EindPrijs = 7.50m,
-                Huidigeprijs = 15.00m,
-                VerkoperId = 1,
-                LocatieId = 2, // Naaldwijk
-                VeilingId = 1
-            }
-        });
-        context.SaveChanges();
-    }
-
-    // Seed Veiling
-    if (!context.Veiling.Any())
-    {
-        context.Veiling.Add(new backend.Models.Veiling
-        {
-            Naam = "Ochtendveiling Aalsmeer",
-            Beschrijving = "De dagelijkse ochtendveiling voor bloemen in Aalsmeer.",
-            Image = "https://images.unsplash.com/photo-1591880911020-f3a197c416c7?q=80&w=800",
-            Starttijd = DateTimeOffset.UtcNow.AddHours(1),
-            Eindtijd = DateTimeOffset.UtcNow.AddHours(5),
-            VeilingMeesterId = 1,
-            LocatieId = 1
-        });
-        context.SaveChanges();
-    }
 }
 
 app.Run();
