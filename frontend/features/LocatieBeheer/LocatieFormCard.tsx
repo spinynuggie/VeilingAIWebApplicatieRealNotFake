@@ -79,11 +79,11 @@ export default function LocatieFormCard({ onSuccess }: Props) {
         {/* Image Upload Section */}
         <BoxMui sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Button
-            variant="contained"
+            variant="outlined"
             component="label"
-            sx={{ width: 'fit-content' }}
+            fullWidth
           >
-            Afbeelding Uploaden
+            Of Upload Afbeelding
             <input
               type="file"
               hidden
@@ -163,7 +163,9 @@ export default function LocatieFormCard({ onSuccess }: Props) {
         <Button
           onClick={handleSubmit}
           disabled={submitting}
-          sx={{ width: { xs: '100%', sm: 'auto' } }} // Full width button on mobile
+          size="large"
+          fullWidth
+        // sx={{ width: { xs: '100%', sm: 'auto' } }} // Removed manual media query in favor of fullWidth
         >
           {submitting ? <CircularProgress size={24} color="inherit" /> : "Locatie Toevoegen"}
         </Button>
