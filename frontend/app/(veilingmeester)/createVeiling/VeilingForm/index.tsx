@@ -3,6 +3,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { createVeiling } from "@/services/veilingService";
 import { Alert, Snackbar, CircularProgress, TextField, Stack, Grid, Typography, Box as BoxMui } from "@mui/material";
 import { Button } from "@/components/Buttons/Button";
+import { Box } from "@/components/Box";
 import { getLocaties, Locatie } from "@/services/locatieService";
 import { Veiling } from "@/types/veiling";
 
@@ -160,7 +161,7 @@ export default function VeilingForm({ formData, setFormData }: VeilingFormProps)
     );
 
     return (
-        <BoxMui component="form" onSubmit={handleSubmit}>
+        <Box component="form" onSubmit={handleSubmit}>
             <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>Nieuwe Veiling</Typography>
 
             <Grid container spacing={4}>
@@ -270,6 +271,6 @@ export default function VeilingForm({ formData, setFormData }: VeilingFormProps)
             </Grid>
             {error && showAlert(error, "error")}
             {success && showAlert(success, "success")}
-        </BoxMui>
+        </Box>
     );
 }

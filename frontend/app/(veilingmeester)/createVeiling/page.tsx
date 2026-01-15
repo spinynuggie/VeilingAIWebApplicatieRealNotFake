@@ -40,7 +40,7 @@ export default function CreateVeilingPage() {
                     }}
                 >
                     {/* LINKER KANT: Het Formulier */}
-                    <BoxMui sx={{ flexGrow: 1, minWidth: { xs: "100%", md: "600px" } }}>
+                    <BoxMui>
                         <VeilingForm formData={formData} setFormData={setFormData} />
                     </BoxMui>
 
