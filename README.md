@@ -1,74 +1,133 @@
-<<<<<<< HEAD
-# Dit heb je nodig voor ons project
+# Veiling site
 
-## Installatie
+Een real-time veilingplatform gebouwd met een moderne stack. Denk aan eBay, maar dan beter.
 
-1. Installeer Node.js (LTS) via [https://nodejs.org](https://nodejs.org)
+---
 
-2. Clone de repository:
-   ```bash
-   git clone https://github.com/spinynuggie/VeilingAIWebApplicatieRealNotFake.git
-   cd VeilingAIWebApplicatieRealNotFake
-   ```
+## Tech Stack
 
-3. Installeer dependencies:
-   ```bash
-   npm install
-   ```
+| Laag         | Technologieën                                                                 |
+|--------------|-------------------------------------------------------------------------------|
+| **Frontend** | React 19, Next.js 16, Material UI, Framer Motion, TailwindCSS, TypeScript, ESLint |
+| **Backend**  | C# / .NET 9, SignalR (real-time), Entity Framework Core, FluentValidation, Swagger |
+| **Database** | PostgreSQL 16                                                                |
 
-4. Installeer Material UI + fonts:
-   ```bash
-   npm install @mui/material @emotion/react @emotion/styled
-   npm install @mui/icons-material
-   npm install @fontsource/roboto
-   ```
+---
 
-5. Start de development server:
-   ```bash
-   npm run dev
-   ```
+## Benodigdheden
 
-Open daarna de app in je browser via [http://localhost:5173](http://localhost:5173) (of de poort die in de terminal staat).
-=======
-# Project
-Tutorial hoe je het project opzet
-## Vereisten
-- Node.js 18 of hoger `https://nodejs.org/en/download`
-- .NET SDK 9.0.9 `https://dotnet.microsoft.com/en-us/download`
-## Installatie
-Voer onderstaande stappen uit in de map `frontend`:
-```
-npm install
-npm install @mui/material @emotion/react @emotion/styled
-npm install @fontsource/roboto
-npm install @mui/icons-material
+Zorg dat je het volgende hebt geinstalleerd:
+
+- **Node.js** (LTS aangeraden) — [nodejs.org](https://nodejs.org)
+- **.NET SDK 9** — [dotnet.microsoft.com](https://dotnet.microsoft.com/en-us/download)
+- **PostgreSQL 16** — ergens draaiend (lokaal, Docker, cloud, maakt niet uit)
+
+---
+
+## Omgevingsvariabelen
+
+Je moet een paar `.env` bestanden aanmaken. Duurt niet lang.
+
+### Backend (`/backend/.env`)
+
+Maak een bestand genaamd `.env` in de `backend` map met het volgende:
+
+```env
+ConnectionStrings__DefaultConnection=Host=localhost;Database=veilingai;Username=postgres;Password=jouwwachtwoord
+Jwt__Key=jouw-super-geheime-jwt-key
+Jwt__Issuer=VeilingAI
+Jwt__Audience=VeilingAIUsers
+FRONTEND_URL=http://localhost:3000
+ADMIN_PASSWORD=jouw-admin-wachtwoord
 ```
 
-## Ontwikkelen
-Start de ontwikkelserver:
+> **Let op:** Het `ConnectionStrings__DefaultConnection` formaat gebruikt dubbele underscores (`__`) omdat .NET zo omgevingsvariabelen mapt naar configuratie keys. Klassiek .NET gedoe.
+
+### Frontend (`/frontend/.env.local`)
+
+Maak een bestand genaamd `.env.local` in de `frontend` map:
+
+```env
+NEXT_PUBLIC_BACKEND_LINK=http://localhost:5000
 ```
-npm run dev
+
+---
+
+## Project Draaien
+
+### 1. Clone de repo
+
+```bash
+git clone https://github.com/spinynuggie/VeilingAIWebApplicatieRealNotFake.git
+cd VeilingAIWebApplicatieRealNotFake
 ```
-Standaard draait Vite op `http://localhost:5173`.
-## Productie build
-Maak een geoptimaliseerde build:
+
+### 2. Start de Backend
+
+```bash
+cd backend
+dotnet restore   # Haalt alle NuGet packages op
+dotnet run       # Start de API server
 ```
-npm run build
+
+De backend draait nu op `http://localhost:5000` (of welke poort .NET ook kiest, check de terminal output).
+
+Swagger docs zijn beschikbaar op `/swagger` als je de API wilt verkennen.
+
+### 3. Start de Frontend
+
+Open een nieuwe terminal:
+
+```bash
+cd frontend
+npm install      # Installeert alle dependencies
+npm run dev      # Start de Next.js dev server
 ```
-Preview van de build (optioneel):
+
+De frontend draait nu op `http://localhost:3000`.
+
+---
+
+## Testen Draaien
+
+De backend heeft een test project met unit tests:
+
+```bash
+cd backend.Test
+dotnet test
 ```
-npm run preview
+
+---
+
+## Productie Build
+
+### Frontend
+
+```bash
+cd frontend
+npm run build    # Maakt een geoptimaliseerde productie build
+npm run start    # Serveert de productie build lokaal
 ```
-## Nuttig om te weten
-- Gemaakt met React + TypeScript en Vite.
-- UI‑componenten via MUI.
-- Broncode staat in `src/`.
-## Scripts (overzicht)
-- `npm run dev` – ontwikkelserver starten
-- `npm run build` – productie build maken
-- `npm run preview` – build lokaal bekijken
-- `npm run lint` – code controleren
-## Backend (optioneel, voor testing)
-De backend staat in `../backend` en kan apart worden gestart met .NET. Voor lokaal testen kun je beide afzonderlijk draaien.
-Draait standaard op `http://localhost:5173`.
->>>>>>> 8082bbc1e56ea6e1de22495e8604d443dad4befa
+
+### Backend
+
+```bash
+cd backend
+dotnet publish -c Release -o ./publish
+```
+
+De gecompileerde output staat in `./publish`. Je kan het draaien met `dotnet backend.dll` vanuit die map.
+
+---
+
+## Opmerkingen
+
+- **SignalR** regelt real-time veiling updates, denk aan biedingen en countdowns.
+- **Admin account**: Bij de eerste run maakt de backend een admin gebruiker aan met email `admin@example.com` en het wachtwoord dat je hebt ingesteld in `ADMIN_PASSWORD`.
+- **Migraties**: EF Core migraties draaien automatisch bij startup, dus de database structuur zet zichzelf op.
+
+---
+
+## Dat was het
+
+Als er iets kapot gaat heb je waarschijnlijk een omgevingsvariabele vergeten. Check die `.env` bestanden nog een keer.

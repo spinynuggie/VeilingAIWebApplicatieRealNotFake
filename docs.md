@@ -1,3 +1,4 @@
+
 # Projectdocumentatie – VeilingAI
 
 Deze documentatie beschrijft de volledige structuur van het VeilingAI project: frontend, backend, services, componenten en deployment.
@@ -7,7 +8,7 @@ Deze documentatie beschrijft de volledige structuur van het VeilingAI project: f
 ## Inhoudsopgave
 
 1. [Project Overzicht](#project-overzicht)
-2. [Technologie Stack](#technologie-stack)
+2. [Tech stack](#tech-stack)
 3. [Frontend](#frontend)
    - [Componenten](#componenten)
    - [Features](#features)
@@ -20,14 +21,13 @@ Deze documentatie beschrijft de volledige structuur van het VeilingAI project: f
    - [Models](#models)
 5. [Validatie & Beveiliging](#validatie--beveiliging)
 6. [Deployment](#deployment)
-7. [Omgevingsvariabelen](#omgevingsvariabelen)
-8. [Contact](#contact)
+7. [Environment-variables](#environment-variables)
 
 ---
 
 ## Project Overzicht
 
-VeilingAI is een real-time veilingplatform gebouwd met:
+Dit project is een real-time veilingplatform gebouwd met:
 - **Frontend**: Next.js 16 (App Router) + React 19 + MUI
 - **Backend**: ASP.NET Core 9 + Entity Framework + PostgreSQL
 - **Real-time**: SignalR voor live biedingen
@@ -295,7 +295,3 @@ Bestand: `deploy.sh`
 | `FRONTEND_URL`                     | Toegestane CORS origin.                 |
 
 ---
-
-## Contact
-
-Voor vragen over deze documentatie, neem contact op met het ontwikkelteam.
