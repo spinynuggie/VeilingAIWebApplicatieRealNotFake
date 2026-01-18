@@ -102,7 +102,7 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
             component="img"
             height="220" // Increased slightly for better aspect ratio
             image={imageUrl}
-            alt={product.name}
+            alt={product.productNaam}
             sx={{ borderRadius: 1, objectFit: 'cover', width: '100%' }}
           />
         ) : (
