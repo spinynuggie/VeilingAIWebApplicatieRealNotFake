@@ -208,7 +208,9 @@ using (var scope = app.Services.CreateScope())
     const string adminEmail = "admin@example.com";
     var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD") ?? "baller123456";
 
-    if (!context.Gebruikers.Any(g => g.Emailadres == adminEmail))
+    var adminUser = context.Gebruikers.FirstOrDefault(g => g.Emailadres == adminEmail);
+
+    if (adminUser == null)
     {
         context.Gebruikers.Add(new backend.Models.Gebruiker
         {
@@ -219,6 +221,17 @@ using (var scope = app.Services.CreateScope())
         });
 
         context.SaveChanges();
+    }
+    else
+    {
+        // Check if the password in the DB matches the one in ENV. If not, update it.
+        // passworHasher.Verify(input, hash) returns true if match.
+        if (!passwordHasher.Verify(adminPassword, adminUser.Wachtwoord))
+        {
+            Console.WriteLine("[INFO] Updating Admin password from environment variable...");
+            adminUser.Wachtwoord = passwordHasher.Hash(adminPassword);
+            context.SaveChanges();
+        }
     }
 
 

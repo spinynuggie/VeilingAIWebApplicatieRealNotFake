@@ -4,7 +4,7 @@
 DOCKER_USERNAME="rayantjedo"
 VERCEL_URL="veiling-ai-web-applicatie-real-not.vercel.app"
 
-TAG="final-production"
+TAG="testprod1"
 
 echo "deploying"
 echo "image: $DOCKER_USERNAME/veiling-backend:$TAG"

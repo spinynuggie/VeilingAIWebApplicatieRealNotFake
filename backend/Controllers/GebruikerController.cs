@@ -283,6 +283,12 @@ namespace backend.Controllers
                 return NotFound();
             }
 
+            // Security check: ADMINS cannot change their own role
+            if (string.Equals(gebruiker.Role, "ADMIN", StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest("ADMIN accounts kunnen hun rol niet wijzigen.");
+            }
+
             gebruiker.Role = normalizedRole;
             _context.Entry(gebruiker).State = EntityState.Modified;
             await _context.SaveChangesAsync();
