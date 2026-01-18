@@ -6,7 +6,11 @@ import {
   Typography,
   Chip,
   Box as BoxMui,
-  Button
+  Button,
+  AlertTitle,
+  Alert,
+  Paper,
+  Divider
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
@@ -90,17 +94,60 @@ export default function KlantProfile() {
 
           {/* Persoonlijke Gegevens */}
           <PersonalDataForm user={user} refreshUser={refreshUser} />
-
+          <Alert 
+  severity="info" 
+  sx={{ 
+    my: 4, 
+    borderRadius: 2, 
+    color: 'primary.main',
+    '& .MuiAlert-icon': { color: 'primary.main' },
+    bgcolor: 'custom.color6', // Ultra Light Mint uit jouw palette
+    border: '1px solid',
+    borderColor: 'primary.light'
+  }}
+>
+  <AlertTitle sx={{ fontWeight: 800 }}>Privacy & Dataopslag</AlertTitle>
+  Wanneer u extra gegevens toevoegt of de rol van <strong>Verkoper</strong> aanneemt, bewaren wij deze zakelijke informatie veilig. 
+  Conform de <strong>AVG</strong> worden deze gegevens uitsluitend gebruikt voor het veilingproces. 
+  Wij bewaren uw data totdat u besluit uw account te verwijderen.
+</Alert>
           {/* Zakelijke Gegevens - Always visible but disabled/enabled by flow inside component */}
           <BusinessDataForm user={user} refreshUser={refreshUser} isVerkoper={isVerkoper} />
-          <Button 
-              variant="contained" 
-              color="error" 
-              onClick={handleDeleteAccount}
-              sx={{ fontWeight: 'bold', textTransform: 'none' }}
-            >
-              Account definitief verwijderen
-            </Button>
+<Paper 
+  elevation={0} 
+  sx={{ 
+    mt: 8, 
+    p: 4, 
+    borderRadius: 2, 
+    border: "1px solid", 
+    borderColor: "error.light", 
+    bgcolor: "background.paper",
+    textAlign: 'center'
+  }}
+>
+  <Typography variant="h6" sx={{ color: "error.main", fontWeight: 800, mb: 1 }}>
+    ACCOUNT OPZEGGEN
+  </Typography>
+  
+  <Divider sx={{ mb: 3, mx: 'auto', width: '200px', bgcolor: 'error.light' }} />
+
+  <Typography variant="body2" sx={{ color: "text.secondary", mb: 4, maxWidth: 700, mx: "auto" }}>
+    Wilt u geen gebruik meer maken van onze diensten? Via de onderstaande knop kunt u gebruik maken van uw 
+    <strong> recht om vergeten te worden (AVG)</strong>. Al uw persoonlijke en zakelijke data worden direct en permanent uit onze database gewist.
+  </Typography>
+
+  <Button 
+    variant="contained" 
+    color="error" 
+    onClick={handleDeleteAccount}
+    sx={{ 
+      px: 6, 
+      '&:hover': { bgcolor: 'error.dark' } 
+    }}
+  >
+    Account definitief verwijderen
+  </Button>
+</Paper>
         </BoxMui>
       </Background>
     </RequireAuth>
