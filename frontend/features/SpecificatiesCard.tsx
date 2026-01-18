@@ -24,12 +24,6 @@ export default function SpecifcatiesCard() {
         <Typography variant="h4" component="h1" gutterBottom>
           Specificaties
         </Typography>
-        <Typography variant="body1">Huidige Specificaties:</Typography>
-        <SearchBar 
-        mode="callback"
-        searchControl={searchControl} 
-        onSearch={(term) => console.log("Gekozen:", term)}
-        />
       </BoxMui>
 
       <BoxMui sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
