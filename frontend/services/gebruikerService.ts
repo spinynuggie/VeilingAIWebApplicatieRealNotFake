@@ -80,3 +80,13 @@ export async function updateRole(role: User["role"], currentUser?: User | null):
 
   return (await res.json()) as User;
 }
+export async function deleteCurrentAccount(id: number): Promise<void> {
+  const res = await authFetch(`${apiBase}/api/Gebruiker/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Verwijderen van account mislukt.");
+  }
+}
