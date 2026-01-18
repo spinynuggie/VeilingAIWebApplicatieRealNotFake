@@ -91,9 +91,6 @@ export default function KlantProfile() {
               sx={{ fontWeight: 700, borderRadius: "8px" }}
             />
           </BoxMui>
-
-          {/* Persoonlijke Gegevens */}
-          <PersonalDataForm user={user} refreshUser={refreshUser} />
           <Alert 
   severity="info" 
   sx={{ 
@@ -111,6 +108,9 @@ export default function KlantProfile() {
   Conform de <strong>AVG</strong> worden deze gegevens uitsluitend gebruikt voor het veilingproces. 
   Wij bewaren uw data totdat u besluit uw account te verwijderen.
 </Alert>
+
+          {/* Persoonlijke Gegevens */}
+          <PersonalDataForm user={user} refreshUser={refreshUser} />
           {/* Zakelijke Gegevens - Always visible but disabled/enabled by flow inside component */}
           <BusinessDataForm user={user} refreshUser={refreshUser} isVerkoper={isVerkoper} />
 <Paper 
