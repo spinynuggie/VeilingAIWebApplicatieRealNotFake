@@ -98,7 +98,6 @@ export default function BusinessDataForm({ user, refreshUser, isVerkoper }: Busi
         huisnummer: business.huisnummer,
         postcode: business.postcode,
         woonplaats: business.woonplaats,
-        financieleGegevens: "",
     });
 
     const handleSave = async () => {
@@ -261,6 +260,16 @@ export default function BusinessDataForm({ user, refreshUser, isVerkoper }: Busi
                         helperText={fieldErrors.postcode}
                     />
                 </Grid>
+                <Grid size={{ xs: 12, md: 4}}>
+                    <TextField
+                        label="Huisnummer"
+                        value={businessValues.huisnummer}
+                        onChange={(e) => handleChange("huisnummer", e.target.value)}
+                        disabled={!isEditing}
+                        error={!!fieldErrors.huisnummer}
+                        helperText={fieldErrors.huisnummer}
+                        />
+                 </Grid>
             </Grid>
 
             {feedback && <Alert severity="success" sx={{ mt: 2, borderRadius: "10px" }}>{feedback}</Alert>}
