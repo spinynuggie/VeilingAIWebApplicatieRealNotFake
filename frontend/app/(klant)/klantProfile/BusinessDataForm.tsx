@@ -250,7 +250,7 @@ export default function BusinessDataForm({ user, refreshUser, isVerkoper }: Busi
                         helperText={fieldErrors.straat}
                     />
                 </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid size={{ xs: 12, md: 3 }}>
                     <TextField
                         label="Postcode"
                         value={businessValues.postcode}
@@ -260,7 +260,7 @@ export default function BusinessDataForm({ user, refreshUser, isVerkoper }: Busi
                         helperText={fieldErrors.postcode}
                     />
                 </Grid>
-                <Grid size={{ xs: 12, md: 4}}>
+                <Grid size={{ xs: 12, md: 1}}>
                     <TextField
                         label="Huisnummer"
                         value={businessValues.huisnummer}
