@@ -13,8 +13,6 @@ export async function getSpecificaties(): Promise<Specificaties[]> {
 
   if (!res.ok) {
     const errorBody = await res.text();
-    console.log("❌ ERROR STATUS:", res.status);
-    console.log("❌ ERROR BODY:", errorBody);
     throw new Error(`Failed to fetch: ${res.status} ${errorBody}`);
   }
 
@@ -46,8 +44,8 @@ export async function createSpecificatie(data: CreateSpecificatieInput): Promise
 
 export async function searchSpecificaties(term: string): Promise<Specificaties[]> {
   const all = await getSpecificaties(); // Using your existing fetch function
-  return all.filter(s => 
-    s.naam.toLowerCase().includes(term.toLowerCase()) || 
+  return all.filter(s =>
+    s.naam.toLowerCase().includes(term.toLowerCase()) ||
     s.beschrijving.toLowerCase().includes(term.toLowerCase())
   );
 }

@@ -12,7 +12,8 @@ const sample = [
     starttijd: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
     eindtijd: new Date(Date.now() + 1000 * 60 * 60).toISOString(),
     locatieId: 1,
-    veilingMeesterId: 1
+    veilingMeesterId: 1,
+    veilingDuurInSeconden: 10
   }
 ];
 

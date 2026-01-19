@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using backend.Data;
 using backend.Models;
 using backend.Dtos;
+using backend.Services;
 
 namespace backend.Controllers
 {
@@ -18,30 +19,49 @@ namespace backend.Controllers
     public class VeilingController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly AuctionStarterService _auctionStarter;
 
-        public VeilingController(AppDbContext context)
+        public VeilingController(AppDbContext context, AuctionStarterService auctionStarter)
         {
             _context = context;
+            _auctionStarter = auctionStarter;
         }
 
         /// <summary>
-        /// Haalt een lijst op van alle geplande en actieve veilingen.
+        /// Haalt alle veilingen op uit de database.
         /// </summary>
         /// <returns>Een lijst met veiling-objecten uit het domeinmodel.</returns>
         /// <response code="200">Lijst van veilingen succesvol opgehaald.</response>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Veiling>>> GetVeiling()
+        public async Task<ActionResult<IEnumerable<object>>> GetVeiling()
         {
-            return await _context.Veiling.ToListAsync();
+            var veilingen = await _context.Veiling
+                .Select(v => new
+                {
+                    v.VeilingId,
+                    v.Naam,
+                    v.Beschrijving,
+                    v.Image,
+                    v.Starttijd,
+                    v.Eindtijd,
+                    v.VeilingDuurInSeconden,
+                    v.VeilingMeesterId,
+                    v.LocatieId,
+                    HasUnfinishedProducts = _context.ProductGegevens
+                        .Any(p => p.VeilingId == v.VeilingId && !p.IsAfgehandeld && p.Hoeveelheid > 0)
+                })
+                .ToListAsync();
+
+            return Ok(veilingen);
         }
         
         /// <summary>
-        /// Haalt de details van een specifieke veiling op basis van het ID.
+        /// Haalt een specifieke veiling op basis van ID.
         /// </summary>
-        /// <param name="id">Het unieke ID van de veiling.</param>
-        /// <returns>Het gevraagde veiling-object.</returns>
-        /// <response code="200">Veiling gevonden en geretourneerd.</response>
-        /// <response code="404">Veiling met dit ID niet gevonden.</response>
+        /// <param name="id">Het ID van de veiling.</param>
+        /// <returns>Het veiling-object als het gevonden is.</returns>
+        /// <response code="200">Veiling gevonden.</response>
+        /// <response code="404">Veiling niet gevonden.</response>
         [HttpGet("{id}")]
         public async Task<ActionResult<Veiling>> GetVeiling(int id)
         {
@@ -56,12 +76,13 @@ namespace backend.Controllers
         }
         
         /// <summary>
-        /// Wijzigt een bestaande veiling. De velden worden bijgewerkt op basis van de meegegeven DTO.
+        /// Wijzigt een bestaande veiling.
         /// </summary>
-        /// <param name="id">Het ID van de bij te werken veiling.</param>
+        /// <param name="id">Het ID van de aan te passen veiling.</param>
         /// <param name="veilingDto">De nieuwe gegevens voor de veiling.</param>
-        /// <returns>Geen inhoud bij succes.</returns>
-        /// <response code="204">Veiling succesvol bijgewerkt.</response>
+        /// <returns>Geen inhoud als de wijziging succesvol was.</returns>
+        /// <response code="204">Veiling succesvol gewijzigd.</response>
+        /// <response code="400">ID in de URL komt niet overeen met ID in de body.</response>
         /// <response code="404">Veiling niet gevonden.</response>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutVeiling(int id, VeilingDto veilingDto)
@@ -81,12 +102,16 @@ namespace backend.Controllers
             veiling.Eindtijd   = veilingDto.Eindtijd;
             veiling.VeilingMeesterId = veilingDto.VeilingMeesterId;
             veiling.LocatieId = veilingDto.LocatieId;
+            veiling.VeilingDuurInSeconden = veilingDto.VeilingDuurInSeconden;
 
             _context.Entry(veiling).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+                
+                // Reschedule in case start time changed
+                _ = _auctionStarter.ScheduleAuctionIfNeeded(id);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -104,14 +129,19 @@ namespace backend.Controllers
         }
 
         /// <summary>
-        /// Creëert een nieuwe veiling in het systeem.
+        /// Voegt een nieuwe veiling toe aan de database.
         /// </summary>
-        /// <param name="veilingDto">De gegevens voor de nieuwe veiling.</param>
-        /// <returns>De aangemaakte veiling inclusief het gegenereerde ID.</returns>
+        /// <param name="veilingDto">Het veiling-object dat toegevoegd moet worden.</param>
+        /// <returns>Het aangemaakte veiling-object met de nieuwe ID.</returns>
         /// <response code="201">Veiling succesvol aangemaakt.</response>
         [HttpPost]
         public async Task<ActionResult<Veiling>> PostVeiling(VeilingDto veilingDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             // 1. Map de inkomende DTO naar een nieuw domeinmodel
             var veiling = new Veiling
             {
@@ -121,14 +151,18 @@ namespace backend.Controllers
                 Starttijd = veilingDto.Starttijd,
                 Eindtijd   = veilingDto.Eindtijd,
                 VeilingMeesterId = veilingDto.VeilingMeesterId,
-                LocatieId = veilingDto.LocatieId
+                LocatieId = veilingDto.LocatieId,
+                VeilingDuurInSeconden = veilingDto.VeilingDuurInSeconden
             };
             
             // 2. Voeg het domeinmodel toe en sla op
             _context.Veiling.Add(veiling);
             await _context.SaveChangesAsync();
 
-            // 3. Retourneer het aangemaakte Veiling domeinmodel
+            // 3. Schedule the auction to start at its start time
+            _ = _auctionStarter.ScheduleAuctionIfNeeded(veiling.VeilingId);
+
+            // 4. Retourneer het aangemaakte Veiling domeinmodel
             return CreatedAtAction("GetVeiling", new { id = veiling.VeilingId }, veiling);
         }
 

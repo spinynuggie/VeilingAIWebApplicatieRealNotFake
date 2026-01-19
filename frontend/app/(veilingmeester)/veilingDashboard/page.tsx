@@ -24,21 +24,32 @@ export default function Landing() {
 
   const now = new Date().getTime();
 
-  const liveVeilingen = veilingen.filter(v => {
-    const start = new Date(v.starttijd).getTime();
-    const end = new Date(v.eindtijd).getTime();
-    return now >= start && now < end;
-  });
-
+  // "Upcoming" also includes active auctions (started but not ended)
+  // Logic: Is active IF (start < now) AND (hasUnfinishedProducts OR end > now)
+  // Logic: Is upcoming IF (start > now)
   const upcomingVeilingen = veilingen.filter(v => {
     const start = new Date(v.starttijd).getTime();
-    return now < start;
+    const end = v.eindtijd ? new Date(v.eindtijd).getTime() : Infinity;
+
+    // Future start time
+    if (start > now) return true;
+
+    // Started, but effectively still running?
+    if (v.hasUnfinishedProducts === true) return true;
+    if (end > now) return true;
+
+    return false;
   });
 
-  const endedVeilingen = veilingen.filter(v => {
-    const end = new Date(v.eindtijd).getTime();
-    return now >= end;
-  });
+  // "Ended" = (end < now) AND (no unfinished products or explicitly handled)
+  // Simplified: If it's not in the "upcoming/active" list, it's ended.
+  const endedVeilingen = veilingen.filter(v => !upcomingVeilingen.includes(v));
+
+  // For display purposes, we might want to separate "Live" (active now) from "Future" (active later)
+  // But for now, let's stick to the user's filtered lists or a simple split.
+  // Let's split upcomingVeilingen into Live (started) and Future (not started)
+  const liveVeilingen = upcomingVeilingen.filter(v => new Date(v.starttijd).getTime() <= now);
+  const futureVeilingen = upcomingVeilingen.filter(v => new Date(v.starttijd).getTime() > now);
 
   return (
     <RequireAuth roles={["ADMIN", "VEILINGMEESTER"]}>
@@ -58,8 +69,8 @@ export default function Landing() {
         {/* Upcoming Auctions */}
         <div style={{ padding: "30px", paddingTop: "0" }}>
           <h2 style={{ marginBottom: "10px", color: "#3b82f6" }}>Toekomstige Veilingen</h2>
-          {upcomingVeilingen.length > 0 ? (
-            <VeilingDisplay veilingen={upcomingVeilingen} mode="veilingAanmaken" />
+          {futureVeilingen.length > 0 ? (
+            <VeilingDisplay veilingen={futureVeilingen} mode="veilingAanmaken" />
           ) : (
             <p style={{ color: "#666" }}>Er zijn geen geplande veilingen.</p>
           )}

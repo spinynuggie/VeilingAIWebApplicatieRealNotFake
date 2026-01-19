@@ -42,7 +42,7 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
 
     // Derive simple states
     const isPending = status === "pending";
-    const isEnded = status === "ended" || isClosed || (remainingQuantity !== undefined && remainingQuantity === 0);
+    const isEnded = status === "ended" || isClosed;
     const currentPrice = livePrice ?? endPrice;
 
     // Progress calculation for the circle (0 to 1)

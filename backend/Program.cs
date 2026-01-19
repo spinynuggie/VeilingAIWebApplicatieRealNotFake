@@ -9,15 +9,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using backend.Hubs;
 using backend.Middleware;
+using FluentValidation;
 using backend.Validation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 
-var builder = WebApplication.CreateBuilder(args);
-
 // Load environment variables (for local dev)
 Env.Load();
+
+var builder = WebApplication.CreateBuilder(args);
 
 // Support multiple domains + auto-trim trailing slashes (which often breaks CORS)
 // 1. Get from Env (safely handle null/empty)
@@ -45,7 +46,6 @@ var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "VeilingAI";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "VeilingAIUsers";
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
 
-// CORS - Must be specific origins to allow Credentials (Cookies)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -58,12 +58,11 @@ builder.Services.AddCors(options =>
     });
 });
 
-Console.WriteLine($"[DEBUG] FRONTEND_URL Env: {Environment.GetEnvironmentVariable("FRONTEND_URL")}");
-Console.WriteLine($"[DEBUG] Final Allowed Origins: {string.Join(", ", frontendOrigins)}");
-
-// add controllers, dbcontext, swagger, authentication, authorization, password hasher
-builder.Services.AddControllers()
-    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ProductCreateValidator>());
+builder.Services.AddControllers();
+// Updated FluentValidation registration (deprecated method removed)
+builder.Services.AddValidatorsFromAssemblyContaining<ProductCreateValidator>();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
 
 builder.Services.AddHealthChecks();
 
@@ -77,6 +76,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddSingleton<AuctionRealtimeService>();
+builder.Services.AddSingleton<AuctionStarterService>();
+builder.Services.AddHostedService<AuctionStarterService>(sp => sp.GetRequiredService<AuctionStarterService>()); // Auto-start auctions when startTijd is reached
 builder.Services.AddScoped<PrijsHistorieService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IFileService, LocalFileService>();

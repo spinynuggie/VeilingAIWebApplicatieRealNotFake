@@ -23,8 +23,17 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setMounted(true);
-    return () => setInputValue("");
+  }, []);
+
+  useEffect(() => {
+    // Set default value based on available price info
+    if (product) {
+      const initialPrice = product.startPrijs || product.eindPrijs || product.huidigeprijs || product.price || 0;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      setInputValue(initialPrice ? initialPrice.toString() : "");
+    }
   }, [product]);
 
   const handleActionClick = () => {

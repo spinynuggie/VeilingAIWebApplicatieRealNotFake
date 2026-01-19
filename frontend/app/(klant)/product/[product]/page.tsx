@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "@/features/(NavBar)/AppNavBar";
-import { getProductById } from "@/services/productService"; 
+import { getProductById } from "@/services/productService";
 import RequireAuth from "@/components/(oud)/RequireAuth";
 import ProductCard from "@/features/ProductCard";
 import { Product } from '@/types/product';
@@ -20,32 +20,23 @@ export default function VeilingDetailPage() {
   useEffect(() => {
     if (id > 0) {
       getProductById(id)
-        .then(data => {
-          console.log("Product details met specs geladen:", data);
-          setCurrentProduct(data);
-        })
-        .catch(err => {
-          console.error("Fout bij laden product:", err);
-        })
+        .then(setCurrentProduct)
         .finally(() => setLoading(false));
     } else {
-        setLoading(false);
+      setLoading(false);
     }
   }, [id]);
 
-  // ❌ VERWIJDERD: De oude 'allProducts.find' logica. 
-  // Die veroorzaakte errors omdat allProducts niet meer bestaat 
-  // en currentProduct al door useState is bezet.
 
   if (loading) {
-    return <p style={{textAlign: "center", marginTop: "20px"}}>Laden van product...</p>;
+    return <p style={{ textAlign: "center", marginTop: "20px" }}>Laden van product...</p>;
   }
 
   if (!currentProduct) {
     return (
       <Background>
         <RequireAuth>
-          <Navbar/>
+          <Navbar />
           <BoxMui sx={{ p: 4 }}>
             <h1>Product niet gevonden</h1>
             <p>Er is geen product met productId: {id}</p>
@@ -59,15 +50,14 @@ export default function VeilingDetailPage() {
     <RequireAuth>
       <Background>
         <Navbar />
-        <BoxMui 
+        <BoxMui
           style={{
             display: "flex",
             justifyContent: "center",
             padding: "60px 40px"
           }}
         >
-          {/* ✅ Gebruikt nu het product uit de useState (incl. specificaties) */}
-          <ProductCard mode="display" product={currentProduct}/>
+          <ProductCard mode="display" product={currentProduct} />
         </BoxMui>
       </Background>
     </RequireAuth>

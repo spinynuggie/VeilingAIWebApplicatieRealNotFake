@@ -12,8 +12,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260115105343_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260119021448_liveUpdate")]
+    partial class liveUpdate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -140,6 +140,9 @@ namespace backend.Migrations
                     b.Property<decimal>("Huidigeprijs")
                         .HasColumnType("numeric");
 
+                    b.Property<bool>("IsAfgehandeld")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("LocatieId")
                         .HasColumnType("integer");
 
@@ -254,7 +257,7 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset>("Eindtijd")
+                    b.Property<DateTimeOffset?>("Eindtijd")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Image")
@@ -270,6 +273,9 @@ namespace backend.Migrations
 
                     b.Property<DateTimeOffset>("Starttijd")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("VeilingDuurInSeconden")
+                        .HasColumnType("integer");
 
                     b.Property<int>("VeilingMeesterId")
                         .HasColumnType("integer");

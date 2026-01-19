@@ -96,8 +96,8 @@ export async function handleResponse(res: Response, defaultMessage: string): Pro
       if (data.title || data.detail) {
         throw new Error(data.detail || data.title);
       }
-    } catch (e: any) {
-      if (e.message && e.message !== "Unexpected token" && !e.message.startsWith("Unexpected token") && !e.message.includes("JSON")) {
+    } catch (e: unknown) {
+      if (e instanceof Error && e.message && e.message !== "Unexpected token" && !e.message.startsWith("Unexpected token") && !e.message.includes("JSON")) {
         throw e;
       }
     }

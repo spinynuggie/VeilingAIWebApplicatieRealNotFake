@@ -34,6 +34,11 @@ namespace backend.Models
         
         public int LocatieId { get; set; }
 
+        /// <summary>
+        /// True when product is fully auctioned (sold out or time expired).
+        /// </summary>
+        public bool IsAfgehandeld { get; set; }
+
         // Navigation property voor meer op meer relatie
         public ICollection<ProductSpecificatie> ProductSpecificaties { get; set; }
     }

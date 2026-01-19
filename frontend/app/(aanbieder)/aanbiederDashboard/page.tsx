@@ -252,7 +252,6 @@ export default function AanbiederDashboard() {
                         <ProductCard
                           product={product}
                           mode="display"
-                          onAction={(val) => console.log("Actie:", val)}
                         />
                       </Box>
                     ))

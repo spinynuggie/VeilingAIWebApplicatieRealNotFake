@@ -24,13 +24,14 @@ export const useCreateSpecificatie = (onSuccess?: () => void) => {
       await createSpecificatie(formData);
       setFormData({ naam: "", beschrijving: "" }); // Reset form
       if (onSuccess) onSuccess();
-    } catch (err: any) {
-      if (err.response && err.response.data && err.response.data.errors) {
-        const backendErrors = err.response.data.errors;
+    } catch (err: unknown) {
+      const e = err as any;
+      if (e.response && e.response.data && e.response.data.errors) {
+        const backendErrors = e.response.data.errors;
         if (backendErrors.beschrijving) {
-          setError(backendErrors.beschrijving[0]); // Display the first error for 'beschrijving'
+          setError(backendErrors.beschrijving[0]);
         } else if (backendErrors.naam) {
-          setError(backendErrors.naam[0]); // Display the first error for 'naam'
+          setError(backendErrors.naam[0]);
         } else {
           setError("Er is een fout opgetreden bij het aanmaken.");
         }

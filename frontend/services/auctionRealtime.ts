@@ -53,6 +53,15 @@ export async function startAuctionConnection(
 
   await connection.start();
   await connection.invoke("JoinAuction", veilingId);
+
+  connection.onreconnected(async () => {
+    try {
+      await connection.invoke("JoinAuction", veilingId);
+    } catch (err) {
+      console.error("Failed to re-join auction after reconnect:", err);
+    }
+  });
+
   return connection;
 }
 

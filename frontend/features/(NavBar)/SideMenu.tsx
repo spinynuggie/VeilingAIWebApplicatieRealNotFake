@@ -18,8 +18,6 @@ import {
     Person as PersonIcon,
     Dashboard as DashboardIcon,
     Add as AddIcon,
-    LocalFlorist as LocalFloristIcon,
-    Receipt as ReceiptIcon,
     AddCircle as AddCircleIcon,
     Tune as TuneIcon,
     Place as PlaceIcon,
@@ -99,7 +97,7 @@ export default function SideMenu({ open, onClose, mode }: SideMenuProps) {
                 </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
-                <ListItemButton component={Link} href="/createVeiling" onClick={onClose}>
+                <ListItemButton component={Link} href="/veilingAanmaken" onClick={onClose}>
                     <ListItemIcon><AddCircleIcon /></ListItemIcon>
                     <ListItemText primary="Veiling Aanmaken" />
                 </ListItemButton>

@@ -35,44 +35,44 @@ export function useVeilingAanmaken(initialVeilingId?: number | null) {
   }, [currentVeilingId]);
 
   useEffect(() => {
-  async function fetchData() {
-    try {
-      setLoading(true);
-      const data = await getProducts();
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const data = await getProducts();
 
-      // We filteren de beschikbare producten (linker kolom)
-      const leftList = data.filter((p) => {
-        // 1. Product mag nog niet in een veiling zitten
-        const isUnassigned = p.veilingId === 0 || p.veilingId === null;
-        
-        // 2. Product moet op dezelfde locatie zijn als de veiling
-        // We vergelijken met 'auctionLocationId' die we uit de veiling data halen
-        const matchesLocation = p.locatieId === auctionLocationId;
+        // We filteren de beschikbare producten (linker kolom)
+        const leftList = data.filter((p) => {
+          // 1. Product mag nog niet in een veiling zitten
+          const isUnassigned = p.veilingId === 0 || p.veilingId === null;
 
-        return isUnassigned && matchesLocation;
-      });
+          // 2. Product moet op dezelfde locatie zijn als de veiling
+          // We vergelijken met 'auctionLocationId' die we uit de veiling data halen
+          const matchesLocation = p.locatieId === auctionLocationId;
 
-      setAvailableProducts(leftList);
-      setFilteredAvailable(leftList);
+          return isUnassigned && matchesLocation;
+        });
 
-      // Rechter kolom: producten die al aan DEZE veiling zijn toegevoegd
-      if (currentVeilingId) {
-        const auctionList = data.filter((p) => p.veilingId === currentVeilingId);
-        setAuctionProducts(auctionList);
-        setFilteredAuction(auctionList);
+        setAvailableProducts(leftList);
+        setFilteredAvailable(leftList);
+
+        // Rechter kolom: producten die al aan DEZE veiling zijn toegevoegd
+        if (currentVeilingId) {
+          const auctionList = data.filter((p) => p.veilingId === currentVeilingId);
+          setAuctionProducts(auctionList);
+          setFilteredAuction(auctionList);
+        }
+      } catch (err) {
+        console.error("Data fetch error:", err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Data fetch error:", err);
-    } finally {
-      setLoading(false);
     }
-  }
 
-  // Belangrijk: dit effect moet opnieuw draaien als het auctionLocationId bekend is
-  if (auctionLocationId !== null) {
-    fetchData();
-  }
-}, [auctionLocationId, currentVeilingId]);
+    // Belangrijk: dit effect moet opnieuw draaien als het auctionLocationId bekend is
+    if (auctionLocationId !== null) {
+      fetchData();
+    }
+  }, [auctionLocationId, currentVeilingId]);
 
   const handleCreateVeiling = async (formData: any) => {
     try {
@@ -81,16 +81,14 @@ export function useVeilingAanmaken(initialVeilingId?: number | null) {
       // Payload bouwen conform Swagger
       const payload = {
         naam: String(formData.title || ""),
-        beschrijving: String(formData.description || ""),
-        image: String(formData.imageUrl || ""),
-        // Zorg dat datums niet leeg zijn voor ISO conversie
+        beschrijving: formData.description,
+        image: formData.imageUrl,
         starttijd: formData.startTime ? new Date(formData.startTime).toISOString() : null,
-        eindtijd: formData.endTime ? new Date(formData.endTime).toISOString() : null,
+        eindtijd: null,
         veilingMeesterId: Number(getCurrentUserId()),
-        locatieId: Number(formData.locationId || 1)
+        locatieId: Number(formData.locationId || 1),
+        veilingDuurInSeconden: Number(formData.duration || 10)
       };
-
-      console.log("Versturen naar API:", payload);
 
       const apiBase = process.env.NEXT_PUBLIC_BACKEND_LINK;
       const response = await fetch(`${apiBase}/api/Veiling`, {
@@ -104,9 +102,6 @@ export function useVeilingAanmaken(initialVeilingId?: number | null) {
 
       if (!response.ok) {
         const errorData = await response.json();
-
-        // DIT LOGT DE EXACTE FOUTEN (bijv. "The locatieId field is required")
-        console.error("BACKEND VALIDATIE FOUT:", errorData.errors);
 
         // Combineer de foutmeldingen voor de gebruiker
         const messages = errorData.errors

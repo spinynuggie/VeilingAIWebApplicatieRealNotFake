@@ -3,9 +3,9 @@ using backend.Dtos;
 
 namespace backend.Validation
 {
-    public class VeilingValidator : AbstractValidator<VeilingDto>
+    public class VeilingCreateValidator : AbstractValidator<VeilingDto>
     {
-        public VeilingValidator()
+        public VeilingCreateValidator()
         {
             RuleFor(x => x.Naam)
                 .NotEmpty().WithMessage("Naam is verplicht.")
@@ -24,11 +24,8 @@ namespace backend.Validation
                 .NotEmpty().WithMessage("Starttijd is verplicht.")
                 .Must(start => start >= DateTimeOffset.UtcNow)
                 .WithMessage("De starttijd mag niet in het verleden liggen.");
-
-            RuleFor(x => x.Eindtijd)
-                .NotEmpty().WithMessage("Eindtijd is verplicht.")
-                .GreaterThan(x => x.Starttijd)
-                .WithMessage("De eindtijd moet na de starttijd liggen.");
+                
+            // REMOVED Eindtijd rule for testing
                 
             RuleFor(x => x.Image)
                 .Must(uri => string.IsNullOrEmpty(uri) || Uri.TryCreate(uri, UriKind.Absolute, out _))

@@ -24,7 +24,14 @@ namespace backend.Models
         
         public DateTimeOffset Starttijd { get; set; }
         
-        public DateTimeOffset Eindtijd { get; set; }
+        public DateTimeOffset? Eindtijd { get; set; }
+
+        /// <summary>
+        /// De duur per productcyclus in seconden (1-30).
+        /// </summary>
+        [Required]
+        [Range(1, 30)]
+        public int VeilingDuurInSeconden { get; set; } = 10;
 
         public int VeilingMeesterId { get; set; }
 

@@ -33,6 +33,8 @@ namespace backend.Services
             public int RemainingQty;
             public DateTimeOffset StartTime; // Effectively when this product became active
             public double DurationSeconds;    // Derived from Veiling duration
+            public bool BidResultedInReset; // Flag for reset logic
+            public DateTimeOffset CycleStartTime; // For accurate progress calculation per cycle
         }
 
         public class AuctionState
@@ -44,7 +46,7 @@ namespace backend.Services
             
             // Global auction constraints
             public DateTimeOffset GlobalStartTime;
-            public DateTimeOffset GlobalEndTime;
+            public DateTimeOffset? GlobalEndTime;
             
             public CancellationTokenSource Cts = new();
             public object Lock = new();
@@ -70,16 +72,13 @@ namespace backend.Services
             if (!int.TryParse(veilingId, out var id)) return null;
 
             var veiling = await db.Veiling.FirstOrDefaultAsync(v => v.VeilingId == id);
-            // Load ALL products for this auction
+            // Load products sequential order
             var products = await db.ProductGegevens
-                .Where(p => p.VeilingId == id)
-                .OrderBy(p => p.ProductId) // Sequential order
+                .Where(p => p.VeilingId == id && !p.IsAfgehandeld) // Only load unfinished products!
+                .OrderBy(p => p.ProductId) 
                 .ToListAsync();
 
             if (veiling == null || !products.Any()) return null;
-
-            var totalDuration = (veiling.Eindtijd - veiling.Starttijd).TotalSeconds;
-            if (totalDuration <= 0) totalDuration = 3600; // Fallback 1h
 
             var state = new AuctionState
             {
@@ -87,6 +86,10 @@ namespace backend.Services
                 GlobalStartTime = veiling.Starttijd,
                 GlobalEndTime = veiling.Eindtijd
             };
+
+            // Use Veiling duration setting
+            double duration = veiling.VeilingDuurInSeconden;
+            if (duration < 1) duration = 10;
 
             foreach (var p in products)
             {
@@ -101,7 +104,8 @@ namespace backend.Services
                     RemainingQty = p.Hoeveelheid,
                     // StartTime will be set when it becomes active
                     StartTime = DateTimeOffset.MaxValue, 
-                    DurationSeconds = totalDuration // Use Veiling duration as the "slope" duration for each item
+                    CycleStartTime = DateTimeOffset.MaxValue,
+                    DurationSeconds = duration // Use Veiling duration as the "slope" duration for each item
                 });
             }
 
@@ -131,6 +135,8 @@ namespace backend.Services
 
                 // INIT PRODUCT
                 product.StartTime = DateTimeOffset.UtcNow;
+                product.CycleStartTime = DateTimeOffset.UtcNow;
+                product.CurrentPrice = product.StartPrice;
                 
                 // Notify clients: Product Switching / Starting
                 await _hubContext.Clients.Group(veilingId).SendAsync("ProductStart", new
@@ -140,7 +146,8 @@ namespace backend.Services
                     productNaam = product.ProductNaam,
                     startPrice = product.StartPrice,
                     qty = product.RemainingQty,
-                    timestamp = DateTimeOffset.UtcNow
+                    timestamp = DateTimeOffset.UtcNow,
+                    duration = product.DurationSeconds
                 });
 
                 // RUN PRODUCT TICK LOOP
@@ -148,11 +155,7 @@ namespace backend.Services
 
                 while (!state.Cts.IsCancellationRequested)
                 {
-                    // Calculate Price
-                    var elapsed = (DateTimeOffset.UtcNow - product.StartTime).TotalSeconds;
-                    var progress = Math.Clamp(elapsed / product.DurationSeconds, 0, 1);
-                    
-                    decimal newPrice = product.StartPrice - (decimal)(progress * (double)(product.StartPrice - product.EndPrice));
+                    bool triggerCooldown = false;
 
                     lock (state.Lock)
                     {
@@ -162,13 +165,65 @@ namespace backend.Services
                             break; // Sold out!
                         }
                         
-                        product.CurrentPrice = newPrice;
-                        
-                        // If we hit the end of the duration/price curve
-                        if (progress >= 1.0)
+                        if (product.BidResultedInReset)
                         {
-                            break; // Timeup for this product
+                            product.BidResultedInReset = false;
+                            triggerCooldown = true;
                         }
+                        else
+                        {
+                            // Calculate Price based on cycle time
+                            var elapsed = (DateTimeOffset.UtcNow - product.CycleStartTime).TotalSeconds;
+                            var progress = Math.Clamp(elapsed / product.DurationSeconds, 0, 1);
+                            
+                            product.CurrentPrice = product.StartPrice - (decimal)(progress * (double)(product.StartPrice - product.EndPrice));
+                            
+                            // If we hit the end of the duration/price curve
+                            if (progress >= 1.0)
+                            {
+                                break; // Timeup for this product
+                            }
+                        }
+                    }
+
+                    if (triggerCooldown)
+                    {
+                        // COOLDOWN LOGIC: Bid placed, pause then reset
+                        state.IsPaused = true; // BLOCK BIDS
+                        await _hubContext.Clients.Group(veilingId).SendAsync("AuctionPaused", new 
+                        { 
+                            veilingId, 
+                            message = "Verkocht!", 
+                            durationMs = 3000 
+                        });
+
+                        try { await Task.Delay(3000, state.Cts.Token); } 
+                        catch (TaskCanceledException) { return; }
+
+                        state.IsPaused = false; // UNBLOCK
+
+                        // RESET: Price and Timer
+                        lock (state.Lock) 
+                        { 
+                            product.CycleStartTime = DateTimeOffset.UtcNow;
+                            product.CurrentPrice = product.StartPrice;
+                            // Ensure flag is cleared if multiple bids slipped in before pause
+                            product.BidResultedInReset = false; 
+                        }
+                        
+                        // Broadcast ProductStart again so frontend resets its display
+                        await _hubContext.Clients.Group(veilingId).SendAsync("ProductStart", new
+                        {
+                            veilingId,
+                            productId = product.ProductId,
+                            productNaam = product.ProductNaam,
+                            startPrice = product.StartPrice,
+                            qty = product.RemainingQty,
+                            timestamp = DateTimeOffset.UtcNow,
+                            duration = product.DurationSeconds
+                        });
+                        
+                        continue; 
                     }
 
                     // Send Tick
@@ -176,7 +231,7 @@ namespace backend.Services
                     {
                         veilingId,
                         productId = product.ProductId, // Include ID so client knows
-                        price = newPrice,
+                        price = product.CurrentPrice,
                         timestamp = DateTimeOffset.UtcNow
                     });
 
@@ -188,16 +243,33 @@ namespace backend.Services
 
                 // PRODUCT ENDED (Sold out or Time up)
                 
-                // 3. PAUSE PHASE (5 Seconds)
+                // Mark as handled in DB
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        using var scope = _scopeFactory.CreateScope();
+                        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                        var dbProduct = await db.ProductGegevens.FindAsync(product.ProductId);
+                        if (dbProduct != null)
+                        {
+                            dbProduct.IsAfgehandeld = true;
+                            await db.SaveChangesAsync();
+                        }
+                    }
+                    catch { /* Fire-and-forget */ }
+                });
+
+                // 3. PAUSE PHASE (Transition)
                 state.IsPaused = true;
                 await _hubContext.Clients.Group(veilingId).SendAsync("AuctionPaused", new
                 {
                     veilingId,
                     message = productSoldOut ? "UITVERKOCHT!" : "Tijd is om!",
-                    durationMs = 5000
+                    durationMs = 3000
                 });
 
-                try { await Task.Delay(5000, state.Cts.Token); }
+                try { await Task.Delay(3000, state.Cts.Token); }
                 catch (TaskCanceledException) { return; }
                 
                 state.IsPaused = false;
@@ -229,9 +301,13 @@ namespace backend.Services
                 if (product.ProductId != productId) return (false, "Dit product is niet meer actief.");
                 
                 if (product.RemainingQty < qty) return (false, "Onvoldoende voorraad.");
+                // STRICT MODE: If a reset is pending, no more bids allowed until next cycle.
+                if (product.BidResultedInReset) return (false, "Product net verkocht, wacht op reset...");
+                
                 if (amount < product.EndPrice || amount > product.StartPrice) return (false, "Bod buiten limiet.");
                 
                 product.RemainingQty -= qty;
+                product.BidResultedInReset = true; // Signal the loop to reset
             }
 
             // Persist async

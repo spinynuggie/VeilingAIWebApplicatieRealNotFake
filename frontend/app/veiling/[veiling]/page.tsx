@@ -3,9 +3,9 @@
 // Force client-side only (disable SSR) for this dynamic auction page
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
-import { HubConnection } from "@microsoft/signalr";
+import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import { Veiling } from "@/types/veiling";
 import { getVeilingen } from "@/services/veilingService";
 import Navbar from "@/features/(NavBar)/AppNavBar";
@@ -15,7 +15,9 @@ import { Box, Typography, Paper } from "@mui/material";
 import RequireAuth from "@/components/(oud)/RequireAuth";
 import ProductCard from "@/features/ProductCard";
 import nextDynamic from "next/dynamic";
+// Memoize VeilingKlok to prevent re-renders on parent updates if props are same
 const VeilingKlok = nextDynamic(() => import("@/components/VeilingKlok").then(mod => mod.VeilingKlok), { ssr: false });
+
 import {
   BidEvent,
   PriceTickEvent,
@@ -43,21 +45,34 @@ function formatCountdown(seconds: number): string {
   return `${s}s`;
 }
 
+// Memoized wrapper for ProductCard to avoid unnecessary re-renders
+const MemoizedProductCard = React.memo(ProductCard);
+
 export default function VeilingDetailPage() {
   const [veiling, setVeiling] = useState<Veiling | null>(null);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [error, setError] = useState<string>("");
-  const [connection, setConnection] = useState<HubConnection | null>(null);
+
+  // Use a Ref for the connection to ensure we don't depend on state updates for existence checks
+  const connectionRef = useRef<HubConnection | null>(null);
+  // Track if we are currently connecting to prevent race conditions
+  const isConnectingRef = useRef<boolean>(false);
+
   const [lastBid, setLastBid] = useState<BidEvent | null>(null);
   const [livePrice, setLivePrice] = useState<number | null>(null);
   const [liveStatus, setLiveStatus] = useState<string>("");
   const [countdown, setCountdown] = useState<number | null>(null);
   const [remainingQty, setRemainingQty] = useState<number | null>(null);
 
+  // Status is now state, initialized to pending
+  const [auctionStatus, setAuctionStatus] = useState<AuctionStatus>("pending");
+
   // Sequential Auction State
   const [activeProductId, setActiveProductId] = useState<number | null>(null);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [pauseMessage, setPauseMessage] = useState<string>("");
+  const [currentDuration, setCurrentDuration] = useState<number>(30);
+  const [transitionCountdown, setTransitionCountdown] = useState<number | null>(null);
 
   const pathname = usePathname();
   const id = parseInt(pathname.split("/").pop() || "0");
@@ -77,7 +92,11 @@ export default function VeilingDetailPage() {
       .then((data) => {
         const found = data.find((v: Veiling) => v.veilingId === id);
         if (!found) setError(`No veiling found with id ${id}`);
-        else setVeiling(found);
+        else {
+          setVeiling(found);
+          // Initial status check
+          checkStatus(found);
+        }
       })
       .catch((err) => {
         console.error("Fetch error:", err);
@@ -85,45 +104,81 @@ export default function VeilingDetailPage() {
       });
   }, [id]);
 
-  // Calculate auction status
-  const getAuctionStatus = (): AuctionStatus => {
-    if (!veiling) return "pending";
+  // Helper to determine status
+  const checkStatus = (v: Veiling) => {
+    if (!v) return;
+
+    // SECURITY: If we already determined it's ended (via SignalR), don't flip back to pending/active based on local clock
+    if (auctionStatus === "ended") return;
+
     const now = Date.now();
-    const start = new Date(veiling.starttijd).getTime();
-    const end = new Date(veiling.eindtijd).getTime();
-    if (now < start) return "pending";
-    if (now >= end) return "ended";
-    return "active";
+    const start = new Date(v.starttijd).getTime();
+    let newStatus: AuctionStatus = "pending";
+
+    if (v.eindtijd && now >= new Date(v.eindtijd).getTime()) {
+      newStatus = "ended";
+    } else if (now >= start) {
+      newStatus = "active";
+    } else {
+      newStatus = "pending";
+    }
+
+    setAuctionStatus(prev => {
+      if (prev === 'ended' && newStatus !== 'ended') return prev;
+      return newStatus;
+    });
   };
 
-  const auctionStatus = getAuctionStatus();
-
-  // Countdown timer for pending auctions
+  // Timer Effect: Updates countdown AND checks status
   useEffect(() => {
-    if (!veiling || auctionStatus !== "pending") {
+    // Transition Countdown Logic
+    let transitionInterval: NodeJS.Timeout | null = null;
+    if (transitionCountdown !== null && transitionCountdown > 0) {
+      transitionInterval = setInterval(() => {
+        setTransitionCountdown(prev => (prev !== null && prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+
+    if (!veiling || auctionStatus === "ended") {
       setCountdown(null);
+      if (transitionInterval) clearInterval(transitionInterval);
       return;
     }
 
-    const updateCountdown = () => {
-      const start = new Date(veiling.starttijd).getTime();
-      const remaining = Math.max(0, Math.floor((start - Date.now()) / 1000));
-      setCountdown(remaining);
+    const interval = setInterval(() => {
+      checkStatus(veiling); // Periodically check if we should switch to active or ended
+
+      if (auctionStatus === "pending") {
+        const start = new Date(veiling.starttijd).getTime();
+        const remaining = Math.max(0, Math.floor((start - Date.now()) / 1000));
+        setCountdown(remaining);
+      } else {
+        setCountdown(null);
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+      if (transitionInterval) clearInterval(transitionInterval);
     };
+  }, [veiling, auctionStatus, transitionCountdown]);
 
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
-  }, [veiling, auctionStatus]);
-
-  // SignalR connection (only when active)
+  // SignalR connection management
   useEffect(() => {
     if (!veiling || auctionStatus !== "active") return;
 
-    let disposed = false;
-    let activeConnection: HubConnection | null = null;
+    // cleanup previous connection if exists (sanity check)
+    if (connectionRef.current && connectionRef.current.state === HubConnectionState.Connected) {
+      return; // Already connected
+    }
+
+    if (isConnectingRef.current) return; // Already connecting
+
+    let mounted = true;
+    isConnectingRef.current = true;
 
     setLiveStatus("Verbinden met live veiling...");
+
     startAuctionConnection(String(veiling.veilingId), {
       onBid: (bid: BidEvent) => {
         setLastBid(bid);
@@ -132,57 +187,77 @@ export default function VeilingDetailPage() {
         }
       },
       onTick: (tick: PriceTickEvent) => {
+        // STRICT ID CHECK: Prevent ghost updates from previous products
+        if (activeProductId && tick.productId !== activeProductId) {
+          console.warn(`Ignored tick for product ${tick.productId} while active is ${activeProductId}`);
+          return;
+        }
+
+        // If we receive a tick, the auction is running, so unpause if needed
+        setIsPaused(false);
+        setPauseMessage("");
+        setTransitionCountdown(null); // Clear manual countdown
+
         setLivePrice(tick.price);
+
         // Fallback: if we receive ticks for a product but missed the start event
-        if (!activeProductId) {
-          console.log("Tick received but no activeProductId. Syncing to:", tick.productId);
-          setActiveProductId(tick.productId);
+        if (!activeProductId && tick.productId) {
+          setActiveProductId(prev => prev ?? tick.productId);
         }
       },
     })
       .then((conn) => {
-        if (disposed) {
+        if (!mounted) {
           stopAuctionConnection(conn);
           return;
         }
-        activeConnection = conn;
+        connectionRef.current = conn;
+        isConnectingRef.current = false;
 
-        // Listen to new Sequential events
         conn.on("ProductStart", (data: any) => {
-          console.log("ProductStart", data);
           setActiveProductId(data.productId);
           setLivePrice(data.startPrice);
           setRemainingQty(data.qty);
+          if (data.duration) setCurrentDuration(data.duration);
           setIsPaused(false);
           setPauseMessage("");
-          setLastBid(null); // Reset bids for new product
+          setTransitionCountdown(null);
+          setLastBid(null);
         });
 
         conn.on("AuctionPaused", (data: any) => {
-          console.log("AuctionPaused", data);
           setIsPaused(true);
           setPauseMessage(data.message || "Pauze...");
+          if (data.durationMs) {
+            setTransitionCountdown(Math.ceil(data.durationMs / 1000));
+          }
         });
 
         conn.on("AuctionEnded", () => {
-          console.log("AuctionEnded");
-          // Optionally handle end logic here
+          setAuctionStatus("ended");
+          setIsPaused(false);
+          setTransitionCountdown(null);
         });
 
-        setConnection(conn);
         setLiveStatus("Live verbonden");
       })
       .catch((err) => {
         console.error("Kon geen live verbinding maken:", err);
-        setLiveStatus("Live verbinding mislukt");
+        if (mounted) {
+          setLiveStatus("Live verbinding mislukt");
+          isConnectingRef.current = false;
+        }
       });
 
     return () => {
-      disposed = true;
-      setConnection(null);
-      stopAuctionConnection(activeConnection);
+      mounted = false;
+      if (connectionRef.current) {
+        stopAuctionConnection(connectionRef.current);
+        connectionRef.current = null;
+      }
+      isConnectingRef.current = false;
     };
-  }, [veiling?.veilingId, auctionStatus]); // Removed activeProductId from deps to avoid reconnect cycles
+  }, [veiling?.veilingId, auctionStatus, activeProductId]);
 
   const filteredProducts = useMemo(() => {
     return allProducts.filter((p) => {
@@ -194,16 +269,8 @@ export default function VeilingDetailPage() {
   const activeProduct = useMemo(() => {
     return activeProductId
       ? (filteredProducts.find(p => p.productId === activeProductId) || allProducts.find(p => p.productId === activeProductId))
-      : (filteredProducts.length > 0 && !connection ? filteredProducts[0] : null);
-  }, [activeProductId, filteredProducts, allProducts, connection]);
-
-  // Debugging logs
-  useEffect(() => {
-    if (activeProductId && !activeProduct && allProducts.length > 0) {
-      console.warn("Mismatch! activeProductId:", activeProductId, "Available IDs:", allProducts.map(p => p.productId));
-      console.log("All Products:", allProducts);
-    }
-  }, [activeProductId, activeProduct, allProducts]);
+      : null; // Don't default to first product anymore, wait for SignalR
+  }, [activeProductId, filteredProducts, allProducts]);
 
   // Sync initial remaining qty if not set
   useEffect(() => {
@@ -216,32 +283,41 @@ export default function VeilingDetailPage() {
     lastBid &&
     activeProduct &&
     lastBid.productId === activeProduct.productId &&
-    remainingQty === 0
+    (remainingQty === 0)
   );
 
-  const handleLiveBid = async (price: number, quantity: number) => {
+  const handleLiveBid = useCallback(async (price: number, quantity: number) => {
     if (!veiling || auctionStatus !== "active") return;
-    if (!activeProduct) {
+    if (!activeProductId) { // Check ID instead of object for speed
       setLiveStatus("Geen actief product.");
       return;
     }
-    if (!connection) {
+    if (!connectionRef.current) {
       setLiveStatus("Geen live verbinding.");
       return;
     }
 
     setLiveStatus("Bod versturen...");
     try {
-      await sendBid(connection, String(veiling.veilingId), activeProduct.productId, price, quantity);
+      await sendBid(connectionRef.current, String(veiling.veilingId), activeProductId, price, quantity);
       setLiveStatus("Bod verstuurd");
     } catch (err) {
       console.error("Bod mislukt:", err);
       setLiveStatus("Bod mislukt");
     }
-  };
+  }, [veiling, auctionStatus, activeProductId]); // removed connection from deps, use ref
 
   if (error) return <p>Error: {error}</p>;
   if (!veiling) return <p>Loading... (looking for id: {id})</p>;
+
+  // Format the helper text for the clock
+  const getClockText = () => {
+    if (auctionStatus === "pending" && countdown !== null) return formatCountdown(countdown);
+    if (isPaused) {
+      return `${pauseMessage} ${transitionCountdown !== null && transitionCountdown > 0 ? `(${transitionCountdown})` : ""}`;
+    }
+    return "Wachten...";
+  };
 
   return (
     <RequireAuth>
@@ -253,10 +329,17 @@ export default function VeilingDetailPage() {
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "1400px", mx: "auto", px: 2 }}>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>{veiling.naam}</Typography>
-              <Typography variant="caption" color="text.secondary">{formatDateTime(veiling.starttijd)} - {formatDateTime(veiling.eindtijd)}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {formatDateTime(veiling.starttijd)} - {veiling.eindtijd ? formatDateTime(veiling.eindtijd) : "Onbekend"}
+              </Typography>
             </Box>
             <Box>
-              {/* Potentially add status badge here */}
+              <Typography variant="button" sx={{
+                color: auctionStatus === 'active' ? 'success.main' : 'text.secondary',
+                fontWeight: 'bold', border: 1, borderColor: 'divider', px: 2, py: 0.5, borderRadius: 1
+              }}>
+                {auctionStatus.toUpperCase()}
+              </Typography>
             </Box>
           </Box>
         </Paper>
@@ -279,16 +362,19 @@ export default function VeilingDetailPage() {
           {/* Left: Product Details */}
           <Box sx={{ flex: "1 1 400px", maxWidth: "500px" }}>
             {activeProduct ? (
-              <ProductCard mode="display" product={activeProduct} />
+              <MemoizedProductCard mode="display" product={activeProduct} />
             ) : (
               <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fafafa', borderRadius: 4, border: '1px dashed #ccc' }}>
                 <Typography variant="h6" color="text.secondary">
                   {auctionStatus === "pending"
                     ? "Deze veiling is nog niet gestart."
-                    : (filteredProducts.length === 0 && !connection
+                    : (filteredProducts.length === 0 && !connectionRef.current
                       ? "Veiling is afgelopen."
-                      : (connection ? "Wachten op volgend product..." : "Producten laden..."))}
+                      : (connectionRef.current ? "Wachten op volgend product..." : "Producten laden..."))}
                 </Typography>
+                {auctionStatus === "active" && !connectionRef.current && (
+                  <Typography variant="caption" color="error">Geen verbinding met server...</Typography>
+                )}
               </Box>
             )}
           </Box>
@@ -297,19 +383,20 @@ export default function VeilingDetailPage() {
           <Box sx={{ flex: "0 0 auto" }}>
             {activeProduct ? (
               <VeilingKlok
-                startPrice={activeProduct ? activeProduct.startPrijs : veiling.producten?.[0]?.startPrijs || 10}
-                endPrice={activeProduct ? activeProduct.eindPrijs : veiling.producten?.[0]?.eindPrijs || 1}
-                duration={300} // arbitrary, driven by backend
+                key={`${activeProduct.productId}-${activeProduct.remainingQty}`} // Force reset when qty changes (reset) or product changes
+                startPrice={activeProduct ? activeProduct.startPrijs : (veiling.producten?.[0]?.startPrijs || 10)}
+                endPrice={activeProduct ? activeProduct.eindPrijs : (veiling.producten?.[0]?.eindPrijs || 1)}
+                duration={currentDuration}
                 productName={activeProduct?.productNaam}
                 productId={activeProduct?.productId}
                 verkoperId={activeProduct?.verkoperId}
                 remainingQuantity={remainingQty ?? activeProduct?.hoeveelheid}
                 livePrice={livePrice}
-                closingPrice={activeBidClosed ? lastBid?.amount : undefined}
+                closingPrice={undefined} // HIDE FINAL PRICE SCREEN
                 status={auctionStatus === "ended" ? "ended" : (auctionStatus === "pending" || isPaused ? "pending" : "active")}
-                countdownText={auctionStatus === "pending" && countdown !== null ? formatCountdown(countdown) : pauseMessage || "Wachten..."}
+                countdownText={getClockText()}
                 onBid={handleLiveBid}
-                isClosed={activeBidClosed}
+                isClosed={false} // HIDE FINAL PRICE SCREEN
               />
             ) : (
               /* Placeholder Clock or Empty */
@@ -317,7 +404,7 @@ export default function VeilingDetailPage() {
                 <Typography color="text.secondary">
                   {auctionStatus === "pending"
                     ? `Veiling begint over ${countdown !== null ? formatCountdown(countdown) : "..."}`
-                    : (isPaused ? pauseMessage : "...")}
+                    : (isPaused ? pauseMessage : "Wachten op start...")}
                 </Typography>
               </Box>
             )}
@@ -327,7 +414,7 @@ export default function VeilingDetailPage() {
           <Box sx={{ flex: "1 1 300px", maxWidth: "400px" }}>
             <Typography variant="h6" sx={{ mb: 2 }}>Volgende producten</Typography>
             <ProductDisplay
-              product={filteredProducts.filter(p => p.productId !== activeProductId)}
+              product={filteredProducts.filter(p => !activeProduct || p.productId > activeProduct.productId)}
             />
           </Box>
         </Box>

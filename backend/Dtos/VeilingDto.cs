@@ -35,12 +35,16 @@ namespace backend.Dtos
         
         /// <summary>Het verwachte of uiterlijke eindmoment van de veiling.</summary>
         [JsonPropertyName("eindtijd")]
-        [Required]
-        public DateTimeOffset Eindtijd { get; set; }
+        public DateTimeOffset? Eindtijd { get; set; }
         
         /// <summary>Het ID van de gebruiker die de rol van veilingmeester vervult.</summary>
         [JsonPropertyName("veilingMeesterId")]
         [Required]
         public int VeilingMeesterId { get; set; }
+        
+        /// <summary>De duur per productcyclus in seconden (1-30).</summary>
+        [JsonPropertyName("veilingDuurInSeconden")]
+        [Range(1, 30, ErrorMessage = "Veilingduur moet tussen 1 en 30 seconden zijn.")]
+        public int VeilingDuurInSeconden { get; set; } = 10;
     }
 }

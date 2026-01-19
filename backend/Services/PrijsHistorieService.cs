@@ -30,9 +30,6 @@ namespace backend.Services
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
-            Console.WriteLine($"[PrijsHistorie] Verbinding geopend. Role: {userRole}");
-
-            // Query 0: Get Seller Name
             await using (var cmd = new NpgsqlCommand(@"SELECT ""Naam"" FROM gebruiker WHERE ""GebruikerId"" = @id", conn))
             {
                 cmd.Parameters.AddWithValue("id", verkoperId);

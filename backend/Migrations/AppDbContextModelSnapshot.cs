@@ -137,6 +137,9 @@ namespace backend.Migrations
                     b.Property<decimal>("Huidigeprijs")
                         .HasColumnType("numeric");
 
+                    b.Property<bool>("IsAfgehandeld")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("LocatieId")
                         .HasColumnType("integer");
 
@@ -251,7 +254,7 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset>("Eindtijd")
+                    b.Property<DateTimeOffset?>("Eindtijd")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Image")
@@ -267,6 +270,9 @@ namespace backend.Migrations
 
                     b.Property<DateTimeOffset>("Starttijd")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("VeilingDuurInSeconden")
+                        .HasColumnType("integer");
 
                     b.Property<int>("VeilingMeesterId")
                         .HasColumnType("integer");

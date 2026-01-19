@@ -12,14 +12,7 @@ export default function ProductDisplay({ product }: ProductDisplayProps) {
   }
 
   const handleProductClick = (productItem: Product) => {
-    console.log("Clicked product:", productItem);
-    console.log("ProductId:", productItem.productId);
-
-    if (!productItem.productId) {
-      console.error("No productId found in product object:", productItem);
-      return;
-    }
-
+    if (!productItem.productId) return;
     router.push(`/product/${productItem.productId}`);
   };
 
