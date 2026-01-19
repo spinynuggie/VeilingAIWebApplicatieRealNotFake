@@ -21,8 +21,8 @@ export default function VeilingList() {
 
   const liveVeilingen = veilingen.filter(v => {
     const start = new Date(v.starttijd).getTime();
-    const end = new Date(v.eindtijd).getTime();
-    return now >= start && now < end;
+    const isFinished = v.hasUnfinishedProducts === false;
+    return now >= start && !isFinished;
   });
 
   const upcomingVeilingen = veilingen.filter(v => {
@@ -31,8 +31,9 @@ export default function VeilingList() {
   });
 
   const endedVeilingen = veilingen.filter(v => {
-    const end = new Date(v.eindtijd).getTime();
-    return now >= end;
+    const start = new Date(v.starttijd).getTime();
+    const isFinished = v.hasUnfinishedProducts === false;
+    return now >= start && isFinished;
   });
 
   return (

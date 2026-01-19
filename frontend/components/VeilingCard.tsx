@@ -21,22 +21,20 @@ interface VeilingCardProps {
 export default function VeilingCard({ veiling, onClick, isPreview = false }: VeilingCardProps) {
     const now = new Date().getTime();
     const start = veiling.starttijd ? new Date(veiling.starttijd).getTime() : now; // Default to now for preview
-    const end = veiling.eindtijd ? new Date(veiling.eindtijd).getTime() : Infinity;
+    const hasUnfinishedProducts = veiling.hasUnfinishedProducts !== false;
 
     let status: "pending" | "active" | "ended" = "pending";
     let progress = 0;
 
-    if (end !== Infinity && now >= end) {
-        status = "ended";
-        progress = 100;
-    } else if (now >= start) {
-        status = "active";
-        const total = end === Infinity ? 0 : end - start;
-        const elapsed = now - start;
-        progress = total > 0 ? (elapsed / total) * 100 : 0;
-    } else {
+    if (now < start) {
         status = "pending";
         progress = 0;
+    } else if (!hasUnfinishedProducts) {
+        status = "ended";
+        progress = 100;
+    } else {
+        status = "active";
+        progress = 50;
     }
 
     const statusColor = status === "active" ? "#10b981" : status === "pending" ? "#f59e0b" : "#ef4444";

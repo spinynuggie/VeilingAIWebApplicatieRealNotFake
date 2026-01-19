@@ -24,32 +24,15 @@ export default function Landing() {
 
   const now = new Date().getTime();
 
-  // "Upcoming" also includes active auctions (started but not ended)
-  // Logic: Is active IF (start < now) AND (hasUnfinishedProducts OR end > now)
-  // Logic: Is upcoming IF (start > now)
-  const upcomingVeilingen = veilingen.filter(v => {
+  const getStatus = (v: Veiling) => {
     const start = new Date(v.starttijd).getTime();
-    const end = v.eindtijd ? new Date(v.eindtijd).getTime() : Infinity;
+    if (start > now) return "upcoming";
+    return v.hasUnfinishedProducts === false ? "ended" : "live";
+  };
 
-    // Future start time
-    if (start > now) return true;
-
-    // Started, but effectively still running?
-    if (v.hasUnfinishedProducts === true) return true;
-    if (end > now) return true;
-
-    return false;
-  });
-
-  // "Ended" = (end < now) AND (no unfinished products or explicitly handled)
-  // Simplified: If it's not in the "upcoming/active" list, it's ended.
-  const endedVeilingen = veilingen.filter(v => !upcomingVeilingen.includes(v));
-
-  // For display purposes, we might want to separate "Live" (active now) from "Future" (active later)
-  // But for now, let's stick to the user's filtered lists or a simple split.
-  // Let's split upcomingVeilingen into Live (started) and Future (not started)
-  const liveVeilingen = upcomingVeilingen.filter(v => new Date(v.starttijd).getTime() <= now);
-  const futureVeilingen = upcomingVeilingen.filter(v => new Date(v.starttijd).getTime() > now);
+  const liveVeilingen = veilingen.filter(v => getStatus(v) === "live");
+  const futureVeilingen = veilingen.filter(v => getStatus(v) === "upcoming");
+  const endedVeilingen = veilingen.filter(v => getStatus(v) === "ended");
 
   return (
     <RequireAuth roles={["ADMIN", "VEILINGMEESTER"]}>
