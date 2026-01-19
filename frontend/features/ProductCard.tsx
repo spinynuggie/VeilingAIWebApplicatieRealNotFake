@@ -183,12 +183,6 @@ export default function ProductCard({ product, mode, onAction }: ProductCardProp
                       {product.startPrijs ? `€${Number(product.startPrijs).toFixed(2)}` : 'n.v.t.'}
                     </Typography>
                   </Paper>
-                  <Paper variant="outlined" sx={{ flex: 1, p: 1, textAlign: 'center', bgcolor: 'custom.color6' }}>
-                    <Typography variant="caption" display="block" color="text.secondary">eindprijs</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                      {product.eindPrijs ? `€${Number(product.eindPrijs).toFixed(2)}` : 'n.v.t.'}
-                    </Typography>
-                  </Paper>
                 </Stack>
               ) : (
                 <Paper variant="outlined" sx={{ p: 1, textAlign: 'center', bgcolor: 'primary.main', color: 'primary.contrastText' }}>
