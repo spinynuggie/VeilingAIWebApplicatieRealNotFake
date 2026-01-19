@@ -77,7 +77,7 @@ export function NavBar({ mode, onLogout }: NavBarProps) {
             )}
 
             {/* Logo links to landing or home */}
-            <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
+            <Link href="/veilingDisplay" style={{ display: 'flex', alignItems: 'center' }}>
               <FloraLogo mode='small' />
             </Link>
           </Stack>
