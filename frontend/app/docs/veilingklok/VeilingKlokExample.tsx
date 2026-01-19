@@ -11,8 +11,6 @@ export default function VeilingKlokExample() {
         endPrice={10}
         duration={3600}
         productName="Voorbeeld Product"
-        productId={123}
-        verkoperId={45}
         livePrice={42}
         remainingQuantity={5}
         onBid={(price, qty) => alert(`Geboden ${qty} @ € ${price.toFixed(2)}`)}
