@@ -11,10 +11,12 @@ import { getVeilingen } from "@/services/veilingService";
 import Navbar from "@/features/(NavBar)/AppNavBar";
 import ProductDisplay from "@/components/(oud)/ProductDisplay";
 import { getProducts } from "@/services/productService";
-import { Box, Typography, Paper } from "@mui/material";
+import { Box, Typography, Paper, IconButton } from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
 import RequireAuth from "@/components/(oud)/RequireAuth";
 import ProductCard from "@/features/ProductCard";
 import nextDynamic from "next/dynamic";
+import { PriceHistoryDialog } from "@/components/PriceHistoryDialog";
 // Memoize VeilingKlok to prevent re-renders on parent updates if props are same
 const VeilingKlok = nextDynamic(() => import("@/components/VeilingKlok").then(mod => mod.VeilingKlok), { ssr: false });
 
@@ -73,6 +75,7 @@ export default function VeilingDetailPage() {
   const [pauseMessage, setPauseMessage] = useState<string>("");
   const [currentDuration, setCurrentDuration] = useState<number>(30);
   const [transitionCountdown, setTransitionCountdown] = useState<number | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const pathname = usePathname();
   const id = parseInt(pathname.split("/").pop() || "0");
@@ -380,7 +383,16 @@ export default function VeilingDetailPage() {
           </Box>
 
           {/* Center: Clock */}
-          <Box sx={{ flex: "0 0 auto" }}>
+          <Box sx={{ flex: "0 0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+            {activeProduct && (
+              <IconButton
+                size="small"
+                onClick={() => setHistoryOpen(true)}
+                aria-label="Prijsinformatie"
+              >
+                <InfoIcon fontSize="small" color="primary" />
+              </IconButton>
+            )}
             {activeProduct ? (
               <VeilingKlok
                 key={`${activeProduct.productId}-${activeProduct.remainingQty}`} // Force reset when qty changes (reset) or product changes
@@ -407,6 +419,15 @@ export default function VeilingDetailPage() {
                     : (isPaused ? pauseMessage : "Wachten op start...")}
                 </Typography>
               </Box>
+            )}
+            {activeProduct && (
+              <PriceHistoryDialog
+                open={historyOpen}
+                onClose={() => setHistoryOpen(false)}
+                productId={activeProduct.productId}
+                verkoperId={activeProduct.verkoperId}
+                productNaam={activeProduct.productNaam}
+              />
             )}
           </Box>
 
