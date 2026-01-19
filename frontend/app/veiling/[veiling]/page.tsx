@@ -334,14 +334,6 @@ export default function VeilingDetailPage() {
                 {formatDateTime(veiling.starttijd)} - {veiling.eindtijd ? formatDateTime(veiling.eindtijd) : "Onbekend"}
               </Typography>
             </Box>
-            <Box>
-              <Typography variant="button" sx={{
-                color: auctionStatus === 'active' ? 'success.main' : 'text.secondary',
-                fontWeight: 'bold', border: 1, borderColor: 'divider', px: 2, py: 0.5, borderRadius: 1
-              }}>
-                {auctionStatus.toUpperCase()}
-              </Typography>
-            </Box>
           </Box>
         </Paper>
 
