@@ -13,7 +13,6 @@ import ProductDisplay from "@/components/(oud)/ProductDisplay";
 import { getProducts } from "@/services/productService";
 import { Box, Typography, Paper, IconButton } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
-import RequireAuth from "@/components/(oud)/RequireAuth";
 import ProductCard from "@/features/ProductCard";
 import nextDynamic from "next/dynamic";
 import { PriceHistoryDialog } from "@/components/PriceHistoryDialog";
@@ -323,9 +322,8 @@ export default function VeilingDetailPage() {
   };
 
   return (
-    <RequireAuth>
-      <div style={{ background: "white", minHeight: "100vh" }}>
-        <Navbar />
+    <div style={{ background: "white", minHeight: "100vh" }}>
+      <Navbar />
 
         {/* Auction Info Header - Minimal */}
         <Paper elevation={1} sx={{ padding: 2, backgroundColor: "#f8f9fa", borderRadius: 0, borderBottom: "1px solid #e0e0e0" }}>
@@ -400,8 +398,6 @@ export default function VeilingDetailPage() {
                 endPrice={activeProduct ? activeProduct.eindPrijs : (veiling.producten?.[0]?.eindPrijs || 1)}
                 duration={currentDuration}
                 productName={activeProduct?.productNaam}
-                productId={activeProduct?.productId}
-                verkoperId={activeProduct?.verkoperId}
                 remainingQuantity={remainingQty ?? activeProduct?.hoeveelheid}
                 livePrice={livePrice}
                 closingPrice={undefined} // HIDE FINAL PRICE SCREEN
@@ -459,7 +455,6 @@ export default function VeilingDetailPage() {
             )}
           </Box>
         )}
-      </div>
-    </RequireAuth>
+    </div>
   );
 }

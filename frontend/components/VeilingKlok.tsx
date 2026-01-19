@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, IconButton } from "@mui/material";
+import { Box, Button, TextField, Typography } from "@mui/material";
 import { motion, AnimatePresence } from 'framer-motion';
-import InfoIcon from '@mui/icons-material/Info';
-import { PriceHistoryDialog } from './PriceHistoryDialog';
 
 interface AuctionClockProps {
     startPrice: number;
     endPrice: number;
     duration: number;
     productName?: string;
-    // New Props for History
-    productId?: number;
-    verkoperId?: number;
 
     isClosed?: boolean;
     closingPrice?: number;
@@ -27,8 +22,6 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
     endPrice,
     duration,
     productName,
-    productId,
-    verkoperId,
     isClosed = false,
     closingPrice,
     onBid,
@@ -38,7 +31,6 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
     remainingQuantity,
 }) => {
     const [quantity, setQuantity] = useState<string>('1');
-    const [historyOpen, setHistoryOpen] = useState(false);
 
     // Derive simple states
     const isPending = status === "pending";
@@ -72,27 +64,11 @@ export const VeilingKlok: React.FC<AuctionClockProps> = ({
         }}>
             {productName && (
                 <Box textAlign="center">
-                    <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                        <Typography variant="h6" fontWeight={700}>{productName}</Typography>
-                        <IconButton size="small" onClick={() => setHistoryOpen(true)}>
-                            <InfoIcon fontSize="small" color="primary" />
-                        </IconButton>
-                    </Box>
+                    <Typography variant="h6" fontWeight={700}>{productName}</Typography>
                     <Typography variant="body2" color="text.secondary">
                         {remainingQuantity !== undefined ? `Nog ${remainingQuantity} beschikbaar` : 'Voorraad onbekend'}
                     </Typography>
                 </Box>
-            )}
-
-            {/* Price History Dialog */}
-            {productName && productId && verkoperId && (
-                <PriceHistoryDialog
-                    open={historyOpen}
-                    onClose={() => setHistoryOpen(false)}
-                    productId={productId}
-                    verkoperId={verkoperId}
-                    productNaam={productName}
-                />
             )}
 
             {/* The Clock Face */}
